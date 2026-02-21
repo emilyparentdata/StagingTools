@@ -162,6 +162,7 @@ Extract all fields and produce properly formatted email HTML. Return a single JS
   - Preserve ALL hyperlinks with their original href values.
   - Do NOT include "The bottom line" section — that is extracted separately below.
   - Do NOT include any heading or content from the bottom line section.
+  - Do NOT include any standalone featured/header/cover image. The article's main image is placed in the template separately — omit any <img> or <figure> block that serves as the article's hero or header image.
 
 - "bottom_line_html": The "The bottom line" section extracted as a single <ul> element. Use this exact style on the <ul>:
   style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 26px; color: #000000; padding-left: 16px;"
@@ -233,6 +234,7 @@ Convert the WordPress HTML to email-ready HTML. Return a single JSON object with
   - Preserve ALL hyperlinks with their original href values.
   - Convert WordPress entities (&nbsp;, &rsquo;, etc.) to their proper Unicode/HTML equivalents.
   - Remove WordPress-only elements like share buttons, author bio boxes, comment sections.
+  - Do NOT include any standalone featured/header/cover image. The article's main image is placed in the template separately — omit any <img> or <figure> block that serves as the article's hero or header image at the top of the content.
 
 {bottom_line_instruction}
 
