@@ -317,12 +317,22 @@ def _update_copyright(soup):
 
 def _inject_fertility(soup, fields):
     """Inject all fields into the fertility article template."""
+    _remove_fertility_pregnancy_banner(soup)
     _update_title(soup, fields)
     _update_headline(soup, fields)
     _update_fertility_subtitle_author(soup, fields)
     _replace_fertility_body(soup, fields)
     _update_fertility_bottom_line(soup, fields)
     _update_copyright(soup)
+
+
+def _remove_fertility_pregnancy_banner(soup):
+    """Remove the 'You are N weeks pregnant' personalization banner row."""
+    banner_p = soup.find('p', class_='news-top-link')
+    if banner_p:
+        outer_tr = _outer_email_tr(banner_p, soup)
+        if outer_tr:
+            outer_tr.decompose()
 
 
 def _update_fertility_subtitle_author(soup, fields):
