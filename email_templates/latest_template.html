@@ -1,0 +1,373 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="x-apple-disable-message-reformatting" />
+    <title>The Pregnancy Dataset We Can't Afford to Lose - ParentData</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=DM+Sans:ital,wght@0,400;0,500;0,700;0,800;1,300;1,700&display=swap" rel="stylesheet">
+    
+    <style type="text/css">
+/* Email Client Resets */
+body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+body { margin: 0; padding: 0; width: 100% !important; height: 100% !important; }
+
+/* Remove spacing on Outlook */
+table { border-collapse: collapse !important; }
+
+/* Prevent WebKit and Windows mobile changing default text sizes */
+body, table, td, p, a, li, blockquote { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+
+/* What it does: Remove spaces around the email design added by some email clients. */
+html, body { margin: 0 auto !important; padding: 0 !important; height: 100% !important; width: 100% !important; }
+
+/* What it does: Stops email clients resizing small text. */
+* { -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; }
+
+/* Center the email */
+.email-container { max-width: 600px; margin: 0 auto; }
+
+/* Force Outlook to provide a "view in browser" link */
+#outlook a { padding: 0; }
+
+/* Prevent Webkit and Windows mobile from changing default text sizes */
+.ExternalClass { width: 100%; }
+.ExternalClass, .ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td, .ExternalClass div {
+    line-height: 100%;
+}
+
+/* Force Hotmail to display normal line spacing */
+.ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td, .ExternalClass div {
+    line-height: 100%;
+}
+
+/* Remove spacing on images */
+a[x-apple-data-detectors] {
+    color: inherit !important;
+    text-decoration: none !important;
+    font-size: inherit !important;
+    font-family: inherit !important;
+    font-weight: inherit !important;
+    line-height: inherit !important;
+}
+
+.fade-out-medium { opacity: .5; }
+.fade-out-light { opacity: .2; }
+
+/* Responsive styles */
+@media only screen and (max-width: 480px) {
+    .email-container { width: 100% !important; min-width: 100% !important; }
+    .fluid { max-width: 100% !important; height: auto !important; margin-left: auto !important; margin-right: auto !important; }
+    .stack-column, .stack-column-center { 
+        display: block !important; 
+        width: 100% !important; 
+        max-width: 100% !important; 
+        direction: ltr !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+    .center-on-mobile { text-align: center !important; }
+    .welcome-message { font-size: 14px !important; line-height: 20px !important; padding: 8px 12px !important; }
+    .sub-text { font-size: 16px !important; }
+    .mobile-padding { padding: 0px 0px !important; }
+    
+    .mobile-hide { display: none !important; }
+    .mobile-show { display: block !important; max-height: none !important; }
+    .headline-mobile { font-size: 32px !important; line-height: 36px !important; letter-spacing: -1.6px !important; padding: 0px 12px !important; }
+    .upgrade-headline-mobile { font-size: 30px !important; line-height: 36px !important; letter-spacing: -1.5px !important; }
+    .logo-mobile { width: 123px !important; height: 36px !important; }
+    .button-mobile { width: 250px !important; padding: 19px 27px !important; }
+    .subscribe-btn-mobile a { padding: 20px 24px !important; font-size: 20px !important; }
+    .continue-reading-btn a { padding: 16px !important; font-size: 18px !important; }
+    .box-pad { padding: 0px !important; }
+    .table-box-mobile { padding: 24px 20px !important; }
+    .no-pad-t-b { padding-top: 0px !important; padding-bottom: 0px !important;}
+    
+    /* Fix horizontal scroll issues */
+    body { width: 100% !important; min-width: 100% !important; }
+    table[class=email-container] { width: 100% !important; }
+    img { max-width: 100% !important; height: auto !important; }
+    
+    /* Fix price image overflow */
+    .price-image { width: 100% !important; max-width: 300px !important; height: auto !important; }
+    
+    /* Force pricing table to stack */
+    .pricing-container { 
+        width: 100% !important; 
+        max-width: 100% !important;
+    }
+    
+    .pricing-row { 
+        display: block !important; 
+        width: 100% !important;
+    }
+    
+    .pricing-old, .pricing-new { 
+        display: block !important; 
+        width: 100% !important; 
+        max-width: 100% !important;
+        text-align: center !important;
+        padding: 0 20px !important;
+    }
+    
+    .pricing-old { 
+        padding-bottom: 16px !important; 
+    }
+    
+    /* Force nested table inside pricing-new to be 100% width */
+    .pricing-new table { 
+        width: 100% !important; 
+        max-width: 100% !important;
+    }
+    
+    .pricing-new td { 
+        display: block !important; 
+        width: 100% !important;
+    }
+    
+    .brush-bg { 
+        max-width: 280px !important; 
+        width: 100% !important; 
+        height: auto !important;
+    }
+    
+    .pricing-old p { 
+        font-size: 48px !important; 
+    }
+    
+    .pricing-new p { 
+        font-size: 48px !important; 
+    }
+}
+</style>
+    
+    <!--[if gte mso 9]>
+    <style type="text/css">
+        /* Outlook-specific styles */
+        table { border-collapse: collapse; }
+        .outlook-fallback { font-family: Arial, sans-serif !important; }
+    </style>
+    <![endif]-->
+</head>
+
+<body style="margin: 0; padding: 0; background-color: #f4f4f4; font-family: 'DM Sans', Arial, Helvetica, sans-serif;">
+<!-- Main Email Container --><center style="width: 100%; background-color: #f4f4f4;">
+<table align="center" border="0" cellpadding="0" cellspacing="0" class="email-container" role="presentation" style="max-width: 600px; margin: 0px auto; background-color: rgb(255, 255, 255); height: 1886.73px;" width="100%"><!-- HEADER SECTION: Cream Background with Logo -->
+<tbody>
+<tr style="height: 81.2312px;">
+<td style="background-color: rgb(255, 252, 238); padding: 20px 0px 24px; text-align: center; height: 81.2312px;"><img alt="ParentData Logo" class="fluid" height="75" src="https://library.iterable.com/3244/21559/1bd174994cea45598cd4d7f4ad5b173d-prarentdata-logo.png" width="179">
+<table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+<tbody>
+<tr>
+<td style="text-align: center; position: relative;"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<!-- HERO SECTION: Headline and Subtitle -->
+<tr style="height: auto;">
+<td style="background-color: rgb(255, 252, 238); padding: 0px 24px; height: auto;">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%"><!-- Headline -->
+<tbody>
+<tr>
+<td style="text-align: center; padding-bottom: 16px;">
+<h1 class="headline-mobile" style="margin: 0; font-family: 'Lora', Georgia, serif; font-weight: bold; font-size: 40px; line-height: 48px; letter-spacing: -2.4px; color: #000000; padding: 0px 54px;">The Pregnancy Dataset We Can't Afford to Lose</h1>
+</td>
+</tr>
+<!-- Subtitle -->
+<tr>
+<td style="text-align: center; padding-bottom: 24px;">
+<p class="sub-text" style="margin: 0; font-family: 'Lora', Georgia, serif; font-weight: 400; font-size: 18px; line-height: 32px; letter-spacing: -0.8px; color: #000000;">The CDC has stopped collecting PRAMS data.</p>
+<p class="sub-text" style="margin: 0; font-family: 'Lora', Georgia, serif; font-weight: 400; font-size: 18px; line-height: 32px; letter-spacing: -0.8px; color: #000000;">Here's what that means for&nbsp;maternal health research.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<!-- WELCOME BANNER -->
+<tr style="height: auto;">
+<td style="background-color: rgb(255, 255, 255); padding: 12px 24px 20px; height: auto;">
+<table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+<tbody>
+<tr>
+<td align="center">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" style="max-width: 444px; width: 100%;">
+<tbody>
+<tr>
+<td class="mobile-padding" style="background-color: #a9ddf3; border-radius: 50px; padding: 12px 52px; text-align: center;">
+<p class="welcome-message" style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 300; font-style: italic; font-size: 18px; line-height: 32px; letter-spacing: -0.9px; color: #000000;">Welcome to the Free Digest, ParentData's weekly newsletter for free subscribers.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<!-- ARTICLE BODY CONTENT -->
+<tr style="height: auto;">
+<td class="table-box-mobile no-pad-t-b" style="background-color: rgb(255, 255, 255); padding: 0px 40px 0px; height: auto;">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%"><!-- Author -->
+<tbody>
+<tr>
+<td style="padding-bottom: 12px; width: 100%;">
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: bold; font-size: 16px; line-height: 24px; letter-spacing: -0.8px; color: #000000;">This is a love letter to a dataset: the Pregnancy Risk Assessment Monitoring Survey, or PRAMS.</p>
+</td>
+</tr>
+<tr>
+<td style="padding-bottom: 8px; width: 100%;">
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; letter-spacing: -0.8px; color: #000000;">It is no secret that I love data, and part of that is an attachment to particular datasets that I believe give us valuable information or insights into the world. The PRAMS dataset is one of those.</p>
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; letter-spacing: -0.8px; color: #000000;">My first goal is to explain why I love this dataset and try to give a sense of why ongoing public data collection of this type is so crucial for answering important policy questions.</p>
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; letter-spacing: -0.8px; color: #000000;">I have a secondary motive, too. The PRAMS data is currently a casualty of a broader assault on data availability. Collection of this data is organized by the CDC, and, as of Spring 2025, it is no longer being collected. Even worse, researchers are no longer able to access historical data. A huge amount of work has, for the moment, just vanished.</p>
+</td>
+</tr>
+<tr>
+<td style="padding-bottom: 8px; width: 100%;">
+<p style="margin: 0 0 24px 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; letter-spacing: -0.8px; color: #000000;">It is not completely clear why this happened. Initially, the current administration stopped all projects that used terms like "equity" and "gender," but it's not clear why this data collection hasn't restarted or why historical data is no longer being provided.</p>
+<div style="position: relative; display: inline-block; width: 100%;"><img alt="Mother breastfeeding while eating" class="fluid" src="https://library.iterable.com/3244/21559/d07690bd678143629e87384bd9e68359-mother-breat-feeding.png" style="width: 100%; max-width: 552px; height: auto; display: block; border-radius: 16px;"></div>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<!-- ARTICLE BODY CONTENT -->
+<tr style="height: auto;">
+<td class="table-box-mobile no-pad-t-b" style="background-color: rgb(255, 255, 255); padding: 0px 40px 20px; height: auto;">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%"><!-- Author -->
+<tbody>
+<tr>
+<td rowspan="3" style="padding-bottom: 8px; width: 100%;">
+<h1 style="margin: 0; font-family: 'Lora', Georgia, serif; font-weight: bold; font-size: 30px; line-height: 36px; letter-spacing: -1.2px; color: #000000; padding-bottom: 4px;">H1 Heading here</h1>
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; letter-spacing: -0.8px; color: #000000;">It is no secret that I love data, and part of that is an attachment to particular datasets that I believe give us valuable information or insights into the world. The PRAMS dataset is one of those.</p>
+<br>
+<h2 style="margin: 0; font-family: 'Lora', Georgia, serif; font-weight: bold; font-size: 24px; line-height: 28px; letter-spacing: -1.2px; color: #000000; padding-bottom: 4px;">H2 Heading here</h2>
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; letter-spacing: -0.8px; color: #000000;">My first goal is to explain why I love this dataset and try to give a sense of why ongoing public data collection of this type is so crucial for answering important policy questions.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<!-- EMILY OSTER AUTHOR BLOCK -->
+<tr>
+<td class="tablebox table-box-mobile" style="background-color: rgb(255, 252, 238); padding: 20px 40px;">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+<tbody>
+<tr>
+<td style="padding-bottom: 8px;">
+<p style="margin: 0 0 4px 0; font-family: 'Lora', Georgia, serif; font-weight: bold; font-size: 22px; line-height: 26px; letter-spacing: -0.66px; color: #000000;">Emily Oster</p>
+<p style="margin: 0 0 8px 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 18px; line-height: 26px; color: #000000;">CEO, ParentData</p>
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: normal; letter-spacing: -0.48px;"><a href="https://parentdata.org/about/" style="color: #054f8b; text-decoration: underline; font-family: 'DM Sans', Arial, Helvetica, sans-serif;">About Emily</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<!-- MORE FROM PARENTDATA SECTION -->
+<tr style="height: auto;">
+<td style="background-color: rgb(255, 255, 255); padding: 28px 24px; height: auto;">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%"><!-- Section Title -->
+<tbody>
+<tr>
+<td style="text-align: center; padding-bottom: 24px;">
+<h2 style="margin: 0; font-family: 'Lora', Georgia, serif; font-weight: bold; font-size: 24px; line-height: 41px; letter-spacing: -1.2px; color: #000000;">More from ParentData</h2>
+</td>
+</tr>
+<!-- Article Card 1 -->
+<tr>
+<td style="padding-bottom: 32px;">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+<tbody>
+<tr>
+<td align="center" style="padding-bottom: 16px;"><a href="#" style="display: block;"> <img alt="Are Classroom Screens Good for Learning?" class="fluid" height="144" src="https://library.iterable.com/3244/21559/7a599d8f88e24010af409016777fb7df-children-with-tab.png" style="width: 100%; max-width: 330px; height: auto; display: block; border-radius: 12px;" width="330"> </a></td>
+</tr>
+<tr>
+<td style="text-align: center;">
+<h3 class="h3-heading" style="margin: 0 0 8px 0; font-family: 'Lora', Georgia, serif; font-weight: bold; font-size: 18px; line-height: 24px; letter-spacing: -0.8px; color: #000000;"><a href="#" style="color: #000000; text-decoration: none;">Are Classroom Screens Good for Learning?</a></h3>
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; letter-spacing: -0.8px; color: #000000;">The best ways to use "educational technology"</p>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<!-- Article Card 2 -->
+<tr>
+<td>
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+<tbody>
+<tr>
+<td align="center" style="padding-bottom: 16px;"><a href="#" style="display: block;"> <img alt="What Fall Vaccines Should We Get?" class="fluid" height="150" src="https://library.iterable.com/3244/21559/71b0a5de44be4859bea28d5e227c8417-sick-child.png" style="width: 100%; max-width: 330px; height: auto; display: block; border-radius: 12px;" width="330"> </a></td>
+</tr>
+<tr>
+<td style="text-align: center;">
+<h3 class="h3-heading" style="margin: 0 0 8px 0; font-family: 'Lora', Georgia, serif; font-weight: bold; font-size: 18px; line-height: 24px; letter-spacing: -0.8px; color: #000000;"><a href="#" style="color: #000000; text-decoration: none;">What Fall Vaccines Should We Get? </a></h3>
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 18px; line-height: 24px; letter-spacing: -0.9px; color: #000000;">Flu, COVID, and RSV</p>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<!-- FOOTER -->
+<tr style="height: auto;">
+<td class="table-box-mobile" style="background-color: rgb(169, 221, 243); padding: 20px 40px 40px; height: auto;">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%"><!-- Logo -->
+<tbody>
+<tr>
+<td style="text-align: left; padding-bottom: 24px;"><img alt="Footer Logo" class="fluid" src="https://library.iterable.com/3244/21559/0c234709315b456daeae8158543952a5-footerlogo.png" style="max-width: 120px; height: auto;" width="120"></td>
+</tr>
+<!-- Footer Text -->
+<tr>
+<td style="text-align: left; padding-bottom: 16px;">
+<p style="margin: 0 0 8px 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 14px; line-height: normal; color: #000000;">You are receiving this email because you opted in via our website.</p>
+</td>
+</tr>
+<!-- Change Preferences -->
+<tr>
+<td style="text-align: left; padding-bottom: 12px;">
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 800; font-size: 14px; line-height: normal; color: #000000;">Want to change how you receive these emails?</p>
+</td>
+</tr>
+<!-- Unsubscribe Link -->
+<tr>
+<td style="text-align: left; padding-bottom: 16px;">
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 14px; line-height: normal; color: #000000;"><a href="{{hostedUnsubscribeUrl}}" style="color: #000000; text-decoration: underline;">Unsubscribe from this list</a></p>
+</td>
+</tr>
+<!-- Manage Preferences -->
+<tr>
+<td style="text-align: left; padding-bottom: 20px;">
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 14px; line-height: normal; color: #000000;">To manage all of your newsletter preferences or cancel, please <a href="https://parentdata.org/account/" style="color: #000000; text-decoration: underline;">visit your account</a>.</p>
+</td>
+</tr>
+<!-- Copyright -->
+<tr>
+<td style="text-align: left;">
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 14px; line-height: normal; color: #000000;">Copyright &copy; 2025 ParentData, All rights reserved.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</center>
+</body>
+</html>

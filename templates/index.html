@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ParentData Email Staging Tool</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header>
+  <h1>ParentData Email Staging Tool</h1>
+</header>
+
+<main>
+
+  <!-- ── Step 1: Upload ──────────────────────────────────────────────── -->
+  <section id="section-upload" class="card">
+    <h2>1. Upload Article Document</h2>
+    <div class="upload-zone" id="upload-zone">
+      <input type="file" id="file-input" accept=".docx" hidden>
+      <p>Drag &amp; drop your <strong>.docx</strong> file here, or <button type="button" class="link-btn" id="browse-btn">browse</button></p>
+      <p id="file-name" class="file-name"></p>
+    </div>
+
+    <div class="upload-or">— or —</div>
+
+    <div class="field-group" style="margin-bottom:0;">
+      <label for="gdoc-url">Google Doc link</label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="url" id="gdoc-url" placeholder="https://docs.google.com/document/d/…" style="flex:1;" onkeydown="if(event.key==='Enter') handleGoogleDocUrl()">
+        <button type="button" class="btn-small" onclick="handleGoogleDocUrl()" style="padding:6px 16px;">Use this doc</button>
+      </div>
+      <p class="hint" style="margin-top:5px;">Doc must be shared as "Anyone with the link can view".</p>
+    </div>
+
+    <div id="upload-status" class="status-bar" hidden></div>
+  </section>
+
+  <!-- ── Step 2: Extracted Fields ────────────────────────────────────── -->
+  <section id="section-fields" class="card" hidden>
+    <h2>2. Review Extracted Fields</h2>
+
+    <div class="field-group">
+      <label for="f-title">Title</label>
+      <input type="text" id="f-title" placeholder="Article title">
+    </div>
+
+    <div class="field-group">
+      <label for="f-subtitle">Subtitle</label>
+      <p class="hint">One line per subtitle row (press Enter for a new row).</p>
+      <textarea id="f-subtitle" rows="2" placeholder="Subtitle line 1&#10;Subtitle line 2"></textarea>
+    </div>
+
+    <div class="field-group">
+      <label for="f-welcome">Welcome Text (Emily's intro HTML)</label>
+      <p class="hint">Full HTML including the &lt;hr&gt; at the end. Leave blank if Emily wrote the full article.</p>
+      <textarea id="f-welcome" rows="8" class="code-area" placeholder="&lt;p style=&quot;...&quot;&gt;&lt;em&gt;Welcome to The Latest...&lt;/em&gt;&lt;/p&gt;&#10;&lt;hr&gt;"></textarea>
+    </div>
+
+    <div class="field-group">
+      <label for="f-author-name">Author Name</label>
+      <input type="text" id="f-author-name" placeholder="e.g. Gillian Goddard">
+    </div>
+
+    <div class="field-group">
+      <label for="f-author-title">Author Title</label>
+      <input type="text" id="f-author-title" placeholder="e.g. Endocrinologist">
+    </div>
+
+    <div class="field-group">
+      <label for="f-author-url">Author Page URL</label>
+      <input type="url" id="f-author-url" placeholder="https://parentdata.org/author/…">
+    </div>
+
+    <div class="field-group">
+      <label for="f-tags">Topic Tags</label>
+      <input type="text" id="f-tags" placeholder="In the News, Hormones, Health and Wellness">
+      <p class="hint">Comma-separated. Used to suggest related articles.</p>
+    </div>
+  </section>
+
+  <!-- ── Step 3: Featured Image ───────────────────────────────────────── -->
+  <section id="section-image" class="card" hidden>
+    <h2>3. Featured Image</h2>
+
+    <div class="field-group">
+      <label for="f-img-url">Image URL (Iterable CDN)</label>
+      <input type="url" id="f-img-url" placeholder="https://library.iterable.com/…">
+    </div>
+
+    <div class="field-group">
+      <label for="f-img-alt">Image Alt Text</label>
+      <input type="text" id="f-img-alt" placeholder="Brief description of the image">
+    </div>
+  </section>
+
+  <!-- ── Step 4: Article Body Preview ────────────────────────────────── -->
+  <section id="section-body" class="card" hidden>
+    <h2>4. Article Body HTML</h2>
+    <p class="hint">Claude-formatted HTML. Edit freely — this is what goes into the email.</p>
+    <details>
+      <summary>Show / hide article body</summary>
+      <textarea id="f-body" rows="20" class="code-area" placeholder="Article body HTML will appear here after upload…"></textarea>
+    </details>
+  </section>
+
+  <!-- ── Step 4b: Inline Graphs ──────────────────────────────────────── -->
+  <section id="section-graphs" class="card" hidden>
+    <h2>4b. Inline Graph Images</h2>
+    <p class="hint">The document contains embedded charts or graphs. Paste the Iterable CDN URL for each one — they will be placed in the article body in order.</p>
+    <div id="graph-fields"></div>
+  </section>
+
+  <!-- ── Step 5: Related Articles ────────────────────────────────────── -->
+  <section id="section-related" class="card" hidden>
+    <h2>5. Related Reading</h2>
+    <p class="hint">Articles are scored from the full ParentData archive. Swap or edit as needed.</p>
+
+    <div id="related-cache-info" class="hint" style="margin-bottom:10px;"></div>
+    <div id="related-loading" class="status-bar" hidden>Fetching article suggestions…</div>
+
+    <div class="related-grid">
+
+      <!-- Slot 1 -->
+      <div class="related-slot" id="slot-0">
+        <h3>Article 1</h3>
+        <div class="swap-row">
+          <label>Swap with:</label>
+          <select id="swap-0"><option value="">— select —</option></select>
+          <button type="button" class="btn-small" onclick="applySwap(0)">Apply</button>
+        </div>
+        <div class="field-group image-url-field">
+          <label>Image URL <span class="required">*</span></label>
+          <input type="url" id="rel-0-image-url" placeholder="https://library.iterable.com/…">
+        </div>
+        <div class="field-group">
+          <label>Image Alt</label>
+          <input type="text" id="rel-0-image-alt" placeholder="Brief image description">
+        </div>
+        <div class="field-group">
+          <label>Title</label>
+          <input type="text" id="rel-0-title">
+        </div>
+        <div class="field-group">
+          <label>URL</label>
+          <input type="url" id="rel-0-url">
+        </div>
+        <div class="field-group">
+          <label>Tagline <span class="field-note">— keep to one short line</span></label>
+          <input type="text" id="rel-0-description" maxlength="80" placeholder="e.g. Q&amp;A on getting an appointment">
+        </div>
+      </div>
+
+      <!-- Slot 2 -->
+      <div class="related-slot" id="slot-1">
+        <h3>Article 2</h3>
+        <div class="swap-row">
+          <label>Swap with:</label>
+          <select id="swap-1"><option value="">— select —</option></select>
+          <button type="button" class="btn-small" onclick="applySwap(1)">Apply</button>
+        </div>
+        <div class="field-group image-url-field">
+          <label>Image URL <span class="required">*</span></label>
+          <input type="url" id="rel-1-image-url" placeholder="https://library.iterable.com/…">
+        </div>
+        <div class="field-group">
+          <label>Image Alt</label>
+          <input type="text" id="rel-1-image-alt" placeholder="Brief image description">
+        </div>
+        <div class="field-group">
+          <label>Title</label>
+          <input type="text" id="rel-1-title">
+        </div>
+        <div class="field-group">
+          <label>URL</label>
+          <input type="url" id="rel-1-url">
+        </div>
+        <div class="field-group">
+          <label>Tagline <span class="field-note">— keep to one short line</span></label>
+          <input type="text" id="rel-1-description" maxlength="80" placeholder="e.g. How pregnancy hormones affect blood sugar">
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Step 6: Generate ─────────────────────────────────────────────── -->
+  <section id="section-generate" class="card" hidden>
+    <h2>6. Generate Email</h2>
+    <button type="button" id="generate-btn" class="btn-primary" onclick="generateEmail()">
+      Generate Staged Email
+    </button>
+    <div id="generate-status" class="status-bar" hidden></div>
+    <div id="result-links" hidden>
+      <a id="preview-link" target="_blank" class="btn-secondary">Open Preview</a>
+      <a id="download-link" download="staged_email.html" class="btn-secondary">Download HTML</a>
+      <button type="button" class="btn-secondary" onclick="copyHtml()">Copy HTML</button>
+    </div>
+  </section>
+
+</main>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+let allSuggestions = [];          // scored suggestions from full article index
+let slotData = [{}, {}];          // current article in each slot
+let lastGeneratedHtml = '';       // most recent generated HTML (for copy)
+
+// ── Upload ─────────────────────────────────────────────────────────────────
+document.getElementById('browse-btn').addEventListener('click', () => {
+  document.getElementById('file-input').click();
+});
+
+document.getElementById('file-input').addEventListener('change', (e) => {
+  if (e.target.files[0]) handleFile(e.target.files[0]);
+});
+
+const uploadZone = document.getElementById('upload-zone');
+uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+uploadZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  uploadZone.classList.remove('drag-over');
+  if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+});
+
+async function handleFile(file) {
+  document.getElementById('file-name').textContent = file.name;
+  showStatus('upload-status', 'Uploading and extracting fields with Claude… this may take 20–40 seconds.', 'info');
+  const formData = new FormData();
+  formData.append('file', file);
+  await _submitUpload(formData);
+}
+
+async function handleGoogleDocUrl() {
+  const url = document.getElementById('gdoc-url').value.trim();
+  if (!url) return;
+  document.getElementById('file-name').textContent = '';
+  showStatus('upload-status', 'Downloading Google Doc and extracting fields… this may take 20–40 seconds.', 'info');
+  const formData = new FormData();
+  formData.append('google_doc_url', url);
+  await _submitUpload(formData);
+}
+
+async function _submitUpload(formData) {
+  try {
+    const resp = await fetch('/upload', { method: 'POST', body: formData });
+    const data = await resp.json();
+
+    if (!resp.ok || data.error) {
+      showStatus('upload-status', `Error: ${data.error || resp.statusText}`, 'error');
+      return;
+    }
+
+    populateFields(data);
+    showStatus('upload-status', 'Fields extracted successfully.', 'success');
+
+    ['section-fields', 'section-image', 'section-body', 'section-related', 'section-generate']
+      .forEach(id => document.getElementById(id).removeAttribute('hidden'));
+
+    if (data.graph_count > 0) {
+      buildGraphFields(data.graph_count, data.inline_graphs || []);
+      document.getElementById('section-graphs').removeAttribute('hidden');
+    } else {
+      document.getElementById('section-graphs').setAttribute('hidden', '');
+    }
+
+    fetchRelatedArticles(data.topic_tags || [], data.related_articles || []);
+
+  } catch (err) {
+    showStatus('upload-status', `Network error: ${err.message}`, 'error');
+  }
+}
+
+function populateFields(data) {
+  document.getElementById('f-title').value = data.title || '';
+  document.getElementById('f-subtitle').value = (data.subtitle_lines || []).join('\n');
+  document.getElementById('f-welcome').value = data.welcome_html || '';
+  document.getElementById('f-author-name').value = data.author_name || '';
+  document.getElementById('f-author-title').value = data.author_title || '';
+  document.getElementById('f-author-url').value = data.author_url || 'https://parentdata.org/author/eoster/';
+  document.getElementById('f-tags').value = (data.topic_tags || []).join(', ');
+  document.getElementById('f-body').value = data.article_body_html || '';
+  if (data.featured_image_url) document.getElementById('f-img-url').value = data.featured_image_url;
+  if (data.featured_image_alt) document.getElementById('f-img-alt').value = data.featured_image_alt;
+}
+
+// ── Related Articles ────────────────────────────────────────────────────────
+async function fetchRelatedArticles(tags, prefilledArticles = []) {
+  const loadingEl = document.getElementById('related-loading');
+  loadingEl.textContent = prefilledArticles.length > 0
+    ? 'Loading article index for swap options…'
+    : 'Fetching article suggestions…';
+  loadingEl.removeAttribute('hidden');
+  document.getElementById('related-cache-info').textContent = '';
+
+  // Pre-fill slots immediately if supplementary data provided them
+  if (prefilledArticles.length > 0) {
+    populateSlot(0, prefilledArticles[0] || {});
+    populateSlot(1, prefilledArticles[1] || {});
+  }
+
+  // Always fetch the article index — needed for swap dropdown
+  const params = new URLSearchParams();
+  tags.forEach(t => params.append('tags', t));
+
+  try {
+    const resp = await fetch(`/articles?${params}`);
+    const data = await resp.json();
+    allSuggestions = data.suggestions || data || [];
+    _showCacheInfo(data.cache);
+  } catch (e) {
+    allSuggestions = [];
+  }
+
+  loadingEl.setAttribute('hidden', '');
+
+  // Only auto-populate slots from index if supplementary data didn't provide them
+  if (prefilledArticles.length === 0) {
+    populateSlot(0, allSuggestions[0] || {});
+    populateSlot(1, allSuggestions[1] || {});
+  }
+
+  populateSwapDropdowns();
+}
+
+function _showCacheInfo(cache) {
+  const el = document.getElementById('related-cache-info');
+  if (!cache || !cache.cached) { el.textContent = ''; return; }
+  const age = cache.age_hours < 1 ? 'just fetched' : `${cache.age_hours}h old`;
+  el.innerHTML =
+    `Searching ${cache.article_count} articles (index ${age}). ` +
+    `<button type="button" class="link-btn" onclick="refreshArticleIndex()">Refresh index</button>`;
+}
+
+async function refreshArticleIndex() {
+  const el = document.getElementById('related-cache-info');
+  el.textContent = 'Refreshing article index… (this may take 30–60 seconds)';
+  try {
+    const resp = await fetch('/refresh-articles', { method: 'POST' });
+    const data = await resp.json();
+    el.textContent = `Index refreshed — ${data.article_count} articles loaded.`;
+  } catch (e) {
+    el.textContent = `Refresh failed: ${e.message}`;
+  }
+}
+
+function populateSlot(slotIndex, article) {
+  slotData[slotIndex] = article;
+  document.getElementById(`rel-${slotIndex}-title`).value = article.title || '';
+  document.getElementById(`rel-${slotIndex}-url`).value = article.url || '';
+  document.getElementById(`rel-${slotIndex}-image-url`).value = article.image_url || '';
+  document.getElementById(`rel-${slotIndex}-image-alt`).value = article.image_alt || article.title || '';
+  document.getElementById(`rel-${slotIndex}-description`).value = article.description || '';
+}
+
+function populateSwapDropdowns() {
+  for (let slotIndex = 0; slotIndex < 2; slotIndex++) {
+    const select = document.getElementById(`swap-${slotIndex}`);
+    select.innerHTML = '<option value="">— select —</option>';
+    allSuggestions.forEach((art, i) => {
+      const opt = document.createElement('option');
+      opt.value = i;
+      opt.textContent = art.title || `Article ${i + 1}`;
+      select.appendChild(opt);
+    });
+  }
+}
+
+function applySwap(slotIndex) {
+  const select = document.getElementById(`swap-${slotIndex}`);
+  const idx = parseInt(select.value);
+  if (isNaN(idx) || !allSuggestions[idx]) return;
+  populateSlot(slotIndex, allSuggestions[idx]);
+  select.value = '';
+}
+
+// ── Generate ────────────────────────────────────────────────────────────────
+async function generateEmail() {
+  showStatus('generate-status', 'Building email HTML…', 'info');
+  document.getElementById('result-links').setAttribute('hidden', '');
+
+  const subtitleRaw = document.getElementById('f-subtitle').value;
+  const subtitleLines = subtitleRaw.split('\n').map(s => s.trim()).filter(Boolean);
+
+  const tagsRaw = document.getElementById('f-tags').value;
+  const topicTags = tagsRaw.split(',').map(s => s.trim()).filter(Boolean);
+
+  const relatedArticles = [0, 1].map(i => ({
+    title: document.getElementById(`rel-${i}-title`).value,
+    url: document.getElementById(`rel-${i}-url`).value,
+    image_url: document.getElementById(`rel-${i}-image-url`).value,
+    image_alt: document.getElementById(`rel-${i}-image-alt`).value,
+    description: document.getElementById(`rel-${i}-description`).value,
+  })).filter(a => a.title || a.url);
+
+  const inlineGraphs = [];
+  let gi = 1;
+  while (document.getElementById(`graph-${gi}-url`)) {
+    inlineGraphs.push({
+      url: document.getElementById(`graph-${gi}-url`).value,
+      alt: document.getElementById(`graph-${gi}-alt`).value,
+    });
+    gi++;
+  }
+
+  const payload = {
+    title: document.getElementById('f-title').value,
+    subtitle_lines: subtitleLines,
+    welcome_html: document.getElementById('f-welcome').value,
+    article_body_html: document.getElementById('f-body').value,
+    author_name: document.getElementById('f-author-name').value,
+    author_title: document.getElementById('f-author-title').value,
+    author_url: document.getElementById('f-author-url').value,
+    featured_image_url: document.getElementById('f-img-url').value,
+    featured_image_alt: document.getElementById('f-img-alt').value,
+    topic_tags: topicTags,
+    related_articles: relatedArticles,
+    inline_graphs: inlineGraphs,
+  };
+
+  try {
+    const resp = await fetch('/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({ error: resp.statusText }));
+      showStatus('generate-status', `Error: ${err.error || resp.statusText}`, 'error');
+      return;
+    }
+
+    const htmlText = await resp.text();
+    lastGeneratedHtml = htmlText;
+
+    const blob = new Blob([htmlText], { type: 'text/html' });
+    const blobUrl = URL.createObjectURL(blob);
+
+    document.getElementById('preview-link').href = blobUrl;
+    document.getElementById('download-link').href = blobUrl;
+    document.getElementById('result-links').removeAttribute('hidden');
+
+    showStatus('generate-status', 'Email generated! Open the preview, download, or copy the HTML.', 'success');
+
+  } catch (err) {
+    showStatus('generate-status', `Network error: ${err.message}`, 'error');
+  }
+}
+
+// ── Inline graphs ────────────────────────────────────────────────────────────
+function buildGraphFields(count, prefill = []) {
+  const container = document.getElementById('graph-fields');
+  container.innerHTML = '';
+  for (let i = 1; i <= count; i++) {
+    const pre = prefill[i - 1] || {};
+    container.insertAdjacentHTML('beforeend', `
+      <div class="graph-slot">
+        <h3>Graph ${i}</h3>
+        <div class="field-group image-url-field">
+          <label>Image URL <span class="required">*</span></label>
+          <input type="url" id="graph-${i}-url" value="${pre.url || ''}" placeholder="https://library.iterable.com/…">
+        </div>
+        <div class="field-group">
+          <label>Alt text</label>
+          <input type="text" id="graph-${i}-alt" value="${pre.alt || ''}" placeholder="e.g. Measles cases by week since 2022">
+        </div>
+      </div>
+    `);
+  }
+}
+
+// ── Copy HTML ────────────────────────────────────────────────────────────────
+async function copyHtml() {
+  if (!lastGeneratedHtml) return;
+  try {
+    await navigator.clipboard.writeText(lastGeneratedHtml);
+    const btn = document.querySelector('#result-links button');
+    const original = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = original; }, 2000);
+  } catch (err) {
+    alert('Copy failed — please use the Download button instead.\n\n' + err.message);
+  }
+}
+
+// ── Utilities ───────────────────────────────────────────────────────────────
+function showStatus(elId, message, type) {
+  const el = document.getElementById(elId);
+  el.textContent = message;
+  el.className = `status-bar status-${type}`;
+  el.removeAttribute('hidden');
+}
+</script>
+
+</body>
+</html>
