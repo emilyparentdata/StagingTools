@@ -264,4 +264,10 @@ def _call_claude(prompt: str) -> dict:
         text = re.sub(r'^```(?:json)?\s*\n?', '', text)
         text = re.sub(r'\n?```\s*$', '', text)
 
-    return json.loads(text)
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        # Claude occasionally returns HTML with unescaped quotes/newlines.
+        # json_repair handles the most common LLM JSON formatting issues.
+        from json_repair import repair_json
+        return json.loads(repair_json(text))
