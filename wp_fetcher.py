@@ -2,13 +2,31 @@
 wp_fetcher.py — Fetch a published ParentData article from the WordPress REST API.
 
 Returns article metadata + raw content HTML for Claude to reformat.
+
+Authentication:
+    ParentData articles are subscriber-only. Without credentials the REST API
+    returns only the public teaser. Set WP_APP_USERNAME and WP_APP_PASSWORD in
+    .env to authenticate and receive the full content.
+
+    Generate an Application Password at:
+    parentdata.org/wp-admin → Users → Your Profile → Application Passwords
 """
 
+import os
 import requests as _requests
 from urllib.parse import urlparse
 
 WP_BASE = 'https://parentdata.org/wp-json/wp/v2'
 HEADERS = {'User-Agent': 'ParentData-StagingTool/1.0'}
+
+
+def _wp_auth():
+    """Return a (username, password) tuple if WP credentials are configured, else None."""
+    username = os.environ.get('WP_APP_USERNAME', '').strip()
+    password = os.environ.get('WP_APP_PASSWORD', '').strip()
+    if username and password:
+        return (username, password)
+    return None
 
 
 def fetch_wp_article(url: str) -> dict:
@@ -26,6 +44,15 @@ def fetch_wp_article(url: str) -> dict:
     if not slug:
         raise ValueError(f'Could not extract slug from URL: {url}')
 
+    auth = _wp_auth()
+    if not auth:
+        raise ValueError(
+            'WP_APP_USERNAME and WP_APP_PASSWORD are not set in .env. '
+            'These are required to fetch full article content past the paywall. '
+            'Generate an Application Password at: '
+            'parentdata.org/wp-admin → Users → Your Profile → Application Passwords'
+        )
+
     resp = _requests.get(
         f'{WP_BASE}/posts',
         params={
@@ -34,6 +61,7 @@ def fetch_wp_article(url: str) -> dict:
             'status': 'publish',
         },
         headers=HEADERS,
+        auth=auth,
         timeout=30,
     )
     resp.raise_for_status()
@@ -41,7 +69,7 @@ def fetch_wp_article(url: str) -> dict:
     if not posts:
         raise ValueError(
             f'No published post found for slug "{slug}". '
-            f'Check that the URL is correct and the article is publicly published.'
+            f'Check that the URL is correct and the article is published.'
         )
 
     return _parse_post(posts[0])
