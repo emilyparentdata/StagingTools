@@ -11,6 +11,10 @@ Loads the base template and replaces:
   - Author block (name, title, link)
   - Related article cards (image, title, description, Read more button)
   - Footer copyright year
+
+Supports two template types:
+  'standard'  — standard newsletter with welcome, author block, related reading
+  'fertility' — fertility article with subtitle/author in header, bottom line box
 """
 
 import re
@@ -28,11 +32,11 @@ STYLE_P_SUB = (
 
 # ── Public entry point ───────────────────────────────────────────────────────
 
-def build_email_html(template_path: str, fields: dict) -> str:
+def build_email_html(template_path: str, fields: dict, template_type: str = 'standard') -> str:
     """
     Build the finished email HTML.
 
-    fields keys:
+    fields keys (standard):
         title               str
         subtitle_lines      list[str]
         welcome_html        str   (Emily's intro section incl. <hr>; empty string if Emily wrote article)
@@ -44,19 +48,25 @@ def build_email_html(template_path: str, fields: dict) -> str:
         featured_image_alt  str
         related_articles    list[{title, url, image_url, image_alt, description}]
 
+    Additional fields for fertility template:
+        bottom_line_html    str   (<ul>...</ul> for the purple bottom line box)
+
     Returns final HTML string.
     """
     with open(template_path, encoding='utf-8') as f:
         soup = BeautifulSoup(f.read(), 'html.parser')
 
-    _update_title(soup, fields)
-    _update_headline(soup, fields)
-    _update_subtitle(soup, fields)
-    _remove_welcome_banner(soup)
-    _replace_article_sections(soup, fields)
-    _update_author_block(soup, fields)
-    _update_related_articles(soup, fields.get('related_articles', []))
-    _update_copyright(soup)
+    if template_type == 'fertility':
+        _inject_fertility(soup, fields)
+    else:
+        _update_title(soup, fields)
+        _update_headline(soup, fields)
+        _update_subtitle(soup, fields)
+        _remove_welcome_banner(soup)
+        _replace_article_sections(soup, fields)
+        _update_author_block(soup, fields)
+        _update_related_articles(soup, fields.get('related_articles', []))
+        _update_copyright(soup)
 
     html = str(soup)
 
@@ -301,6 +311,128 @@ def _update_copyright(soup):
             p.clear()
             p.append(NavigableString(f'Copyright \u00a9 {year} ParentData, All rights reserved.'))
             break
+
+
+# ── Fertility template injection ──────────────────────────────────────────────
+
+def _inject_fertility(soup, fields):
+    """Inject all fields into the fertility article template."""
+    _update_title(soup, fields)
+    _update_headline(soup, fields)
+    _update_fertility_subtitle_author(soup, fields)
+    _replace_fertility_body(soup, fields)
+    _update_fertility_bottom_line(soup, fields)
+    _update_copyright(soup)
+
+
+def _update_fertility_subtitle_author(soup, fields):
+    """
+    Update the subtitle and author line in the fertility template header.
+
+    The fertility template has a <td class="table-box-mobile top-box-header-m no-top-pad">
+    containing two <p class="sub-text"> elements:
+      1st p: subtitle (font-weight: 600)
+      2nd p: author name + title (font-weight: 300)
+    """
+    subtitle_td = None
+    for td in soup.find_all('td'):
+        classes = td.get('class', [])
+        if 'table-box-mobile' in classes and 'top-box-header-m' in classes:
+            subtitle_td = td
+            break
+    if not subtitle_td:
+        return
+
+    sub_paras = subtitle_td.find_all('p', class_='sub-text')
+
+    # First p: subtitle
+    subtitle_lines = fields.get('subtitle_lines', [])
+    subtitle_text = subtitle_lines[0] if subtitle_lines else ''
+    if sub_paras:
+        sub_paras[0].clear()
+        sub_paras[0].append(NavigableString(subtitle_text))
+
+    # Second p: author name (+ title if present)
+    author_name = fields.get('author_name', '')
+    author_title = fields.get('author_title', '')
+    author_line = f'{author_name}, {author_title}' if author_title else author_name
+    if len(sub_paras) >= 2:
+        sub_paras[1].clear()
+        sub_paras[1].append(NavigableString(author_line))
+
+
+def _replace_fertility_body(soup, fields):
+    """
+    Inject article body and featured image into the fertility template.
+
+    Layout in the template:
+      Row 4 (nested table):
+        - td.tablebox  → intro content (before first H2)
+        - td            → featured image (img[alt="Article Image"])
+      Row 5 (direct td.tablebox.table-box-mobile.no-top-pad):
+        → main body (from first H2 onward)
+    """
+    body_html = fields.get('article_body_html', '')
+    intro_html, main_html = _split_at_first_heading(body_html)
+
+    # --- Intro body td (first td.tablebox that is NOT also table-box-mobile) ---
+    intro_td = None
+    for td in soup.find_all('td'):
+        classes = td.get('class', [])
+        if 'tablebox' in classes and 'table-box-mobile' not in classes:
+            intro_td = td
+            break
+    if intro_td:
+        intro_td.clear()
+        if intro_html:
+            intro_td.append(BeautifulSoup(intro_html, 'html.parser'))
+
+    # --- Featured image ---
+    img_url = fields.get('featured_image_url', '')
+    img_alt = _escape_attr(fields.get('featured_image_alt', ''))
+    img = soup.find('img', attrs={'alt': 'Article Image'})
+    if img and img_url:
+        img['src'] = img_url
+        img['alt'] = img_alt
+
+    # --- Main body td (td.tablebox.table-box-mobile.no-top-pad, Row 5) ---
+    main_td = None
+    for td in soup.find_all('td'):
+        classes = td.get('class', [])
+        if 'tablebox' in classes and 'table-box-mobile' in classes and 'no-top-pad' in classes:
+            main_td = td
+            break
+    if main_td:
+        main_td.clear()
+        if main_html:
+            main_td.append(BeautifulSoup(main_html, 'html.parser'))
+
+
+def _update_fertility_bottom_line(soup, fields):
+    """
+    Replace the <ul> inside the purple bottom line box with the new content.
+
+    The purple box has background-color: #a9b4ff in its style attribute.
+    Inside is a nested table with an h3 heading row and a ul row.
+    """
+    bottom_line_html = fields.get('bottom_line_html', '')
+    if not bottom_line_html:
+        return
+
+    # Find the purple bottom line td
+    purple_td = None
+    for td in soup.find_all('td'):
+        if 'a9b4ff' in td.get('style', ''):
+            purple_td = td
+            break
+    if not purple_td:
+        return
+
+    # Replace the existing <ul>
+    ul = purple_td.find('ul')
+    if ul:
+        new_ul = BeautifulSoup(bottom_line_html, 'html.parser')
+        ul.replace_with(new_ul)
 
 
 # ── Utilities ────────────────────────────────────────────────────────────────

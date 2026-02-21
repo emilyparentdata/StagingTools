@@ -14,9 +14,24 @@
 
 <main>
 
+  <!-- ── Choose Template ─────────────────────────────────────────────── -->
+  <section id="section-template" class="card">
+    <h2>Choose Template</h2>
+    <div class="template-selector">
+      <button type="button" class="template-card selected" id="tcard-standard" onclick="selectTemplate('standard', this)">
+        <strong>Standard Newsletter</strong>
+        <span>Emily's intro &middot; author block &middot; related reading</span>
+      </button>
+      <button type="button" class="template-card" id="tcard-fertility" onclick="selectTemplate('fertility', this)">
+        <strong>Fertility Article</strong>
+        <span>Guest author headline &middot; purple bottom line box &middot; no related reading</span>
+      </button>
+    </div>
+  </section>
+
   <!-- ── Step 1: Upload ──────────────────────────────────────────────── -->
   <section id="section-upload" class="card">
-    <h2>1. Upload Article Document</h2>
+    <h2>1. Upload Article</h2>
     <div class="upload-zone" id="upload-zone">
       <input type="file" id="file-input" accept=".docx" hidden>
       <p>Drag &amp; drop your <strong>.docx</strong> file here, or <button type="button" class="link-btn" id="browse-btn">browse</button></p>
@@ -25,13 +40,24 @@
 
     <div class="upload-or">— or —</div>
 
-    <div class="field-group" style="margin-bottom:0;">
+    <div class="field-group">
       <label for="gdoc-url">Google Doc link</label>
       <div style="display:flex;gap:8px;align-items:center;">
         <input type="url" id="gdoc-url" placeholder="https://docs.google.com/document/d/…" style="flex:1;" onkeydown="if(event.key==='Enter') handleGoogleDocUrl()">
         <button type="button" class="btn-small" onclick="handleGoogleDocUrl()" style="padding:6px 16px;">Use this doc</button>
       </div>
       <p class="hint" style="margin-top:5px;">Doc must be shared as "Anyone with the link can view".</p>
+    </div>
+
+    <div class="upload-or">— or —</div>
+
+    <div class="field-group" style="margin-bottom:0;">
+      <label for="wp-url">ParentData article URL</label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="url" id="wp-url" placeholder="https://parentdata.org/babies/safe-sleep/" style="flex:1;" onkeydown="if(event.key==='Enter') handleWpUrl()">
+        <button type="button" class="btn-small" onclick="handleWpUrl()" style="padding:6px 16px;">Use this article</button>
+      </div>
+      <p class="hint" style="margin-top:5px;">Pull from an already-published ParentData article.</p>
     </div>
 
     <div id="upload-status" class="status-bar" hidden></div>
@@ -52,7 +78,7 @@
       <textarea id="f-subtitle" rows="2" placeholder="Subtitle line 1&#10;Subtitle line 2"></textarea>
     </div>
 
-    <div class="field-group">
+    <div id="group-welcome" class="field-group">
       <label for="f-welcome">Welcome Text (Emily's intro HTML)</label>
       <p class="hint">Full HTML including the &lt;hr&gt; at the end. Leave blank if Emily wrote the full article.</p>
       <textarea id="f-welcome" rows="8" class="code-area" placeholder="&lt;p style=&quot;...&quot;&gt;&lt;em&gt;Welcome to The Latest...&lt;/em&gt;&lt;/p&gt;&#10;&lt;hr&gt;"></textarea>
@@ -64,11 +90,11 @@
     </div>
 
     <div class="field-group">
-      <label for="f-author-title">Author Title</label>
-      <input type="text" id="f-author-title" placeholder="e.g. Endocrinologist">
+      <label for="f-author-title">Author Title / Credential</label>
+      <input type="text" id="f-author-title" placeholder="e.g. MD, Endocrinologist">
     </div>
 
-    <div class="field-group">
+    <div id="group-author-url" class="field-group">
       <label for="f-author-url">Author Page URL</label>
       <input type="url" id="f-author-url" placeholder="https://parentdata.org/author/…">
     </div>
@@ -112,7 +138,14 @@
     <div id="graph-fields"></div>
   </section>
 
-  <!-- ── Step 5: Related Articles ────────────────────────────────────── -->
+  <!-- ── Step 4c: Bottom Line (fertility only) ────────────────────────── -->
+  <section id="section-bottomline" class="card" hidden>
+    <h2>4c. Bottom Line</h2>
+    <p class="hint">The summary bullet points that appear in the purple box at the end of the email. Paste or edit the <code>&lt;ul&gt;...&lt;/ul&gt;</code> HTML below.</p>
+    <textarea id="f-bottomline" rows="10" class="code-area" placeholder="&lt;ul style=&quot;...&quot;&gt;&#10;  &lt;li&gt;First key takeaway&lt;/li&gt;&#10;  &lt;li&gt;Second key takeaway&lt;/li&gt;&#10;&lt;/ul&gt;"></textarea>
+  </section>
+
+  <!-- ── Step 5: Related Articles (standard only) ─────────────────────── -->
   <section id="section-related" class="card" hidden>
     <h2>5. Related Reading</h2>
     <p class="hint">Articles are scored from the full ParentData archive. Swap or edit as needed.</p>
@@ -203,9 +236,39 @@
 
 <script>
 // ── State ──────────────────────────────────────────────────────────────────
+let currentTemplate = 'standard';
 let allSuggestions = [];          // scored suggestions from full article index
 let slotData = [{}, {}];          // current article in each slot
 let lastGeneratedHtml = '';       // most recent generated HTML (for copy)
+
+// ── Template selection ──────────────────────────────────────────────────────
+function selectTemplate(type, btn) {
+  currentTemplate = type;
+  document.querySelectorAll('.template-card').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function _updateSectionVisibility() {
+  const isFertility = currentTemplate === 'fertility';
+
+  // Welcome field — hidden for fertility
+  setHide('group-welcome', isFertility);
+
+  // Author URL — hidden for fertility (not used in fertility template)
+  setHide('group-author-url', isFertility);
+
+  // Related articles — standard only
+  setHide('section-related', isFertility);
+
+  // Bottom line — fertility only
+  setHide('section-bottomline', !isFertility);
+}
+
+function setHide(id, hide) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.style.display = hide ? 'none' : '';
+}
 
 // ── Upload ─────────────────────────────────────────────────────────────────
 document.getElementById('browse-btn').addEventListener('click', () => {
@@ -230,6 +293,7 @@ async function handleFile(file) {
   showStatus('upload-status', 'Uploading and extracting fields with Claude… this may take 20–40 seconds.', 'info');
   const formData = new FormData();
   formData.append('file', file);
+  formData.append('template_type', currentTemplate);
   await _submitUpload(formData);
 }
 
@@ -240,6 +304,18 @@ async function handleGoogleDocUrl() {
   showStatus('upload-status', 'Downloading Google Doc and extracting fields… this may take 20–40 seconds.', 'info');
   const formData = new FormData();
   formData.append('google_doc_url', url);
+  formData.append('template_type', currentTemplate);
+  await _submitUpload(formData);
+}
+
+async function handleWpUrl() {
+  const url = document.getElementById('wp-url').value.trim();
+  if (!url) return;
+  document.getElementById('file-name').textContent = '';
+  showStatus('upload-status', 'Fetching article from ParentData and reformatting with Claude… this may take 20–40 seconds.', 'info');
+  const formData = new FormData();
+  formData.append('wordpress_url', url);
+  formData.append('template_type', currentTemplate);
   await _submitUpload(formData);
 }
 
@@ -256,9 +332,11 @@ async function _submitUpload(formData) {
     populateFields(data);
     showStatus('upload-status', 'Fields extracted successfully.', 'success');
 
-    ['section-fields', 'section-image', 'section-body', 'section-related', 'section-generate']
+    // Show always-visible sections
+    ['section-fields', 'section-image', 'section-body', 'section-generate']
       .forEach(id => document.getElementById(id).removeAttribute('hidden'));
 
+    // Show graph section only if there are graphs
     if (data.graph_count > 0) {
       buildGraphFields(data.graph_count, data.inline_graphs || []);
       document.getElementById('section-graphs').removeAttribute('hidden');
@@ -266,7 +344,19 @@ async function _submitUpload(formData) {
       document.getElementById('section-graphs').setAttribute('hidden', '');
     }
 
-    fetchRelatedArticles(data.topic_tags || [], data.related_articles || []);
+    // Show template-specific sections
+    const isFertility = currentTemplate === 'fertility';
+    if (isFertility) {
+      document.getElementById('section-bottomline').removeAttribute('hidden');
+      document.getElementById('section-related').setAttribute('hidden', '');
+    } else {
+      document.getElementById('section-related').removeAttribute('hidden');
+      document.getElementById('section-bottomline').setAttribute('hidden', '');
+      fetchRelatedArticles(data.topic_tags || [], data.related_articles || []);
+    }
+
+    // Apply field-level visibility for the chosen template
+    _updateSectionVisibility();
 
   } catch (err) {
     showStatus('upload-status', `Network error: ${err.message}`, 'error');
@@ -282,6 +372,7 @@ function populateFields(data) {
   document.getElementById('f-author-url').value = data.author_url || 'https://parentdata.org/author/eoster/';
   document.getElementById('f-tags').value = (data.topic_tags || []).join(', ');
   document.getElementById('f-body').value = data.article_body_html || '';
+  document.getElementById('f-bottomline').value = data.bottom_line_html || '';
   if (data.featured_image_url) document.getElementById('f-img-url').value = data.featured_image_url;
   if (data.featured_image_alt) document.getElementById('f-img-alt').value = data.featured_image_alt;
 }
@@ -387,7 +478,9 @@ async function generateEmail() {
   const tagsRaw = document.getElementById('f-tags').value;
   const topicTags = tagsRaw.split(',').map(s => s.trim()).filter(Boolean);
 
-  const relatedArticles = [0, 1].map(i => ({
+  const isFertility = currentTemplate === 'fertility';
+
+  const relatedArticles = isFertility ? [] : [0, 1].map(i => ({
     title: document.getElementById(`rel-${i}-title`).value,
     url: document.getElementById(`rel-${i}-url`).value,
     image_url: document.getElementById(`rel-${i}-image-url`).value,
@@ -406,10 +499,12 @@ async function generateEmail() {
   }
 
   const payload = {
+    template_type: currentTemplate,
     title: document.getElementById('f-title').value,
     subtitle_lines: subtitleLines,
-    welcome_html: document.getElementById('f-welcome').value,
+    welcome_html: isFertility ? '' : document.getElementById('f-welcome').value,
     article_body_html: document.getElementById('f-body').value,
+    bottom_line_html: isFertility ? document.getElementById('f-bottomline').value : '',
     author_name: document.getElementById('f-author-name').value,
     author_title: document.getElementById('f-author-title').value,
     author_url: document.getElementById('f-author-url').value,
