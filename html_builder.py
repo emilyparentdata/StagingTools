@@ -688,10 +688,17 @@ def _apply_link_fixes(html: str) -> str:
         has_font_sz  = bool(re.search(r'\bfont-size\s*:', cur_style, re.I))
 
         # Only skip if the content span already carries the actual link styles
-        # (color present), not just a formatting span like font-style:italic.
-        already_fixed = bool(re.match(
-            r'^\s*<span\b[^>]*\bstyle\s*=\s*"[^"]*\bcolor\s*:', content, re.I
-        ))
+        # with an explicit font-size — not just a formatting span (italic/bold)
+        # and not a span that has color+text-dec but is missing font-size.
+        _span_style_m = re.match(
+            r'^\s*<span\b[^>]*\bstyle\s*=\s*"([^"]*)"', content, re.I
+        )
+        _span_style = _span_style_m.group(1) if _span_style_m else ''
+        already_fixed = bool(
+            _span_style
+            and re.search(r'\bcolor\s*:', _span_style, re.I)
+            and re.search(r'\bfont-size\s*:', _span_style, re.I)
+        )
 
         # Already complete — don't double-process
         if has_color and has_text_dec and already_fixed:
@@ -722,12 +729,16 @@ def _apply_link_fixes(html: str) -> str:
         c_m   = re.search(r'\bcolor\s*:\s*([^;]+)',          merged, re.I)
         td_m  = re.search(r'text-decoration\s*:\s*([^;]+)',  merged, re.I)
 
+        # Use an explicit px value (not inherit) so older iOS Mail renders the
+        # span at the correct size even when its inline style context breaks
+        # inheritance through the CSS-applied <a> rule.  16px is the article
+        # body standard; links that already carry an explicit size (e.g. 14px
+        # footer links) use that instead.
         span_parts = [
+            f"font-size:{fz_m.group(1).strip() if fz_m else '16px'}",
             f"color:{c_m.group(1).strip() if c_m else '#000000'}",
             f"text-decoration:{td_m.group(1).strip() if td_m else 'underline'}",
         ]
-        if fz_m:
-            span_parts.insert(0, f"font-size:{fz_m.group(1).strip()}")
         span_style = ';'.join(span_parts) + ';'
 
         new_content = content if already_fixed else f'<span style="{span_style}">{content}</span>'
