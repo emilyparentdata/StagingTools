@@ -294,6 +294,12 @@
   <!-- ── Generate ─────────────────────────────────────────────────────── -->
   <section id="section-generate" class="card" hidden>
     <h2>Generate Email</h2>
+    <div id="group-update-banner" style="display:none; margin-bottom:14px;">
+      <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+        <input type="checkbox" id="cb-update-banner">
+        Include "Update your newsletters" banner at top
+      </label>
+    </div>
     <button type="button" id="generate-btn" class="btn-primary" onclick="generateEmail()">
       Generate Staged Email
     </button>
@@ -355,6 +361,9 @@ function _showPostUploadSections(isQA, isFertility) {
   // Field-level visibility within section-fields
   setHide('group-welcome', isFertility);
   setHide('group-author-url', isFertility);
+
+  // Fertility/QA-only option in generate section
+  setHide('group-update-banner', !(isFertility || isQA));
 }
 
 function setHide(id, hide) {
@@ -591,6 +600,7 @@ async function generateEmail() {
   if (isQA) {
     payload = {
       template_type: 'qa',
+      include_update_banner: document.getElementById('cb-update-banner').checked,
       intro_text: document.getElementById('f-intro').value,
       qa1: {
         question_text: document.getElementById('qa1-question').value,
@@ -628,6 +638,7 @@ async function generateEmail() {
 
     payload = {
       template_type: currentTemplate,
+      include_update_banner: document.getElementById('cb-update-banner').checked,
       title: document.getElementById('f-title').value,
       subtitle_lines: subtitleLines,
       welcome_html: isFertility ? '' : document.getElementById('f-welcome').value,

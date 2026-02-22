@@ -319,7 +319,7 @@ def _update_copyright(soup):
 
 def _inject_fertility(soup, fields):
     """Inject all fields into the fertility article template."""
-    _remove_fertility_pregnancy_banner(soup)
+    _handle_fertility_banner(soup, fields.get('include_update_banner', False))
     _update_title(soup, fields)
     _update_headline(soup, fields)
     _update_fertility_subtitle_author(soup, fields)
@@ -328,13 +328,34 @@ def _inject_fertility(soup, fields):
     _update_copyright(soup)
 
 
-def _remove_fertility_pregnancy_banner(soup):
-    """Remove the 'You are N weeks pregnant' personalization banner row."""
+def _handle_fertility_banner(soup, include_banner: bool):
+    """
+    Handle the top banner row (p.news-top-link) in fertility templates.
+
+    If include_banner is False (default): remove the row entirely.
+    If include_banner is True: replace its content with the newsletter
+    update prompt so readers can opt out of fertility sends.
+    """
     banner_p = soup.find('p', class_='news-top-link')
-    if banner_p:
+    if not banner_p:
+        return
+
+    if not include_banner:
         outer_tr = _outer_email_tr(banner_p, soup)
         if outer_tr:
             outer_tr.decompose()
+        return
+
+    # Update with new text, preserving the same <p> element and its styling
+    banner_p.clear()
+    new_html = (
+        'Are you starting fertility treatment or no longer TTC? '
+        '<span style="text-decoration: underline; font-style: italic;">'
+        '<a href="https://parentdata.org/account/#newsletter-settings-section"'
+        ' style="color: #000000;">Update your newsletters.</a>'
+        '</span>'
+    )
+    banner_p.append(BeautifulSoup(new_html, 'html.parser'))
 
 
 def _update_fertility_subtitle_author(soup, fields):
@@ -451,7 +472,7 @@ def _update_fertility_bottom_line(soup, fields):
 
 def _inject_qa(soup, fields):
     """Inject all fields into the Q&A template."""
-    _remove_fertility_pregnancy_banner(soup)
+    _handle_fertility_banner(soup, fields.get('include_update_banner', False))
     _update_qa_intro(soup, fields)
     _update_qa_pairs(soup, fields)
     _update_copyright(soup)
