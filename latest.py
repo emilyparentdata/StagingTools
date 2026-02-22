@@ -43,6 +43,14 @@ TEMPLATES = {
         'has_related_reading': False,
         'has_bottom_line': True,
     },
+    'qa': {
+        'label': 'Fertility Q&A',
+        'file': BASE_DIR / 'email_templates' / 'template_fertilityqa.html',
+        'has_welcome': False,
+        'has_author_block': False,
+        'has_related_reading': False,
+        'has_bottom_line': False,
+    },
 }
 
 
@@ -61,11 +69,34 @@ def upload():
     wordpress_url = request.form.get('wordpress_url', '').strip()
     google_doc_url = request.form.get('google_doc_url', '').strip()
     has_file = 'file' in request.files and request.files['file'].filename
+    wp_url_1 = request.form.get('wp_url_1', '').strip()
+    wp_url_2 = request.form.get('wp_url_2', '').strip()
 
-    if not wordpress_url and not google_doc_url and not has_file:
+    if not wordpress_url and not google_doc_url and not has_file and not (wp_url_1 and wp_url_2):
         return jsonify({'error': 'Provide a .docx file, a Google Doc link, or a ParentData article URL'}), 400
 
-    # ── WordPress article URL path ───────────────────────────────────────────
+    # ── Q&A: two WordPress URLs ──────────────────────────────────────────────
+    if template_type == 'qa' and wp_url_1 and wp_url_2:
+        try:
+            from wp_fetcher import fetch_wp_article
+            from claude_client import extract_qa_content, generate_qa_intro
+
+            article1 = fetch_wp_article(wp_url_1)
+            article2 = fetch_wp_article(wp_url_2)
+
+            qa1 = extract_qa_content(article1['content_html'])
+            qa2 = extract_qa_content(article2['content_html'])
+            intro_text = generate_qa_intro(article1['title'], article2['title'])
+
+            return jsonify({
+                'intro_text': intro_text,
+                'qa1': qa1,
+                'qa2': qa2,
+            })
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+
+    # ── Single WordPress article URL path ────────────────────────────────────
     if wordpress_url:
         try:
             from wp_fetcher import fetch_wp_article

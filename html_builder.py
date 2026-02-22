@@ -56,7 +56,9 @@ def build_email_html(template_path: str, fields: dict, template_type: str = 'sta
     with open(template_path, encoding='utf-8') as f:
         soup = BeautifulSoup(f.read(), 'html.parser')
 
-    if template_type == 'fertility':
+    if template_type == 'qa':
+        _inject_qa(soup, fields)
+    elif template_type == 'fertility':
         _inject_fertility(soup, fields)
     else:
         _update_title(soup, fields)
@@ -443,6 +445,73 @@ def _update_fertility_bottom_line(soup, fields):
     if ul:
         new_ul = BeautifulSoup(bottom_line_html, 'html.parser')
         ul.replace_with(new_ul)
+
+
+# ── Q&A template injection ───────────────────────────────────────────────────
+
+def _inject_qa(soup, fields):
+    """Inject all fields into the Q&A template."""
+    _remove_fertility_pregnancy_banner(soup)
+    _update_qa_intro(soup, fields)
+    _update_qa_pairs(soup, fields)
+    _update_copyright(soup)
+
+
+def _update_qa_intro(soup, fields):
+    """Update the subtitle/intro sentence (p.sub-text) with the editable intro text."""
+    intro_text = fields.get('intro_text', '')
+    sub_p = soup.find('p', class_='sub-text')
+    if sub_p and intro_text:
+        sub_p.clear()
+        sub_p.append(BeautifulSoup(
+            f'<span style="white-space: pre-wrap;">{_escape_attr(intro_text)}</span>',
+            'html.parser',
+        ))
+
+
+def _update_qa_pairs(soup, fields):
+    """
+    Inject both Q&A pairs.
+
+    Locates each Question/Answer block by the decorative img[alt="Question"] and
+    img[alt="Answer"] images, then:
+      - Replaces the italic <p> in the question block with the reader's question text.
+      - Replaces the <div> inside td.tablebox in the answer block with the answer HTML.
+    """
+    question_imgs = soup.find_all('img', attrs={'alt': 'Question'})
+    answer_imgs = soup.find_all('img', attrs={'alt': 'Answer'})
+
+    for i, q_img in enumerate(question_imgs):
+        qa = fields.get(f'qa{i + 1}', {})
+        outer_tr = _outer_email_tr(q_img, soup)
+        if not outer_tr:
+            continue
+
+        # The italic <p> holds the question text and author sign-off
+        italic_p = outer_tr.find('p', style=lambda s: 'italic' in (s or ''))
+        if italic_p:
+            question_text = _escape_attr(qa.get('question_text', ''))
+            author = _escape_attr(qa.get('question_author', ''))
+            content = f'<span style="white-space: pre-wrap;">{question_text}</span>'
+            if author:
+                content += f'<br><br><span style="white-space: pre-wrap;">\u2014{author}</span>'
+            italic_p.clear()
+            italic_p.append(BeautifulSoup(content, 'html.parser'))
+
+    for i, a_img in enumerate(answer_imgs):
+        qa = fields.get(f'qa{i + 1}', {})
+        outer_tr = _outer_email_tr(a_img, soup)
+        if not outer_tr:
+            continue
+
+        tablebox_td = outer_tr.find('td', class_='tablebox')
+        if tablebox_td:
+            div = tablebox_td.find('div')
+            if div:
+                div.clear()
+                answer_html = qa.get('answer_html', '')
+                if answer_html:
+                    div.append(BeautifulSoup(answer_html, 'html.parser'))
 
 
 # ── Utilities ────────────────────────────────────────────────────────────────

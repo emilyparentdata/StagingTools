@@ -24,7 +24,11 @@
       </button>
       <button type="button" class="template-card" id="tcard-fertility" onclick="selectTemplate('fertility', this)">
         <strong>Fertility Article</strong>
-        <span>Guest author headline &middot; purple bottom line box &middot; no related reading</span>
+        <span>Guest author headline &middot; purple bottom line box</span>
+      </button>
+      <button type="button" class="template-card" id="tcard-qa" onclick="selectTemplate('qa', this)">
+        <strong>Fertility Q&amp;A</strong>
+        <span>Two reader questions &middot; intro sentence &middot; two WP articles</span>
       </button>
     </div>
   </section>
@@ -32,38 +36,56 @@
   <!-- ── Step 1: Upload ──────────────────────────────────────────────── -->
   <section id="section-upload" class="card">
     <h2>1. Upload Article</h2>
-    <div class="upload-zone" id="upload-zone">
-      <input type="file" id="file-input" accept=".docx" hidden>
-      <p>Drag &amp; drop your <strong>.docx</strong> file here, or <button type="button" class="link-btn" id="browse-btn">browse</button></p>
-      <p id="file-name" class="file-name"></p>
+
+    <!-- Standard / Fertility upload options -->
+    <div id="standard-upload-area">
+      <div class="upload-zone" id="upload-zone">
+        <input type="file" id="file-input" accept=".docx" hidden>
+        <p>Drag &amp; drop your <strong>.docx</strong> file here, or <button type="button" class="link-btn" id="browse-btn">browse</button></p>
+        <p id="file-name" class="file-name"></p>
+      </div>
+
+      <div class="upload-or">— or —</div>
+
+      <div class="field-group">
+        <label for="gdoc-url">Google Doc link</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="url" id="gdoc-url" placeholder="https://docs.google.com/document/d/…" style="flex:1;" onkeydown="if(event.key==='Enter') handleGoogleDocUrl()">
+          <button type="button" class="btn-small" onclick="handleGoogleDocUrl()" style="padding:6px 16px;">Use this doc</button>
+        </div>
+        <p class="hint" style="margin-top:5px;">Doc must be shared as "Anyone with the link can view".</p>
+      </div>
+
+      <div class="upload-or">— or —</div>
+
+      <div class="field-group" style="margin-bottom:0;">
+        <label for="wp-url">ParentData article URL</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="url" id="wp-url" placeholder="https://parentdata.org/…" style="flex:1;" onkeydown="if(event.key==='Enter') handleWpUrl()">
+          <button type="button" class="btn-small" onclick="handleWpUrl()" style="padding:6px 16px;">Use this article</button>
+        </div>
+        <p class="hint" style="margin-top:5px;">Pull from an already-published ParentData article. Requires WP credentials in .env.</p>
+      </div>
     </div>
 
-    <div class="upload-or">— or —</div>
-
-    <div class="field-group">
-      <label for="gdoc-url">Google Doc link</label>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <input type="url" id="gdoc-url" placeholder="https://docs.google.com/document/d/…" style="flex:1;" onkeydown="if(event.key==='Enter') handleGoogleDocUrl()">
-        <button type="button" class="btn-small" onclick="handleGoogleDocUrl()" style="padding:6px 16px;">Use this doc</button>
+    <!-- Q&A upload options (two URLs) -->
+    <div id="qa-upload-area" style="display:none;">
+      <p class="hint" style="margin-bottom:14px;">Paste the two ParentData Q&amp;A article URLs to fetch. Requires WP credentials in .env.</p>
+      <div class="field-group">
+        <label for="wp-url-1">Article 1 URL</label>
+        <input type="url" id="wp-url-1" placeholder="https://parentdata.org/…">
       </div>
-      <p class="hint" style="margin-top:5px;">Doc must be shared as "Anyone with the link can view".</p>
-    </div>
-
-    <div class="upload-or">— or —</div>
-
-    <div class="field-group" style="margin-bottom:0;">
-      <label for="wp-url">ParentData article URL</label>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <input type="url" id="wp-url" placeholder="https://parentdata.org/babies/safe-sleep/" style="flex:1;" onkeydown="if(event.key==='Enter') handleWpUrl()">
-        <button type="button" class="btn-small" onclick="handleWpUrl()" style="padding:6px 16px;">Use this article</button>
+      <div class="field-group" style="margin-bottom:0;">
+        <label for="wp-url-2">Article 2 URL</label>
+        <input type="url" id="wp-url-2" placeholder="https://parentdata.org/…">
       </div>
-      <p class="hint" style="margin-top:5px;">Pull from an already-published ParentData article.</p>
+      <button type="button" class="btn-primary" onclick="handleQAUrls()" style="margin-top:16px;">Fetch Both Articles</button>
     </div>
 
     <div id="upload-status" class="status-bar" hidden></div>
   </section>
 
-  <!-- ── Step 2: Extracted Fields ────────────────────────────────────── -->
+  <!-- ── Step 2: Extracted Fields (standard / fertility) ─────────────── -->
   <section id="section-fields" class="card" hidden>
     <h2>2. Review Extracted Fields</h2>
 
@@ -106,7 +128,7 @@
     </div>
   </section>
 
-  <!-- ── Step 3: Featured Image ───────────────────────────────────────── -->
+  <!-- ── Step 3: Featured Image (standard / fertility) ────────────────── -->
   <section id="section-image" class="card" hidden>
     <h2>3. Featured Image</h2>
 
@@ -121,7 +143,7 @@
     </div>
   </section>
 
-  <!-- ── Step 4: Article Body Preview ────────────────────────────────── -->
+  <!-- ── Step 4: Article Body HTML (standard / fertility) ─────────────── -->
   <section id="section-body" class="card" hidden>
     <h2>4. Article Body HTML</h2>
     <p class="hint">Claude-formatted HTML. Edit freely — this is what goes into the email.</p>
@@ -142,7 +164,62 @@
   <section id="section-bottomline" class="card" hidden>
     <h2>4c. Bottom Line</h2>
     <p class="hint">The summary bullet points that appear in the purple box at the end of the email. Paste or edit the <code>&lt;ul&gt;...&lt;/ul&gt;</code> HTML below.</p>
-    <textarea id="f-bottomline" rows="10" class="code-area" placeholder="&lt;ul style=&quot;...&quot;&gt;&#10;  &lt;li&gt;First key takeaway&lt;/li&gt;&#10;  &lt;li&gt;Second key takeaway&lt;/li&gt;&#10;&lt;/ul&gt;"></textarea>
+    <textarea id="f-bottomline" rows="10" class="code-area" placeholder="&lt;ul style=&quot;...&quot;&gt;&#10;  &lt;li&gt;First key takeaway&lt;/li&gt;&#10;&lt;/ul&gt;"></textarea>
+  </section>
+
+  <!-- ── Step 2 (QA): Intro Text ──────────────────────────────────────── -->
+  <section id="section-intro" class="card" hidden>
+    <h2>2. Intro Text</h2>
+    <p class="hint">Claude's suggested intro sentence. Edit freely before generating.</p>
+    <textarea id="f-intro" rows="3" placeholder="It's Q&amp;A day! This week's questions are about…"></textarea>
+  </section>
+
+  <!-- ── Step 3 (QA): Q&A Pair 1 ─────────────────────────────────────── -->
+  <section id="section-qa1" class="card" hidden>
+    <h2>3. Question &amp; Answer 1</h2>
+
+    <div class="field-group">
+      <label for="qa1-question">Question Text</label>
+      <p class="hint">The reader's question as plain text (no HTML).</p>
+      <textarea id="qa1-question" rows="4" placeholder="I'm coming off birth control and haven't had a period yet…"></textarea>
+    </div>
+
+    <div class="field-group">
+      <label for="qa1-author">Sign-off Name</label>
+      <input type="text" id="qa1-author" placeholder="e.g. Anne Marie">
+    </div>
+
+    <div class="field-group">
+      <label for="qa1-answer">Answer HTML</label>
+      <details>
+        <summary>Show / hide answer body</summary>
+        <textarea id="qa1-answer" rows="16" class="code-area" placeholder="Answer HTML will appear here after fetch…"></textarea>
+      </details>
+    </div>
+  </section>
+
+  <!-- ── Step 4 (QA): Q&A Pair 2 ─────────────────────────────────────── -->
+  <section id="section-qa2" class="card" hidden>
+    <h2>4. Question &amp; Answer 2</h2>
+
+    <div class="field-group">
+      <label for="qa2-question">Question Text</label>
+      <p class="hint">The reader's question as plain text (no HTML).</p>
+      <textarea id="qa2-question" rows="4" placeholder="How early should I start taking prenatal vitamins?"></textarea>
+    </div>
+
+    <div class="field-group">
+      <label for="qa2-author">Sign-off Name</label>
+      <input type="text" id="qa2-author" placeholder="e.g. Another pill to swallow">
+    </div>
+
+    <div class="field-group">
+      <label for="qa2-answer">Answer HTML</label>
+      <details>
+        <summary>Show / hide answer body</summary>
+        <textarea id="qa2-answer" rows="16" class="code-area" placeholder="Answer HTML will appear here after fetch…"></textarea>
+      </details>
+    </div>
   </section>
 
   <!-- ── Step 5: Related Articles (standard only) ─────────────────────── -->
@@ -154,8 +231,6 @@
     <div id="related-loading" class="status-bar" hidden>Fetching article suggestions…</div>
 
     <div class="related-grid">
-
-      <!-- Slot 1 -->
       <div class="related-slot" id="slot-0">
         <h3>Article 1</h3>
         <div class="swap-row">
@@ -185,7 +260,6 @@
         </div>
       </div>
 
-      <!-- Slot 2 -->
       <div class="related-slot" id="slot-1">
         <h3>Article 2</h3>
         <div class="swap-row">
@@ -214,13 +288,12 @@
           <input type="text" id="rel-1-description" maxlength="80" placeholder="e.g. How pregnancy hormones affect blood sugar">
         </div>
       </div>
-
     </div>
   </section>
 
-  <!-- ── Step 6: Generate ─────────────────────────────────────────────── -->
+  <!-- ── Generate ─────────────────────────────────────────────────────── -->
   <section id="section-generate" class="card" hidden>
-    <h2>6. Generate Email</h2>
+    <h2>Generate Email</h2>
     <button type="button" id="generate-btn" class="btn-primary" onclick="generateEmail()">
       Generate Staged Email
     </button>
@@ -237,40 +310,59 @@
 <script>
 // ── State ──────────────────────────────────────────────────────────────────
 let currentTemplate = 'standard';
-let allSuggestions = [];          // scored suggestions from full article index
-let slotData = [{}, {}];          // current article in each slot
-let lastGeneratedHtml = '';       // most recent generated HTML (for copy)
+let allSuggestions = [];
+let slotData = [{}, {}];
+let lastGeneratedHtml = '';
 
 // ── Template selection ──────────────────────────────────────────────────────
 function selectTemplate(type, btn) {
   currentTemplate = type;
   document.querySelectorAll('.template-card').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
+
+  // Toggle upload area
+  const isQA = type === 'qa';
+  document.getElementById('standard-upload-area').style.display = isQA ? 'none' : '';
+  document.getElementById('qa-upload-area').style.display = isQA ? '' : 'none';
 }
 
-function _updateSectionVisibility() {
-  const isFertility = currentTemplate === 'fertility';
+function _showPostUploadSections(isQA, isFertility) {
+  // Sections common to standard + fertility
+  ['section-fields', 'section-image', 'section-body', 'section-generate'].forEach(id => {
+    document.getElementById(id).style.display = isQA ? 'none' : '';
+    if (!isQA) document.getElementById(id).removeAttribute('hidden');
+  });
 
-  // Welcome field — hidden for fertility
+  // Standard-only
+  document.getElementById('section-related').style.display = (isQA || isFertility) ? 'none' : '';
+  if (!isQA && !isFertility) document.getElementById('section-related').removeAttribute('hidden');
+
+  // Fertility-only
+  document.getElementById('section-bottomline').style.display = isFertility ? '' : 'none';
+  if (isFertility) document.getElementById('section-bottomline').removeAttribute('hidden');
+
+  // QA-only
+  ['section-intro', 'section-qa1', 'section-qa2'].forEach(id => {
+    document.getElementById(id).style.display = isQA ? '' : 'none';
+    if (isQA) document.getElementById(id).removeAttribute('hidden');
+  });
+
+  // Always show generate
+  const genSection = document.getElementById('section-generate');
+  genSection.style.display = '';
+  genSection.removeAttribute('hidden');
+
+  // Field-level visibility within section-fields
   setHide('group-welcome', isFertility);
-
-  // Author URL — hidden for fertility (not used in fertility template)
   setHide('group-author-url', isFertility);
-
-  // Related articles — standard only
-  setHide('section-related', isFertility);
-
-  // Bottom line — fertility only
-  setHide('section-bottomline', !isFertility);
 }
 
 function setHide(id, hide) {
   const el = document.getElementById(id);
-  if (!el) return;
-  el.style.display = hide ? 'none' : '';
+  if (el) el.style.display = hide ? 'none' : '';
 }
 
-// ── Upload ─────────────────────────────────────────────────────────────────
+// ── Upload (standard / fertility) ───────────────────────────────────────────
 document.getElementById('browse-btn').addEventListener('click', () => {
   document.getElementById('file-input').click();
 });
@@ -319,6 +411,22 @@ async function handleWpUrl() {
   await _submitUpload(formData);
 }
 
+// ── Upload (QA) ──────────────────────────────────────────────────────────────
+async function handleQAUrls() {
+  const url1 = document.getElementById('wp-url-1').value.trim();
+  const url2 = document.getElementById('wp-url-2').value.trim();
+  if (!url1 || !url2) {
+    showStatus('upload-status', 'Please enter both article URLs.', 'error');
+    return;
+  }
+  showStatus('upload-status', 'Fetching both articles and extracting Q&A content… this may take 30–60 seconds.', 'info');
+  const formData = new FormData();
+  formData.append('wp_url_1', url1);
+  formData.append('wp_url_2', url2);
+  formData.append('template_type', 'qa');
+  await _submitUpload(formData);
+}
+
 async function _submitUpload(formData) {
   try {
     const resp = await fetch('/upload', { method: 'POST', body: formData });
@@ -329,34 +437,28 @@ async function _submitUpload(formData) {
       return;
     }
 
-    populateFields(data);
-    showStatus('upload-status', 'Fields extracted successfully.', 'success');
-
-    // Show always-visible sections
-    ['section-fields', 'section-image', 'section-body', 'section-generate']
-      .forEach(id => document.getElementById(id).removeAttribute('hidden'));
-
-    // Show graph section only if there are graphs
-    if (data.graph_count > 0) {
-      buildGraphFields(data.graph_count, data.inline_graphs || []);
-      document.getElementById('section-graphs').removeAttribute('hidden');
-    } else {
-      document.getElementById('section-graphs').setAttribute('hidden', '');
-    }
-
-    // Show template-specific sections
+    const isQA = currentTemplate === 'qa';
     const isFertility = currentTemplate === 'fertility';
-    if (isFertility) {
-      document.getElementById('section-bottomline').removeAttribute('hidden');
-      document.getElementById('section-related').setAttribute('hidden', '');
+
+    if (isQA) {
+      populateQAFields(data);
     } else {
-      document.getElementById('section-related').removeAttribute('hidden');
-      document.getElementById('section-bottomline').setAttribute('hidden', '');
-      fetchRelatedArticles(data.topic_tags || [], data.related_articles || []);
+      populateFields(data);
+
+      if (data.graph_count > 0) {
+        buildGraphFields(data.graph_count, data.inline_graphs || []);
+        document.getElementById('section-graphs').removeAttribute('hidden');
+      } else {
+        document.getElementById('section-graphs').setAttribute('hidden', '');
+      }
+
+      if (!isFertility) {
+        fetchRelatedArticles(data.topic_tags || [], data.related_articles || []);
+      }
     }
 
-    // Apply field-level visibility for the chosen template
-    _updateSectionVisibility();
+    _showPostUploadSections(isQA, isFertility);
+    showStatus('upload-status', 'Fields extracted successfully.', 'success');
 
   } catch (err) {
     showStatus('upload-status', `Network error: ${err.message}`, 'error');
@@ -377,6 +479,18 @@ function populateFields(data) {
   if (data.featured_image_alt) document.getElementById('f-img-alt').value = data.featured_image_alt;
 }
 
+function populateQAFields(data) {
+  document.getElementById('f-intro').value = data.intro_text || '';
+  const qa1 = data.qa1 || {};
+  document.getElementById('qa1-question').value = qa1.question_text || '';
+  document.getElementById('qa1-author').value = qa1.question_author || '';
+  document.getElementById('qa1-answer').value = qa1.answer_html || '';
+  const qa2 = data.qa2 || {};
+  document.getElementById('qa2-question').value = qa2.question_text || '';
+  document.getElementById('qa2-author').value = qa2.question_author || '';
+  document.getElementById('qa2-answer').value = qa2.answer_html || '';
+}
+
 // ── Related Articles ────────────────────────────────────────────────────────
 async function fetchRelatedArticles(tags, prefilledArticles = []) {
   const loadingEl = document.getElementById('related-loading');
@@ -386,13 +500,11 @@ async function fetchRelatedArticles(tags, prefilledArticles = []) {
   loadingEl.removeAttribute('hidden');
   document.getElementById('related-cache-info').textContent = '';
 
-  // Pre-fill slots immediately if supplementary data provided them
   if (prefilledArticles.length > 0) {
     populateSlot(0, prefilledArticles[0] || {});
     populateSlot(1, prefilledArticles[1] || {});
   }
 
-  // Always fetch the article index — needed for swap dropdown
   const params = new URLSearchParams();
   tags.forEach(t => params.append('tags', t));
 
@@ -407,7 +519,6 @@ async function fetchRelatedArticles(tags, prefilledArticles = []) {
 
   loadingEl.setAttribute('hidden', '');
 
-  // Only auto-populate slots from index if supplementary data didn't provide them
   if (prefilledArticles.length === 0) {
     populateSlot(0, allSuggestions[0] || {});
     populateSlot(1, allSuggestions[1] || {});
@@ -472,48 +583,66 @@ async function generateEmail() {
   showStatus('generate-status', 'Building email HTML…', 'info');
   document.getElementById('result-links').setAttribute('hidden', '');
 
-  const subtitleRaw = document.getElementById('f-subtitle').value;
-  const subtitleLines = subtitleRaw.split('\n').map(s => s.trim()).filter(Boolean);
-
-  const tagsRaw = document.getElementById('f-tags').value;
-  const topicTags = tagsRaw.split(',').map(s => s.trim()).filter(Boolean);
-
+  const isQA = currentTemplate === 'qa';
   const isFertility = currentTemplate === 'fertility';
 
-  const relatedArticles = isFertility ? [] : [0, 1].map(i => ({
-    title: document.getElementById(`rel-${i}-title`).value,
-    url: document.getElementById(`rel-${i}-url`).value,
-    image_url: document.getElementById(`rel-${i}-image-url`).value,
-    image_alt: document.getElementById(`rel-${i}-image-alt`).value,
-    description: document.getElementById(`rel-${i}-description`).value,
-  })).filter(a => a.title || a.url);
+  let payload;
 
-  const inlineGraphs = [];
-  let gi = 1;
-  while (document.getElementById(`graph-${gi}-url`)) {
-    inlineGraphs.push({
-      url: document.getElementById(`graph-${gi}-url`).value,
-      alt: document.getElementById(`graph-${gi}-alt`).value,
-    });
-    gi++;
+  if (isQA) {
+    payload = {
+      template_type: 'qa',
+      intro_text: document.getElementById('f-intro').value,
+      qa1: {
+        question_text: document.getElementById('qa1-question').value,
+        question_author: document.getElementById('qa1-author').value,
+        answer_html: document.getElementById('qa1-answer').value,
+      },
+      qa2: {
+        question_text: document.getElementById('qa2-question').value,
+        question_author: document.getElementById('qa2-author').value,
+        answer_html: document.getElementById('qa2-answer').value,
+      },
+    };
+  } else {
+    const subtitleLines = document.getElementById('f-subtitle').value
+      .split('\n').map(s => s.trim()).filter(Boolean);
+    const topicTags = document.getElementById('f-tags').value
+      .split(',').map(s => s.trim()).filter(Boolean);
+    const relatedArticles = isFertility ? [] : [0, 1].map(i => ({
+      title: document.getElementById(`rel-${i}-title`).value,
+      url: document.getElementById(`rel-${i}-url`).value,
+      image_url: document.getElementById(`rel-${i}-image-url`).value,
+      image_alt: document.getElementById(`rel-${i}-image-alt`).value,
+      description: document.getElementById(`rel-${i}-description`).value,
+    })).filter(a => a.title || a.url);
+
+    const inlineGraphs = [];
+    let gi = 1;
+    while (document.getElementById(`graph-${gi}-url`)) {
+      inlineGraphs.push({
+        url: document.getElementById(`graph-${gi}-url`).value,
+        alt: document.getElementById(`graph-${gi}-alt`).value,
+      });
+      gi++;
+    }
+
+    payload = {
+      template_type: currentTemplate,
+      title: document.getElementById('f-title').value,
+      subtitle_lines: subtitleLines,
+      welcome_html: isFertility ? '' : document.getElementById('f-welcome').value,
+      article_body_html: document.getElementById('f-body').value,
+      bottom_line_html: isFertility ? document.getElementById('f-bottomline').value : '',
+      author_name: document.getElementById('f-author-name').value,
+      author_title: document.getElementById('f-author-title').value,
+      author_url: document.getElementById('f-author-url').value,
+      featured_image_url: document.getElementById('f-img-url').value,
+      featured_image_alt: document.getElementById('f-img-alt').value,
+      topic_tags: topicTags,
+      related_articles: relatedArticles,
+      inline_graphs: inlineGraphs,
+    };
   }
-
-  const payload = {
-    template_type: currentTemplate,
-    title: document.getElementById('f-title').value,
-    subtitle_lines: subtitleLines,
-    welcome_html: isFertility ? '' : document.getElementById('f-welcome').value,
-    article_body_html: document.getElementById('f-body').value,
-    bottom_line_html: isFertility ? document.getElementById('f-bottomline').value : '',
-    author_name: document.getElementById('f-author-name').value,
-    author_title: document.getElementById('f-author-title').value,
-    author_url: document.getElementById('f-author-url').value,
-    featured_image_url: document.getElementById('f-img-url').value,
-    featured_image_alt: document.getElementById('f-img-alt').value,
-    topic_tags: topicTags,
-    related_articles: relatedArticles,
-    inline_graphs: inlineGraphs,
-  };
 
   try {
     const resp = await fetch('/generate', {

@@ -251,6 +251,67 @@ IMPORTANT:
     return result
 
 
+def extract_qa_content(content_html: str) -> dict:
+    """
+    Extract the reader question and formatted answer from a Q&A-style WP article.
+
+    Returns:
+        question_text:   str  — the reader's question as plain text
+        question_author: str  — the sign-off name (e.g. "Anne Marie"); '' if not found
+        answer_html:     str  — the answer body as email inline-styled HTML
+    """
+    prompt = f"""You are processing a Q&A article from ParentData where a reader asked a question and Emily Oster (or a guest expert) answered it.
+
+## WORDPRESS ARTICLE HTML:
+{content_html}
+
+## STYLE GUIDE FOR EMAIL HTML:
+{STYLE_GUIDE}
+
+## YOUR TASK:
+Extract and return a JSON object with EXACTLY these keys:
+
+- "question_text": The reader's full question as plain text (no HTML tags). This is usually at the beginning of the article in italic or blockquote formatting. Do not include the sign-off (the "—Name" part).
+
+- "question_author": The reader's sign-off name only — e.g. if the article ends the question with "—Anne Marie", return "Anne Marie". If no name is given, return "A reader".
+
+- "answer_html": The complete answer body as HTML with inline styles from the Style Guide. Rules:
+  - Use <h2> for any section headings.
+  - Use <p> with the regular paragraph inline style for body text.
+  - Preserve ALL hyperlinks with their original href values.
+  - Do NOT include the reader's question — only the answer.
+  - Do NOT include any featured/header image.
+  - Strip WordPress block classes (wp-block-*, etc.).
+
+IMPORTANT: Return ONLY the raw JSON object. No markdown fences, no explanation."""
+
+    return _call_claude(prompt)
+
+
+def generate_qa_intro(title1: str, title2: str) -> str:
+    """
+    Generate a suggested one-sentence intro for the Q&A email based on the two article topics.
+    Returns plain text (not JSON).
+    """
+    prompt = f"""Write a short, friendly intro sentence for a ParentData fertility Q&A email newsletter.
+
+The email answers two reader questions:
+1. Article topic: {title1}
+2. Article topic: {title2}
+
+Write one or two sentences in a warm, conversational tone. Example style:
+"It's Q&A day! This week's questions are about when to start taking prenatals and how long it takes for your period to return after stopping birth control."
+
+Return ONLY the plain text intro. No quotes around it, no extra explanation."""
+
+    response = client.messages.create(
+        model=MODEL,
+        max_tokens=200,
+        messages=[{'role': 'user', 'content': prompt}],
+    )
+    return response.content[0].text.strip()
+
+
 def _call_claude(prompt: str) -> dict:
     """Send a prompt to Claude and parse the JSON response."""
     response = client.messages.create(
