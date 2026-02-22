@@ -654,12 +654,24 @@ def apply_email_fixes(html: str) -> str:
 def _apply_link_fixes(html: str) -> str:
     """
     For every <a href> in the HTML:
-      - Ensure it has font-size, color, and text-decoration inline styles.
+      - Ensure it has color and text-decoration inline styles.
       - Wrap its content in a <span> with those same styles.
 
     This is the Gmail iOS workaround: Gmail iOS strips all inline styles from
     <a> tags but respects styles on child elements, so the span preserves the
-    appearance.  Mirrors the email-checker link fix exactly.
+    appearance.
+
+    We intentionally do NOT add font-size:inherit to <a> tags: on older iOS
+    Mail, explicit 'inherit' on an <a> tag can resolve to a system default
+    small size rather than the parent paragraph's computed size.  Natural CSS
+    inheritance (no declaration) is more reliable, and the email templates
+    already have .tablebox a { font-size:16px !important } as a backstop for
+    Apple Mail.  When a link already has an explicit px font-size we copy it
+    onto the span so it survives Gmail's style stripping.
+
+    'already_fixed' only fires when the span wrapper already carries link
+    styles (color present), not just any italic/bold span from em→span
+    conversion — those spans need the wrapper too.
     """
     def fix_link(m):
         attrs, content = m.group(1), m.group(2)
@@ -674,16 +686,20 @@ def _apply_link_fixes(html: str) -> str:
         has_color    = bool(re.search(r'\bcolor\s*:', cur_style, re.I))
         has_text_dec = bool(re.search(r'\btext-decoration\s*:', cur_style, re.I))
         has_font_sz  = bool(re.search(r'\bfont-size\s*:', cur_style, re.I))
-        already_fixed = bool(re.match(r'^\s*<span\b[^>]*\bstyle\s*=', content, re.I))
+
+        # Only skip if the content span already carries the actual link styles
+        # (color present), not just a formatting span like font-style:italic.
+        already_fixed = bool(re.match(
+            r'^\s*<span\b[^>]*\bstyle\s*=\s*"[^"]*\bcolor\s*:', content, re.I
+        ))
 
         # Already complete — don't double-process
-        if has_color and has_text_dec and has_font_sz and already_fixed:
+        if has_color and has_text_dec and already_fixed:
             return m.group(0)
 
-        # Build the styles missing from the <a> tag
+        # Build the styles missing from the <a> tag (no font-size:inherit —
+        # natural inheritance is more reliable on older iOS Mail)
         add_parts = []
-        if not has_font_sz:
-            add_parts.append('font-size:inherit')
         if not has_color:
             add_parts.append('color:#000000')
         if not has_text_dec:
@@ -699,16 +715,20 @@ def _apply_link_fixes(html: str) -> str:
         else:
             new_attrs = attrs
 
-        # Derive the span's style from the now-merged <a> style
+        # Build the span's style — copy explicit font-size if present, but do
+        # not synthesise font-size:inherit (same reasoning as above).
         merged = add_str + cur_style
         fz_m  = re.search(r'font-size\s*:\s*([^;]+)',       merged, re.I)
         c_m   = re.search(r'\bcolor\s*:\s*([^;]+)',          merged, re.I)
         td_m  = re.search(r'text-decoration\s*:\s*([^;]+)',  merged, re.I)
-        span_style = (
-            f"font-size:{fz_m.group(1).strip() if fz_m else 'inherit'};"
-            f"color:{c_m.group(1).strip() if c_m else '#000000'};"
-            f"text-decoration:{td_m.group(1).strip() if td_m else 'underline'};"
-        )
+
+        span_parts = [
+            f"color:{c_m.group(1).strip() if c_m else '#000000'}",
+            f"text-decoration:{td_m.group(1).strip() if td_m else 'underline'}",
+        ]
+        if fz_m:
+            span_parts.insert(0, f"font-size:{fz_m.group(1).strip()}")
+        span_style = ';'.join(span_parts) + ';'
 
         new_content = content if already_fixed else f'<span style="{span_style}">{content}</span>'
         return f'<a{new_attrs}>{new_content}</a>'
