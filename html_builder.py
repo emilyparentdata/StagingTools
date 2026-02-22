@@ -757,21 +757,23 @@ def _inject_gmail_ios_css(html: str) -> str:
     email clients ignore it entirely.
 
     We use that selector to force font-size and font-family on:
-      1. <a> tags inside .tablebox (the article body sections)
-      2. <span> tags inside those <a> tags
+      1. <a> tags inside .tablebox (ensures the anchor itself is 16px)
+      2. All <span> tags inside .tablebox <p> and <li> elements — covers
+         link-fix spans, bold spans, italic spans, and any other formatted
+         inline elements
 
-    This is a belt-and-suspenders fallback for cases where Gmail iOS strips
-    inline styles from spans inside <a> tags (observed in some app versions),
-    or where the span's font-family inheritance through a style-stripped <a>
-    resolves to the wrong font.
+    This is a belt-and-suspenders fallback for cases where Gmail iOS fails to
+    inherit font-size/family through spans (observed in some app versions for
+    both link spans and plain bold/italic formatting spans).
 
-    The rule targets only .tablebox links, so article-card title links (which
-    are in Lora and live outside .tablebox) are not affected.
+    The rules target .tablebox only, so headings (Lora), subtitle lines, and
+    article-card title links (outside .tablebox) are not affected.
     """
     gmail_css = (
-        "\n/* Gmail iOS: link span font-size + family fix (u+#body selector) */\n"
+        "\n/* Gmail iOS: fix font-size/family on all .tablebox spans */\n"
         "u + #body .tablebox a{font-size:16px!important}\n"
-        "u + #body .tablebox a span{"
+        "u + #body .tablebox p span,"
+        "u + #body .tablebox li span{"
         "font-size:16px!important;"
         "font-family:'DM Sans',Arial,Helvetica,sans-serif!important"
         "}\n"
