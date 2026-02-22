@@ -645,6 +645,9 @@ def apply_email_fixes(html: str) -> str:
     # 7. Gmail iOS link fix (regex on string — mirrors email-checker exactly)
     html = _apply_link_fixes(html)
 
+    # 7b. Gmail iOS u+#body CSS injection — belt-and-suspenders for link spans
+    html = _inject_gmail_ios_css(html)
+
     # 8. Iterable height fix (regex on string)
     html = _fix_iterable_heights(html)
 
@@ -745,6 +748,45 @@ def _apply_link_fixes(html: str) -> str:
         return f'<a{new_attrs}>{new_content}</a>'
 
     return re.sub(r'<a\b([^>]*)>([\s\S]*?)</a>', fix_link, html, flags=re.IGNORECASE)
+
+
+def _inject_gmail_ios_css(html: str) -> str:
+    """
+    Gmail on iOS injects a bare <u></u> element adjacent to the email body,
+    which makes the 'u + #body' CSS selector match ONLY in Gmail iOS — other
+    email clients ignore it entirely.
+
+    We use that selector to force font-size and font-family on:
+      1. <a> tags inside .tablebox (the article body sections)
+      2. <span> tags inside those <a> tags
+
+    This is a belt-and-suspenders fallback for cases where Gmail iOS strips
+    inline styles from spans inside <a> tags (observed in some app versions),
+    or where the span's font-family inheritance through a style-stripped <a>
+    resolves to the wrong font.
+
+    The rule targets only .tablebox links, so article-card title links (which
+    are in Lora and live outside .tablebox) are not affected.
+    """
+    gmail_css = (
+        "\n/* Gmail iOS: link span font-size + family fix (u+#body selector) */\n"
+        "u + #body .tablebox a{font-size:16px!important}\n"
+        "u + #body .tablebox a span{"
+        "font-size:16px!important;"
+        "font-family:'DM Sans',Arial,Helvetica,sans-serif!important"
+        "}\n"
+    )
+    # Ensure <body> has id="body" so the selector can match
+    html = re.sub(
+        r'<body\b(?![^>]*\bid\s*=)([^>]*)>',
+        r'<body id="body"\1>',
+        html,
+        count=1,
+        flags=re.IGNORECASE,
+    )
+    # Append CSS inside the first <style> block
+    html = html.replace('</style>', gmail_css + '</style>', 1)
+    return html
 
 
 def _fix_iterable_heights(html: str) -> str:
