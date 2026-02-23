@@ -22,7 +22,7 @@ H2 heading:
   style="margin: 0 0 24px 0; font-family: 'Lora', Georgia, serif; font-weight: bold; font-size: 24px; line-height: 28px; letter-spacing: -1.2px; color: #000000;"
 
 Regular paragraph (article body):
-  style="margin: 0 0 24px 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; letter-spacing: -0.8px; color: #000000;"
+  style="margin: 0 0 24px 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; color: #000000;"
 
 Bold inline text within paragraph: use <strong> tag inside the <p>
 
@@ -30,10 +30,10 @@ Hyperlink inside article body:
   style="color: #054f8b; text-decoration: underline;"
 
 List item <li>:
-  style="font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; letter-spacing: -0.8px; color: #000000;"
+  style="font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; color: #000000;"
 
 Welcome/intro section paragraphs (Emily's italicized intro text and newsletter announcements):
-  style="padding-bottom: 24px; margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; letter-spacing: -0.8px; color: #000000;"
+  style="padding-bottom: 24px; margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; color: #000000;"
   - Wrap italic text in <em>
   - Links within italic text: <a href="URL"><em>link text</em></a>
 
