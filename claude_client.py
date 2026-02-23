@@ -47,6 +47,34 @@ Bottom line list (fertility template only):
   <ul style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 26px; color: #000000; padding-left: 16px;">
 """
 
+# Fertility/QA templates do not use letter-spacing on body text — only headings have it.
+STYLE_GUIDE_FERTILITY = """
+EMAIL HTML INLINE STYLE REFERENCE
+===================================
+H1 heading:
+  style="margin: 0 0 24px 0; font-family: 'Lora', Georgia, serif; font-weight: bold; font-size: 30px; line-height: 36px; letter-spacing: -1.2px; color: #000000;"
+
+H2 heading:
+  style="margin: 0 0 24px 0; font-family: 'Lora', Georgia, serif; font-weight: bold; font-size: 24px; line-height: 28px; letter-spacing: -1.2px; color: #000000;"
+
+Regular paragraph (article body):
+  style="margin: 0 0 24px 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; color: #000000;"
+
+Bold inline text within paragraph: use <strong> tag inside the <p>
+
+Hyperlink inside article body:
+  style="color: #054f8b; text-decoration: underline;"
+
+List item <li>:
+  style="font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; color: #000000;"
+
+Welcome/intro section paragraphs:
+  style="padding-bottom: 24px; margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; color: #000000;"
+
+Bottom line list (fertility template only):
+  <ul style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 26px; color: #000000; padding-left: 16px;">
+"""
+
 
 def extract_fields(raw_text: str, mammoth_html: str, template_type: str = 'standard') -> dict:
     """
@@ -137,7 +165,7 @@ Below is the raw text and HTML conversion of a Word document containing the arti
 {mammoth_html}
 
 ## STYLE GUIDE FOR EMAIL HTML:
-{STYLE_GUIDE}
+{STYLE_GUIDE_FERTILITY}
 
 ## YOUR TASK:
 Extract all fields and produce properly formatted email HTML. Return a single JSON object with EXACTLY these keys:
@@ -209,6 +237,8 @@ def reformat_wp_content(content_html: str, template_type: str = 'standard') -> d
         else 'Use <h1> for primary section headings and <h2> for subsections.'
     )
 
+    style_guide = STYLE_GUIDE_FERTILITY if template_type == 'fertility' else STYLE_GUIDE
+
     prompt = f"""You are preparing a ParentData newsletter article for email staging.
 
 Below is the WordPress block HTML from an already-published parentdata.org article.
@@ -219,7 +249,7 @@ to clean, email-safe HTML with inline styles.
 {content_html}
 
 ## STYLE GUIDE FOR EMAIL HTML:
-{STYLE_GUIDE}
+{style_guide}
 
 ## YOUR TASK:
 Convert the WordPress HTML to email-ready HTML. Return a single JSON object with EXACTLY these keys:
@@ -266,7 +296,7 @@ def extract_qa_content(content_html: str) -> dict:
 {content_html}
 
 ## STYLE GUIDE FOR EMAIL HTML:
-{STYLE_GUIDE}
+{STYLE_GUIDE_FERTILITY}
 
 ## YOUR TASK:
 Extract and return a JSON object with EXACTLY these keys:
