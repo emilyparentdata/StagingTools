@@ -352,7 +352,7 @@ def _handle_fertility_banner(soup, include_banner: bool):
         'Are you starting fertility treatment or no longer TTC? '
         '<span style="text-decoration: underline; font-style: italic;">'
         '<a href="https://parentdata.org/account/#newsletter-settings-section"'
-        ' style="color: #000000;">Update your newsletters.</a>'
+        ' style="color: #000000; font-size: 18px;">Update your newsletters.</a>'
         '</span>'
     )
     banner_p.append(BeautifulSoup(new_html, 'html.parser'))
