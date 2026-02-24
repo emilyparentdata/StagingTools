@@ -30,6 +30,10 @@
         <strong>Fertility Q&amp;A</strong>
         <span>Two reader questions &middot; intro sentence &middot; two WP articles</span>
       </button>
+      <button type="button" class="template-card" id="tcard-marketing" onclick="selectTemplate('marketing', this)">
+        <strong>Marketing Article</strong>
+        <span>Trial upgrade email &middot; featured article &middot; upgrade CTA</span>
+      </button>
     </div>
   </section>
 
@@ -125,6 +129,38 @@
       <label for="f-tags">Topic Tags</label>
       <input type="text" id="f-tags" placeholder="In the News, Hormones, Health and Wellness">
       <p class="hint">Comma-separated. Used to suggest related articles.</p>
+    </div>
+
+    <div id="group-marketing" style="display:none;">
+      <div class="field-group">
+        <label for="mkt-banner">Banner text</label>
+        <input type="text" id="mkt-banner" value="It's the final day of your trial!">
+      </div>
+      <div class="field-group">
+        <label for="mkt-intro">Intro text</label>
+        <select id="mkt-intro"><option value="">— loading options —</option></select>
+      </div>
+      <div class="field-group">
+        <label>Pricing plan</label>
+        <div style="display:flex;gap:24px;padding:4px 0;">
+          <label style="font-weight:400;display:flex;align-items:center;gap:6px;cursor:pointer;">
+            <input type="radio" name="mkt-pricing-mode" id="mkt-mode-yearly" value="yearly" checked>
+            Yearly&nbsp;(<s>$120</s>&nbsp;&rarr;&nbsp;$84/year)
+          </label>
+          <label style="font-weight:400;display:flex;align-items:center;gap:6px;cursor:pointer;">
+            <input type="radio" name="mkt-pricing-mode" id="mkt-mode-monthly" value="monthly">
+            Monthly&nbsp;(<s>$12</s>&nbsp;&rarr;&nbsp;$7/month)
+          </label>
+        </div>
+      </div>
+      <div class="field-group">
+        <label for="mkt-price">Discount price</label>
+        <input type="text" id="mkt-price" value="$84/year">
+      </div>
+      <div class="field-group">
+        <label for="mkt-url">Discount URL</label>
+        <input type="url" id="mkt-url" value="https://parentdata.org/register/plus-yearly/?coupon=allaccess30">
+      </div>
     </div>
   </section>
 
@@ -319,6 +355,7 @@ let currentTemplate = 'standard';
 let allSuggestions = [];
 let slotData = [{}, {}];
 let lastGeneratedHtml = '';
+let uploadedArticleUrl = '';
 
 // ── Template selection ──────────────────────────────────────────────────────
 function selectTemplate(type, btn) {
@@ -330,18 +367,19 @@ function selectTemplate(type, btn) {
   const isQA = type === 'qa';
   document.getElementById('standard-upload-area').style.display = isQA ? 'none' : '';
   document.getElementById('qa-upload-area').style.display = isQA ? '' : 'none';
+  // Marketing uses the same standard upload area (single WP URL)
 }
 
-function _showPostUploadSections(isQA, isFertility) {
-  // Sections common to standard + fertility
+function _showPostUploadSections(isQA, isFertility, isMarketing) {
+  // Sections common to standard + fertility + marketing
   ['section-fields', 'section-image', 'section-body', 'section-generate'].forEach(id => {
     document.getElementById(id).style.display = isQA ? 'none' : '';
     if (!isQA) document.getElementById(id).removeAttribute('hidden');
   });
 
   // Standard-only
-  document.getElementById('section-related').style.display = (isQA || isFertility) ? 'none' : '';
-  if (!isQA && !isFertility) document.getElementById('section-related').removeAttribute('hidden');
+  document.getElementById('section-related').style.display = (isQA || isFertility || isMarketing) ? 'none' : '';
+  if (!isQA && !isFertility && !isMarketing) document.getElementById('section-related').removeAttribute('hidden');
 
   // Fertility-only
   document.getElementById('section-bottomline').style.display = isFertility ? '' : 'none';
@@ -359,8 +397,9 @@ function _showPostUploadSections(isQA, isFertility) {
   genSection.removeAttribute('hidden');
 
   // Field-level visibility within section-fields
-  setHide('group-welcome', isFertility);
-  setHide('group-author-url', isFertility);
+  setHide('group-welcome', isFertility || isMarketing);
+  setHide('group-author-url', isFertility || isMarketing);
+  setHide('group-marketing', !isMarketing);
 
   // Fertility/QA-only option in generate section
   setHide('group-update-banner', !(isFertility || isQA));
@@ -448,6 +487,9 @@ async function _submitUpload(formData) {
 
     const isQA = currentTemplate === 'qa';
     const isFertility = currentTemplate === 'fertility';
+    const isMarketing = currentTemplate === 'marketing';
+
+    if (data.article_url) uploadedArticleUrl = data.article_url;
 
     if (isQA) {
       populateQAFields(data);
@@ -461,12 +503,12 @@ async function _submitUpload(formData) {
         document.getElementById('section-graphs').setAttribute('hidden', '');
       }
 
-      if (!isFertility) {
+      if (!isFertility && !isMarketing) {
         fetchRelatedArticles(data.topic_tags || [], data.related_articles || []);
       }
     }
 
-    _showPostUploadSections(isQA, isFertility);
+    _showPostUploadSections(isQA, isFertility, isMarketing);
     showStatus('upload-status', 'Fields extracted successfully.', 'success');
 
   } catch (err) {
@@ -594,6 +636,7 @@ async function generateEmail() {
 
   const isQA = currentTemplate === 'qa';
   const isFertility = currentTemplate === 'fertility';
+  const isMarketing = currentTemplate === 'marketing';
 
   let payload;
 
@@ -612,6 +655,23 @@ async function generateEmail() {
         question_author: document.getElementById('qa2-author').value,
         answer_html: document.getElementById('qa2-answer').value,
       },
+    };
+  } else if (isMarketing) {
+    payload = {
+      template_type: 'marketing',
+      title: document.getElementById('f-title').value,
+      author_name: document.getElementById('f-author-name').value,
+      author_title: document.getElementById('f-author-title').value,
+      author_url: document.getElementById('f-author-url').value,
+      featured_image_url: document.getElementById('f-img-url').value,
+      featured_image_alt: document.getElementById('f-img-alt').value,
+      article_body_html: document.getElementById('f-body').value,
+      banner_text: document.getElementById('mkt-banner').value,
+      intro_option_text: document.getElementById('mkt-intro').selectedOptions[0]?.dataset.text || '',
+      old_price: document.getElementById('mkt-mode-monthly').checked ? '$12' : '$120',
+      discount_price: document.getElementById('mkt-price').value,
+      discount_url: document.getElementById('mkt-url').value,
+      article_url: uploadedArticleUrl,
     };
   } else {
     const subtitleLines = document.getElementById('f-subtitle').value
@@ -720,6 +780,36 @@ async function copyHtml() {
     alert('Copy failed — please use the Download button instead.\n\n' + err.message);
   }
 }
+
+// ── Marketing pricing mode ───────────────────────────────────────────────────
+const _PRICING = {
+  yearly:  { price: '$84/year',  url: 'https://parentdata.org/register/plus-yearly/?coupon=allaccess30' },
+  monthly: { price: '$7/month',  url: 'https://parentdata.org/register/plus/?coupon=monthlydiscount' },
+};
+document.querySelectorAll('input[name="mkt-pricing-mode"]').forEach(radio => {
+  radio.addEventListener('change', () => {
+    const mode = document.querySelector('input[name="mkt-pricing-mode"]:checked').value;
+    document.getElementById('mkt-price').value = _PRICING[mode].price;
+    document.getElementById('mkt-url').value   = _PRICING[mode].url;
+  });
+});
+
+// ── Marketing config ─────────────────────────────────────────────────────────
+fetch('/marketing-config')
+  .then(r => r.json())
+  .then(data => {
+    const sel = document.getElementById('mkt-intro');
+    sel.innerHTML = '';
+    (data.intro_options || []).forEach((opt, i) => {
+      const o = document.createElement('option');
+      o.value = opt.name;
+      o.dataset.text = opt.text;
+      o.textContent = opt.name;
+      if (i === 0) o.selected = true;
+      sel.appendChild(o);
+    });
+  })
+  .catch(() => {});
 
 // ── Utilities ───────────────────────────────────────────────────────────────
 function showStatus(elId, message, type) {

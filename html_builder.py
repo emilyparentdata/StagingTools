@@ -60,6 +60,8 @@ def build_email_html(template_path: str, fields: dict, template_type: str = 'sta
         _inject_qa(soup, fields)
     elif template_type == 'fertility':
         _inject_fertility(soup, fields)
+    elif template_type == 'marketing':
+        _inject_marketing(soup, fields)
     else:
         _update_title(soup, fields)
         _update_headline(soup, fields)
@@ -535,7 +537,207 @@ def _update_qa_pairs(soup, fields):
                     div.append(BeautifulSoup(answer_html, 'html.parser'))
 
 
+# ── Marketing template injection ─────────────────────────────────────────────
+
+_STYLE_P_MKT_INTRO = (
+    "font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; "
+    "font-size: 16px; line-height: 24px; color: #000000; font-style: italic;"
+)
+
+
+def _inject_marketing(soup, fields):
+    """Inject all fields into the marketing article template."""
+    _update_title(soup, fields)
+    _update_marketing_banner(soup, fields)
+    _update_marketing_intro(soup, fields)
+    _update_marketing_pricing(soup, fields)
+    _replace_marketing_body(soup, fields)
+    _update_marketing_author(soup, fields)
+    _update_copyright(soup)
+
+
+def _update_marketing_banner(soup, fields):
+    """Update the blue pill bar text (p.welcome-message)."""
+    p = soup.find('p', class_='welcome-message')
+    if not p:
+        return
+    p.clear()
+    p.append(NavigableString(fields.get('banner_text', "It's the final day of your trial!")))
+
+
+def _update_marketing_intro(soup, fields):
+    """Replace the intro tablebox paragraphs with CSV-sourced text and discount link."""
+    intro_td = soup.find('td', class_='tablebox')
+    if not intro_td:
+        return
+
+    text = fields.get('intro_option_text', '')
+    discount_url = _escape_attr(fields.get('discount_url', '#'))
+
+    if '👉' in text:
+        para1 = text.split('👉')[0].strip()
+        para2 = '👉 ' + text.split('👉')[1].strip()
+    else:
+        para1 = text
+        para2 = ''
+
+    intro_td.clear()
+
+    p1_html = f'<p style="{_STYLE_P_MKT_INTRO}">{_escape_attr(para1)}</p>'
+    intro_td.append(BeautifulSoup(p1_html, 'html.parser'))
+
+    if para2:
+        p2_html = (
+            f'<p style="{_STYLE_P_MKT_INTRO}">'
+            f'<a href="{discount_url}" style="color:#054f8b;text-decoration:underline;">'
+            f'{_escape_attr(para2)}</a></p>'
+        )
+        intro_td.append(BeautifulSoup(p2_html, 'html.parser'))
+
+
+def _update_marketing_pricing(soup, fields):
+    """Update the old (strikethrough) price, new price, and UPGRADE NOW button href."""
+    old_price_td = soup.find('td', class_='pricing-old')
+    if old_price_td:
+        p = old_price_td.find('p')
+        if p:
+            p.clear()
+            p.append(NavigableString(fields.get('old_price', '$120')))
+
+    pricing_td = soup.find('td', class_='pricing-new')
+    if pricing_td:
+        p = pricing_td.find('p')
+        if p:
+            p.clear()
+            p.append(NavigableString(fields.get('discount_price', '$84/year')))
+
+    upgrade_link = soup.find('a', string=re.compile(r'UPGRADE\s+NOW', re.I))
+    if upgrade_link:
+        upgrade_link['href'] = fields.get('discount_url', 'https://parentdata.org/register/plus-yearly/?coupon=allaccess30')
+
+
+def _replace_marketing_body(soup, fields):
+    """
+    Delete all rows between the upgrade section and author block, then insert:
+      [intro paragraphs row →] featured image row → main body row → leave-a-comment row
+
+    The article body is split at the first heading so the image sits between the
+    opening paragraphs and the first section heading.  If the body starts directly
+    with a heading (no intro text), the image row comes first.
+    """
+    upgrade_link = soup.find('a', string=re.compile(r'UPGRADE\s+NOW', re.I))
+    upgrade_row = _outer_email_tr(upgrade_link, soup)
+
+    author_td = _find_marketing_author_td(soup)
+    author_row = _outer_email_tr(author_td, soup) if author_td else None
+
+    if not upgrade_row or not author_row:
+        return
+
+    main_tbody = soup.find('table', class_='email-container').find('tbody')
+    rows = list(main_tbody.find_all('tr', recursive=False))
+    start_i = rows.index(upgrade_row)
+    end_i = rows.index(author_row)
+    for row in rows[start_i + 1:end_i]:
+        row.decompose()
+
+    featured_image_url = _escape_attr(fields.get('featured_image_url', ''))
+    featured_image_alt = _escape_attr(fields.get('featured_image_alt', ''))
+    article_body_html = fields.get('article_body_html', '')
+    article_url = _escape_attr(fields.get('article_url', '#'))
+
+    # Split body at first heading so image goes between intro text and first section
+    intro_html, main_html = _split_at_first_heading(article_body_html)
+
+    def _body_row(content_html):
+        return (
+            f'<tr><td class="table-box-mobile no-top-pad" style="background-color:#fff;padding:0 48px;">'
+            f'<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">'
+            f'<tbody><tr><td class="tablebox" style="padding-bottom:0;">'
+            f'{content_html}'
+            f'</td></tr></tbody></table></td></tr>'
+        )
+
+    featured_image_row_html = (
+        f'<tr><td class="table-box-mobile no-top-pad" style="background-color:#fff;padding:0 48px;">'
+        f'<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">'
+        f'<tbody><tr><td style="text-align:center;">'
+        f'<img src="{featured_image_url}" alt="{featured_image_alt}"'
+        f' style="display:block;width:100%;max-width:520px;height:auto;border-radius:20px;margin:0 auto;"'
+        f' class="fluid">'
+        f'</td></tr></tbody></table></td></tr>'
+    )
+
+    leave_comment_row_html = (
+        f'<tr><td class="table-box-mobile no-top-pad" style="background-color:#fff;padding:0 48px 40px;">'
+        f'<table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation"'
+        f' style="max-width:288px;width:100%;">'
+        f'<tbody><tr><td align="center" style="padding:0;">'
+        f'<div style="display:inline-block;border-radius:15px;background-color:#fceea9;'
+        f'border:2px solid #000;box-shadow:0 4px 4px rgba(0,0,0,0.25);">'
+        f'<a href="{article_url}" rel="noopener" target="_blank"'
+        f' style="display:block;padding:16px 24px;font-family:\'DM Sans\',Arial,sans-serif;'
+        f'font-weight:800;font-size:20px;color:#000;text-decoration:none;text-transform:uppercase;">'
+        f'LEAVE A COMMENT</a></div>'
+        f'</td></tr></tbody></table></td></tr>'
+    )
+
+    def _parsed_tr(html):
+        return BeautifulSoup(html, 'html.parser').find('tr')
+
+    # Insert in reverse order so the final document order is correct
+    upgrade_row.insert_after(_parsed_tr(leave_comment_row_html))
+    upgrade_row.insert_after(_parsed_tr(_body_row(main_html)))
+    upgrade_row.insert_after(_parsed_tr(featured_image_row_html))
+    if intro_html:
+        upgrade_row.insert_after(_parsed_tr(_body_row(intro_html)))
+
+
+def _update_marketing_author(soup, fields):
+    """Update author name, title, and About link in the marketing author block."""
+    author_td = _find_marketing_author_td(soup)
+    if not author_td:
+        return
+
+    author_name = fields.get('author_name', '')
+    author_title = fields.get('author_title', '')
+    author_url = fields.get('author_url', '#')
+    first_name = author_name.split()[0] if author_name else 'Author'
+
+    author_p = author_td.find('p', style=re.compile(r'Lora.*font-size:\s*22px', re.I))
+    if author_p:
+        author_p.clear()
+        author_p.append(NavigableString(author_name))
+
+        title_p = author_p.find_next_sibling('p')
+        if title_p:
+            title_p.clear()
+            title_p.append(NavigableString(author_title))
+
+        link = author_p.find_next('a')
+        if link:
+            link['href'] = author_url
+            link.clear()
+            link.append(NavigableString(f'About {first_name}'))
+
+
 # ── Utilities ────────────────────────────────────────────────────────────────
+
+def _find_marketing_author_td(soup):
+    """
+    Find the marketing template author block td.
+
+    The author block has both 'tablebox' and 'table-box-mobile' classes AND a
+    cream background (rgb(255, 252, 238)), which distinguishes it from the
+    article body sections that also have both classes but no background color.
+    """
+    for td in soup.find_all('td'):
+        classes = td.get('class', [])
+        if 'tablebox' in classes and 'table-box-mobile' in classes:
+            if '255, 252, 238' in td.get('style', ''):
+                return td
+    return None
+
 
 def _outer_email_tr(element, soup):
     """Find the direct child <tr> of the main email table's <tbody> that contains element."""

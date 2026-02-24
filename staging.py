@@ -9,6 +9,7 @@ Routes:
     POST /generate         — Accept all fields, build final HTML, return it
 """
 
+import csv
 import os
 import re
 import tempfile
@@ -51,12 +52,38 @@ TEMPLATES = {
         'has_related_reading': False,
         'has_bottom_line': False,
     },
+    'marketing': {
+        'label': 'Marketing article',
+        'file': BASE_DIR / 'email_templates' / 'template_marketing.html',
+        'has_welcome': False,
+        'has_author_block': True,
+        'has_related_reading': False,
+        'has_bottom_line': False,
+    },
 }
 
 
 @app.route('/')
 def index():
     return render_template('index.html')
+
+
+@app.route('/marketing-config')
+def marketing_config():
+    """Return intro text options from the marketing assets CSV."""
+    csv_path = BASE_DIR / 'marketing_assets' / 'article_intro_text_options.csv'
+    intro_options = []
+    try:
+        with open(csv_path, encoding='utf-8-sig') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                name = row.get('Name', '').strip()
+                text = row.get('Intro Text', '').strip()
+                if name and text:
+                    intro_options.append({'name': name, 'text': text})
+    except Exception:
+        pass
+    return jsonify({'intro_options': intro_options})
 
 
 @app.route('/upload', methods=['POST'])
@@ -118,6 +145,7 @@ def upload():
                 'article_body_html':   reformatted.get('article_body_html', ''),
                 'bottom_line_html':    reformatted.get('bottom_line_html', ''),
                 'graph_count':         0,
+                'article_url':         wordpress_url,
             }
             return jsonify(response_data)
 

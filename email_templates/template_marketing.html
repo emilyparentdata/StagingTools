@@ -1,0 +1,417 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="x-apple-disable-message-reformatting" />
+    <title>Q&A Day - ParentData</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=DM+Sans:ital,wght@0,400;0,500;0,700;0,800;1,300;1,700&display=swap" rel="stylesheet">
+    
+    <style type="text/css">
+        /* Email Client Resets */
+        body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+        table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+        img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+        body { margin: 0; padding: 0; width: 100% !important; height: 100% !important; }
+        
+        /* Remove spacing on Outlook */
+        table { border-collapse: collapse !important; }
+        
+        /* Prevent WebKit and Windows mobile changing default text sizes */
+        body, table, td, p, a, li, blockquote { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+        
+        /* What it does: Remove spaces around the email design added by some email clients. */
+        html, body { margin: 0 auto !important; padding: 0 !important; height: 100% !important; width: 100% !important; }
+        
+        /* What it does: Stops email clients resizing small text. */
+        * { -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; }
+        
+        /* Center the email */
+        .email-container { max-width: 600px; margin: 0 auto; }
+        
+        /* Force Outlook to provide a "view in browser" link */
+        #outlook a { padding: 0; }
+        
+        /* Prevent Webkit and Windows mobile from changing default text sizes */
+        .ExternalClass { width: 100%; }
+        .ExternalClass, .ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td, .ExternalClass div {
+            line-height: 100%;
+        }
+        
+        /* Force Hotmail to display normal line spacing */
+        .ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td, .ExternalClass div {
+            line-height: 100%;
+        }
+        
+        /* Remove spacing on images */
+        a[x-apple-data-detectors] {
+            color: inherit !important;
+            text-decoration: none !important;
+            font-size: inherit !important;
+            font-family: inherit !important;
+            font-weight: inherit !important;
+            line-height: inherit !important;
+        }
+        /* Forces links to stay black and underlined in modern clients */
+        p a { color: #000000 !important; text-decoration: underline !important;  }
+        li a { color: #000000 !important; text-decoration: underline !important; }
+        .apple-link p a { color: #000000 !important; text-decoration: underline !important;  }
+        .tablebox a, .tablebox li a, .tableboxlnk a, .tableboxlnk li a {
+              color: #054f8b !important;
+              text-decoration: underline !important;
+              font-size: 16px !important;
+            }
+          .tablebox ul {margin: 0px !important; }
+          .tablebox ul li { padding-bottom: 4px !important;}
+        
+        .fade-out-medium { opacity: .5; }
+        .fade-out-light { opacity: .2; }
+        
+        /* Responsive styles */
+        @media only screen and (max-width: 480px) {
+            .email-container { width: 100% !important; min-width: 100% !important; }
+            .fluid { max-width: 100% !important; height: auto !important; margin-left: auto !important; margin-right: auto !important; }
+            .stack-column, .stack-column-center { display: block !important; width: 100% !important; max-width: 100% !important; direction: ltr !important; }
+            .center-on-mobile { text-align: center !important; }
+            .welcome-message { font-size: 14px !important; line-height: 20px !important; padding: 8px 12px !important; }
+            .sub-text { font-size: 16px !important; }
+            .mobile-padding { padding: 12px 0px !important; }
+            .mobile-hide { display: none !important; }
+            .mobile-show { display: block !important; max-height: none !important; }
+            .headline-mobile { font-size: 32px !important; line-height: 36px !important; letter-spacing: -1.6px !important; padding: 0px 12px !important; }
+            .td-sub-text { padding-right: 20px !important; padding-left: 20px !important; }
+            .upgrade-headline-mobile { font-size: 30px !important; line-height: 36px !important; letter-spacing: -1.5px !important; }
+            .logo-mobile { width: 123px !important; height: 36px !important; }
+            .button-mobile { width: 250px !important; padding: 19px 27px !important; }
+            .subscribe-btn-mobile a { padding: 20px 24px !important; font-size: 20px !important; }
+            .continue-reading-btn a { padding: 16px !important; font-size: 18px !important; }
+            .box-pad { padding: 0px !important; }
+            .table-box-mobile { padding: 24px 20px !important; }
+            .top-box-header-m { font-size: 16px !important; line-height: 22px !important; }
+            .no-top-pad { padding-top: 0px !important; }
+            
+            /* Fix horizontal scroll issues */
+            body { width: 100% !important; min-width: 100% !important; }
+            table[class=email-container] { width: 100% !important; }
+            img { max-width: 100% !important; height: auto !important; }
+            
+            /* Pricing mobile adjustments - Stack on mobile */
+            .pricing-old, .pricing-new {
+                display: block !important;
+                width: 90% !important;
+                max-width: 100% !important;
+                text-align: center !important;
+                padding: 0 2px !important;
+            }
+            .pricing-old {
+                padding-bottom: 16px !important;
+                padding-top: 20px !important;
+            }
+            .pricing-old p {
+                font-size: 40px !important;
+                line-height: 44px !important;
+            }
+            .pricing-new {
+                padding: 30px 20px !important;
+            }
+            .pricing-new p {
+                font-size: 40px !important;
+                line-height: 44px !important;
+            }
+        }
+    </style>
+    
+    <!--[if gte mso 9]>
+    <style type="text/css">
+        /* Outlook-specific styles */
+        table { border-collapse: collapse; }
+        .outlook-fallback { font-family: Arial, sans-serif !important; }
+    </style>
+    <![endif]-->
+</head>
+
+<body style="margin: 0; padding: 0; background-color: #f4f4f4; font-family: 'DM Sans', Arial, Helvetica, sans-serif;">
+<!-- Preview Text (hidden) -->
+<div style="display: none; max-height: 0px; overflow: hidden; font-size: 1px; line-height: 1px; color: #ffffff;">Q&amp;A Day - Questions and answers from parents going through the same age and stage as you.</div>
+<!-- Main Email Container --><center style="width: 100%; background-color: #f4f4f4;">
+<table align="center" border="0" cellpadding="0" cellspacing="0" class="email-container" role="presentation" style="max-width: 600px; margin: 0px auto; background-color: rgb(255, 255, 255); width: 100%; height: auto;"><!-- HEADER SECTION: Cream Background with Logo -->
+<tbody>
+<tr style="height: 200px;">
+<td style="background-image: url('https://library.iterable.com/3244/21559/714d02ed02c948099ccb7d2044371a93-header-banner-bg-x3.png'); background-position: center center; background-size: 600px 250px; background-repeat: no-repeat; padding: 28px 0px; text-align: center; width: 99.6667%; height: 200px;"><img alt="ParentData Logo" class="fluid" height="75" src="https://library.iterable.com/3244/21559/b5c9498bb7414fe58b65737e0683e0c9-parentlogo-yellow-x3.png" width="179">
+<table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+<tbody>
+<tr>
+<td style="text-align: center; position: relative;"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<!-- WELCOME BANNER -->
+<tr style="height: auto;">
+<td style="background-color: rgb(255, 255, 255); padding: 12px 24px 20px; height: auto;">
+<table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+<tbody>
+<tr>
+<td align="center">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" style="max-width: 444px; width: 100%;">
+<tbody>
+<tr>
+<td class="mobile-padding" style="background-color: #a9ddf3; border-radius: 50px; padding: 12px 52px; text-align: center;">
+<p class="welcome-message" style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 300; font-style: italic; font-size: 18px; line-height: 32px; letter-spacing: -0.9px; color: #000000;">It's the final day of your trial!</p>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<!-- ARTICLE BODY CONTENT -->
+<tr style="height: auto;">
+<td style="background-color: rgb(255, 255, 255); padding: 0px 0px 0px; height: auto;">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+<tbody>
+<tr>
+<td class="table-box-mobile no-top-pad" style="background-color: rgb(255, 255, 255); padding: 0px 48px 00px; width: 99.6667%;">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+<tbody>
+<tr>
+<td class="tablebox" style="padding-bottom: 0px;">
+<p style="font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 24px; color: #000000; font-style: italic;">Today&rsquo;s featured article on fostering independence is just one example of the 1,300+ research-based pieces in our archives. You can dive into the latest posts, or browse by topic and&nbsp;<a href="https://parentdata.org/register/plus-yearly/?coupon=allaccess30">age group</a>&nbsp;&mdash; there&rsquo;s a wealth of evidence-based guidance waiting for you.</p>
+<p style="font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 24px; color: #000000; font-style: italic;">👉 Paid subscribers get access to the full archives as well as your choice of newsletters (plus many other perks) delivered every week.&nbsp; And right now, if you upgrade during your trial, you&rsquo;ll get&nbsp;<span style="font-size: 16px; font-weight: bold;">30% off an all-access Plus membership.</span></p>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<!-- UPGRADE SECTION: Cream Background -->
+<tr style="height: auto;">
+<td class="table-box-mobile" style="background-color: rgb(255, 252, 238); padding: 36px 48px; height: auto;">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%"><!-- Unlock Headline -->
+<tbody>
+<tr>
+<td style="text-align: center; padding-bottom: 12px;">
+<table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="width: 88%; max-width: 500px;">
+<tbody>
+<tr><!-- Old Price Column - Left Side -->
+<td class="pricing-old" style="width: 30%; vertical-align: middle; text-align: right; padding-right: 20px;">
+<p style="margin: 0; font-family: 'Lora', Georgia, serif; font-weight: 400; font-size: 48px; line-height: 52px; color: #000000; text-decoration: line-through;">$120</p>
+</td>
+<!-- New Price Column - Right Side with Splash Background -->
+<td class="pricing-new" style="width: 70%; vertical-align: middle; text-align: center; background-image: url('https://library.iterable.com/3244/21559/2a80c68d3b4f4804b52b0c5d52274ee7-brush.png'); background-size: contain; background-repeat: no-repeat; background-position: center; padding: 30px 20px;">
+<p style="margin: 0; font-family: 'Lora', Georgia, serif; font-weight: bold; font-size: 48px; line-height: 52px; letter-spacing: -1.5px; color: #000000;">$84/year</p>
+<!--[if gte mso 9]>
+</v:textbox>
+</v:rect>
+<![endif]--></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr>
+<td align="center" style="padding-bottom: 0px;">
+<table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="max-width: 288px; width: 100%;">
+<tbody>
+<tr>
+<td align="center" style="padding: 20px;">
+<div class="subscribe-btn-mobile" style="display: inline-block; mso-hide: all; width: auto; border-radius: 15px; background-color: #fceea9; border: 2px solid #000000; box-shadow: 0px 4px 4px 0px rgba(0,0,0,0.25);"><a href="https://parentdata.org/register/plus-yearly/?coupon=allaccess30" rel="noopener" style="display: block; padding: 20px 54px; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 800; font-size: 24px; line-height: 20px; letter-spacing: 0.24px; color: #000000; text-decoration: none; text-transform: uppercase; text-align: center; white-space: nowrap;" target="_blank">UPGRADE NOW</a></div>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 500; font-size: 16px; line-height: 20px; letter-spacing: -0.8px; color: #000000;">cancel anytime</p>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<!-- ARTICLE BODY CONTENT -->
+<tr style="height: auto;">
+<td style="background-color: rgb(255, 255, 255); padding: 0px; height: auto;">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+<tbody>
+<tr>
+<td class="table-box-mobile no-top-pad" style="background-color: #ffffff; padding: 0px 48px 0px;">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+<tbody>
+<tr>
+<td class="tablebox" style="padding-bottom: 0px;"><!-- Opening paragraphs -->
+<p style="font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 22px; color: #000000;">For most of the first year of my daughter's life, we lived in Lisbon, Portugal. My husband was doing research for his doctorate in history, and I was working on my master's thesis (I had recently completed all of the coursework for a master's in child development and half of my master's in social work, with an emphasis on clinical work with children and families). The subject of that thesis was first-time parents of toddlers. My mind that sunny Portuguese fall and winter was a mix of highbrow and lowbrow parenting ideas: the notion of Winnicott's "good enough mother" and Margaret Mahler's concepts of separation and individuation in infant development, interspersed with baby puree recipes and a blog on infant sleep that taught me how to settle my daughter into a nap routine.</p>
+<p style="font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 22px; color: #000000;">Our apartment was bigger and brighter than the place we'd left behind in New York, and the farmer's market up the street stocked beautiful produce all year long, unlike the sea of onions we found in Fort Greene Park in January. Our lives in Portugal were lovely, but we were alone: our family and friends were an ocean away. In this way, I think my experience of early motherhood was a version of what many of us face: we bring babies into communities into which we may not have deep ties. Often, we are far from family.</p>
+<p style="font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 22px; color: #000000;">My older sister and my 11-year-old niece came to visit Lisbon when my daughter was 8 months old and learning to army crawl and scoot on her bum. One day, she inched her way closer and closer to the freestanding radiator that heated our living room. I had eyed this development with a mixture of worry and resignation: she was a baby, so I figured I would just move her away, and that my days of being able to switch the laundry out or go to the bathroom alone while she was awake were numbered. But as she inched closer to the radiator, my sister scooped her up.</p>
+<p style="font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 22px; color: #000000;">"No," she said firmly to baby Lola, in a voice that was authoritative but not unkind. "No." She put Lola back on the floor but further from the radiator and facing the opposite direction. And every time Lola again made her way towards the hot appliance, Caitlin lifted her up and offered Lola this firm but friendly no. In the days that followed, I repeated this tactic. Lola never touched the radiator, and eventually, she stopped moving towards it. I put dangerous items out of reach, but that "no" served us both through baby- and toddlerhood. And the notion of her responsiveness &mdash; the idea that I had not given her quite enough credit for taking in a limit and incorporating it into her independent exploration and play &mdash; bloomed.</p>
+<p style="font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 22px; color: #000000;">I often wonder what would have happened if I had been even more isolated during my daughter's early years: what if my sister had not spent her February break with us? Would I have figured out that my daughter's grasp of limits and language was already there, even before she could walk or talk? And what else did I miss out on, being so far from her and my other big sister? I was on my way to becoming an "expert" in parenting, but I was a novice who was far from my parents and my in-laws, who raised eight children between them.</p>
+<p style="font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 22px; color: #000000;">So many of us parent in a vacuum: we have little to do with children until our friends start having them or until we have our own. This makes it hard to know what our children are capable of. Once they arrive, we tend to both over- and underestimate them: we wonder why our 2-year-old can't accept that it's time to leave the park, but we don't allow our 4-year-old to pour their own milk. Limits and independence are deeply interconnected (a child who knows to pause at a street corner is building the skills that will, in a few years, allow them to cross safely on their own). My daughter's grasp of "no" allowed me to leave her playing while I put away clean laundry or read the news. It gave her some freedom in a space: she knew what was hers to explore, and what was not. Was there some risk in relying on her understanding of this limit? Maybe. But avoiding risk has its own dangers, too.</p>
+<p style="font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 22px; color: #000000;">My sister was then the parent of an 11-year-old. She knew that raising a child involves holding two unwieldy tasks in your arms simultaneously: you must care for the little person in front of you, and you must also parent for the future, for the child or young adult you hope will stand in front of you in two, five, or 15 years. This means setting limits and fostering independence.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<!-- WHITE SECTION: Why it's important -->
+<tr style="height: auto;">
+<td class="no-top-pad" style="background-color: rgb(255, 255, 255); padding: 0px; height: auto;">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+<tbody>
+<tr>
+<td class="table-box-mobile tablebox" style="padding: 0px 48px;">
+<p style="margin: 0 0 16px 0; font-family: 'Lora', Georgia, serif; font-weight: bold; font-size: 22px; line-height: 28px; color: #000000;">Why it's important to help kids become more independent</p>
+<p style="margin: 0 0 16px 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 24px; color: #000000;">Why does it matter if our kids become independent? Well, in the long term, we need them to pour their own milk and put on their shoes. But in the short term, doing so gives them a sense of agency and efficacy. There's good reason to believe that kids are less independent than they were a few decades ago, and some reason to believe that this may be a <a href="https://url.us.m.mimecastprotect.com/s/BdeBCR6JJkiv9KxGH4fKH1K3tN?domain=links.parentdata.org" style="color: #054f8b; text-decoration: underline; font-family: 'DM Sans', Arial, Helvetica, sans-serif;">contributing factor in anxiety</a>.</p>
+<p style="margin: 0 0 16px 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 24px; color: #000000;">Perhaps some of our growing (and important!) interest in data has held us back here. There's very little quantitative data about what children are capable of at different ages. In part, this is because such expectations for autonomy and independence are regionally and culturally specific, for obvious reasons, and different children vary quite a bit in their readiness for different tasks. (For one thing, both judgment and fine- and gross-motor skills can evolve at dramatically different rates even among culturally similar children.) But we do have a lot of observational information, largely from teachers and professional caregivers, about what most children are capable of at different ages.</p>
+<p style="margin: 0 0 16px 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 24px; color: #000000;">And we can do our own data collection. We can observe what our children are capable of as they play (the child who is pouring water in the bath can begin to learn to pour their own milk into their cereal). We can observe or ask what our kids are capable of in their classrooms in order to get a sense of what tasks they could be mastering at home. (Of course, kids may initially resist completing familiar school tasks at home, particularly when they are tired.) And while comparison sometimes gets a bad rap, in reality, there's a lot of value in looking at kids a bit older than yours and asking yourself: could my kid do that? What skills would they need to be able to get there?</p>
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 24px; color: #000000;">Parenthood, as ever, is a dizzying juggling of cliches: you live in the here and now, and <a href="https://url.us.m.mimecastprotect.com/s/VAXNCVOjjofxr4Y2iAhvHEVN8E?domain=links.parentdata.org" style="color: #054f8b; text-decoration: underline; font-family: 'DM Sans', Arial, Helvetica, sans-serif;">you play the long game</a>. If we want to raise children who can set out bravely into a complex world, we must sometimes push them forward &mdash; allow them to test their limits and make mistakes.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<!-- IMAGE SECTION -->
+<tr style="height: auto;">
+<td class="table-box-mobile no-top-pad" style="background-color: rgb(255, 255, 255); padding: 0px 48px; height: auto;">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+<tbody>
+<tr>
+<td style="text-align: center;"><img alt="Independent Activities" class="fluid" src="https://library.iterable.com/3244/21559/65eef79eaf4b4ea99f2968401b3b4c5d-age-group.jpg" style="display: block; width: 100%; max-width: 520px; height: auto; border-radius: 20px; margin: 0 auto;"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<!-- HOW TO HELP SECTION -->
+<tr style="height: auto;">
+<td style="background-color: rgb(255, 255, 255); padding: 0px; height: auto;">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+<tbody>
+<tr>
+<td class="table-box-mobile" style="background-color: rgb(255, 255, 255); padding: 0px 48px 8px;">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+<tbody>
+<tr>
+<td class="tablebox" style="padding-bottom: 0px;">
+<p style="margin: 0 0 16px 0; font-family: 'Lora', Georgia, serif; font-weight: bold; font-size: 22px; line-height: 28px; color: #000000;">How to help children become more independent</p>
+<p style="margin: 0 0 16px 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 24px; color: #000000;">The gulf between crawling away from the living room radiator and riding around the neighborhood on a bike (as my daughter eventually did) feels vast. But any large task can be broken down into small ones that can be taught over weeks, months, and years.</p>
+<p style="margin: 0 0 16px 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 24px; color: #000000;">Identifying developmentally appropriate tasks can be done by observation, but it's fair, too, to think about what would reduce your stress and domestic workload: could my kid put away their clean laundry? Could they learn to turn on the TV on Saturday mornings and navigate their way to Bluey? Could they be the one to serve the gross-smelling food to the perpetually hungry cat?</p>
+<!-- Subheading 1 -->
+<p style="margin: 0 0 8px 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: bold; font-size: 18px; line-height: 24px; color: #000000;">Scaffold the task for your child</p>
+<p style="margin: 0 0 16px 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 24px; color: #000000;">There are many ways to scaffold kids' mastery of new tasks. One educational strategy is to first do it for them, then do it with them, then watch them do it, until finally they can do it independently. If we stick to the example of the cereal, we might say to a 4-year-old: "I think you're getting to be big enough that you could get your own cereal ready in the morning!" (I'd suggest using a tone that communicates that this is an exciting sign of maturity, not the first step on a road paved with endless household tasks that the adults can't wait to offload onto the rising generation.) You would then ask them to pay attention as you narrate choosing a bowl, filling it with cereal, and then fetching the milk from the refrigerator, pouring it carefully into the bowl, and returning it to the fridge (this last point remains challenging even for some adults in my household). The next day, you might pour the cereal and the milk together. The following day, you might stand nearby (paper towels at the ready) and watch your child fill the bowl. And eventually, they can take this task over completely, leaving you free to dry your hair (or sleep in!).</p>
+<!-- Subheading 2 -->
+<p style="margin: 0 0 8px 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: bold; font-size: 18px; line-height: 24px; color: #000000;">Let them complete the final step</p>
+<p style="margin: 0 0 16px 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 24px; color: #000000;">Another strategy for fostering independence is known as "backward chaining." In this approach, you would similarly break the task down into steps, narrate your actions, and ask your kid to observe you, but you'd allow them to complete the final step under your supervision, giving them a sense of both accomplishment and possibility &mdash; this is a task that I can learn to do! Because the child is immediately successful &mdash; they are asked to pour the milk into the bowl of cereal that you have prepared &mdash; they can say, "I helped get my breakfast ready!" Frustration is more limited, and motivation is higher. Earlier steps are introduced on subsequent days.</p>
+<!-- Subheading 3 -->
+<p style="margin: 0 0 8px 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: bold; font-size: 18px; line-height: 24px; color: #000000;">Adjust your home environment</p>
+<p style="margin: 0 0 16px 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 24px; color: #000000;">It can be helpful to consider the ways in which your home environment might be getting in the way of your child's independence: a mudroom without hooks at a child's level will prevent even a motivated kid from hanging up their coat at the end of the day, and a coat that lacks a fabric loop cannot easily be hung. These are simple fixes and so is finding a low kitchen drawer in which you can store bowls and cups that your child can easily reach, moving the shampoo onto the side of the bath so that your 5-year-old can easily reach it and learn to wash their hair, or simply deciding that you will no longer carry your child's backpack on the walk into school. Make use of sturdy stools and of your child's ever-growing capacity to do hard things.</p>
+<!-- Subheading 4 -->
+<p style="margin: 0 0 8px 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: bold; font-size: 18px; line-height: 24px; color: #000000;">Get comfortable with mistakes</p>
+<p style="margin: 0 0 16px 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 24px; color: #000000;">Fostering independence requires something else from us, however, and this piece is challenging for me, personally, and for many parents that I know. We must tolerate mistakes, mess, and chaos in a world that already feels depressingly chaotic and error-ridden. We must also learn to accept work that is not completed to our standards. We do not have to learn to enjoy these things, but if an enormous volume of milk spills onto the counter and trickles onto the floor, we must calmly offer our child the paper towels in a way that communicates that mistakes are an inevitable and non-catastrophic part of the process. If your first grader, tasked with making their lunch, decides to eat cream cheese and jam sandwiches every day for six weeks straight, I recommend keeping your objections to yourself.</p>
+<p style="margin: 0 0 16px 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 24px; color: #000000;">Consider what boundaries are essential to your sanity: I don't allow my kids to eat anywhere other than the table, which allows me to be relatively zen about kitchen spills and chaotic dresser drawers. And we must remind ourselves that mishaps are part of the goal: the child who bikes alone around the neighborhood may fall off their bicycle, scraping their knee. They may get lost. They may be chased by a mean little dog. That's okay. Because they'll come home &mdash; shaken, possibly, or maybe just triumphant &mdash; secure in the knowledge that, faced with a pickle, they figured out what to do.</p>
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 24px; color: #000000;">Finally, we can prevent ourselves from stepping in by <a href="https://url.us.m.mimecastprotect.com/s/nBMCCXDllqUXv6W4I8sEHWYTBi?domain=links.parentdata.org" style="color: #054f8b; text-decoration: underline; font-family: 'DM Sans', Arial, Helvetica, sans-serif;">reframing these everyday tasks as learning opportunities</a>. Which, of course, they are. Because raising children who can independently cross the street, cut up their own chicken, and make difficult decisions in stressful situations is, in fact, the end goal. Perhaps, if we are lucky, they will hear our voices in their head as they try to figure out what to do.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<!-- LEAVE A COMMENT BUTTON -->
+<tr style="height: auto;">
+<td class="table-box-mobile no-top-pad" style="background-color: rgb(255, 255, 255); padding: 0px 48px 40px; height: auto;">
+<table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="max-width: 288px; width: 100%;">
+<tbody>
+<tr>
+<td align="center" style="padding: 0px 0px;">
+<div class="subscribe-btn-mobile" style="display: inline-block; mso-hide: all; width: auto; border-radius: 15px; background-color: #fceea9; border: 2px solid #000000; box-shadow: 0px 4px 4px 0px rgba(0,0,0,0.25);"><a href="https://parentdata.org/article-comments-link" rel="noopener" style="display: block; padding: 16px 24px; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 800; font-size: 20px; line-height: 20px; letter-spacing: 0.24px; color: #000000; text-decoration: none; text-transform: uppercase; text-align: center; white-space: nowrap;" target="_blank">LEAVE A COMMENT</a></div>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<!-- EMILY OSTER AUTHOR BLOCK -->
+<tr style="height: auto;">
+<td class="tablebox table-box-mobile" style="background-color: rgb(255, 252, 238); padding: 20px 48px; height: auto;">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+<tbody>
+<tr>
+<td style="padding-bottom: 8px;">
+<p style="margin: 0 0 4px 0; font-family: 'Lora', Georgia, serif; font-weight: bold; font-size: 22px; line-height: 26px; letter-spacing: -0.66px; color: #000000;">Miranda Featherstone</p>
+<p style="margin: 0 0 8px 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 18px; line-height: 26px; color: #000000;">Social Worker, Writer</p>
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: normal; letter-spacing: -0.48px;"><a href="https://parentdata.org/about/" style="color: #054f8b; text-decoration: underline; font-family: 'DM Sans', Arial, Helvetica, sans-serif;">About Miranda</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<!-- FOOTER -->
+<tr style="height: auto;">
+<td class="table-box-mobile" style="background-color: rgb(252, 238, 169); padding: 20px 48px 40px; height: auto;">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%"><!-- Logo -->
+<tbody>
+<tr>
+<td style="text-align: left; padding-bottom: 24px;"><img alt="Footer Logo" class="fluid" src="https://library.iterable.com/3244/21559/0c234709315b456daeae8158543952a5-footerlogo.png" style="max-width: 120px; height: auto;" width="120"></td>
+</tr>
+<!-- Footer Text -->
+<tr>
+<td style="text-align: left; padding-bottom: 16px;">
+<p style="margin: 0 0 8px 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 14px; line-height: normal; color: #000000;">You are receiving this email because you opted in via our website.</p>
+</td>
+</tr>
+<!-- Change Preferences -->
+<tr>
+<td style="text-align: left; padding-bottom: 12px;">
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 800; font-size: 14px; line-height: normal; color: #000000;">Want to change how you receive these emails?</p>
+</td>
+</tr>
+<!-- Unsubscribe Link -->
+<tr>
+<td style="text-align: left; padding-bottom: 16px;">
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 14px; line-height: normal; color: #000000;"><a href="{{hostedUnsubscribeUrl}}" style="color: #000000; text-decoration: underline;">Unsubscribe from this list</a></p>
+</td>
+</tr>
+<!-- Manage Preferences -->
+<tr>
+<td style="text-align: left; padding-bottom: 20px;">
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 14px; line-height: normal; color: #000000;">To manage all of your newsletter preferences or cancel, please <a href="https://parentdata.org/account/" style="color: #000000; text-decoration: underline;">visit your account</a>.</p>
+</td>
+</tr>
+<!-- Copyright -->
+<tr>
+<td style="text-align: left;">
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 14px; line-height: normal; color: #000000;">Copyright &copy; 2025 ParentData, All rights reserved.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</center>
+</body>
+</html>

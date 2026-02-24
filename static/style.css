@@ -64,7 +64,8 @@ main {
 
 .field-group input[type="text"],
 .field-group input[type="url"],
-.field-group textarea {
+.field-group textarea,
+.field-group select {
   width: 100%;
   padding: 8px 10px;
   border: 1px solid #ccc;
@@ -75,7 +76,8 @@ main {
 }
 
 .field-group input:focus,
-.field-group textarea:focus {
+.field-group textarea:focus,
+.field-group select:focus {
   outline: none;
   border-color: #054f8b;
   box-shadow: 0 0 0 2px rgba(5, 79, 139, 0.12);
