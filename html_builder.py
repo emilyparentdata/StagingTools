@@ -646,6 +646,9 @@ def _replace_marketing_body(soup, fields):
     article_body_html = fields.get('article_body_html', '')
     article_url = _escape_attr(fields.get('article_url', '#'))
 
+    # Scale down font sizes for marketing context (slightly smaller than standard body)
+    article_body_html = _scale_marketing_body_fonts(article_body_html)
+
     # Split body at first heading so image goes between intro text and first section
     intro_html, main_html = _split_at_first_heading(article_body_html)
 
@@ -722,6 +725,21 @@ def _update_marketing_author(soup, fields):
 
 
 # ── Utilities ────────────────────────────────────────────────────────────────
+
+def _scale_marketing_body_fonts(html: str) -> str:
+    """
+    Scale down inline font sizes in marketing article body HTML so the body
+    feels like a preview rather than the full newsletter layout.
+
+    22px Lora section headings → 18px
+    16px DM Sans body text / list items → 14px
+    """
+    if not html:
+        return html
+    html = re.sub(r'\bfont-size:\s*22px', 'font-size:18px', html)
+    html = re.sub(r'\bfont-size:\s*16px', 'font-size:14px', html)
+    return html
+
 
 def _find_marketing_author_td(soup):
     """
