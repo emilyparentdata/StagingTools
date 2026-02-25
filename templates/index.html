@@ -79,9 +79,13 @@
         <label for="wp-url-1">Article 1 URL</label>
         <input type="url" id="wp-url-1" placeholder="https://parentdata.org/…">
       </div>
-      <div class="field-group" style="margin-bottom:0;">
+      <div class="field-group">
         <label for="wp-url-2">Article 2 URL</label>
         <input type="url" id="wp-url-2" placeholder="https://parentdata.org/…">
+      </div>
+      <div class="field-group" style="margin-bottom:0;">
+        <label for="qa-intro-text">Intro text</label>
+        <textarea id="qa-intro-text" rows="3" style="width:100%;" placeholder="It's Q&amp;A day! This week's questions are about…"></textarea>
       </div>
       <button type="button" class="btn-primary" onclick="handleQAUrls()" style="margin-top:16px;">Fetch Both Articles</button>
     </div>
@@ -386,10 +390,12 @@ function _showPostUploadSections(isQA, isFertility, isMarketing) {
   if (isFertility) document.getElementById('section-bottomline').removeAttribute('hidden');
 
   // QA-only
-  ['section-intro', 'section-qa1', 'section-qa2'].forEach(id => {
+  ['section-qa1', 'section-qa2'].forEach(id => {
     document.getElementById(id).style.display = isQA ? '' : 'none';
     if (isQA) document.getElementById(id).removeAttribute('hidden');
   });
+  // section-intro is no longer shown post-upload; intro text lives in the upload form
+  document.getElementById('section-intro').style.display = 'none';
 
   // Always show generate
   const genSection = document.getElementById('section-generate');
@@ -530,8 +536,11 @@ function populateFields(data) {
   if (data.featured_image_alt) document.getElementById('f-img-alt').value = data.featured_image_alt;
 }
 
+// Store qa_authors from upload response for use at generate time
+let _qaAuthors = [];
+
 function populateQAFields(data) {
-  document.getElementById('f-intro').value = data.intro_text || '';
+  _qaAuthors = data.qa_authors || [];
   const qa1 = data.qa1 || {};
   document.getElementById('qa1-question').value = qa1.question_text || '';
   document.getElementById('qa1-author').value = qa1.question_author || '';
@@ -644,7 +653,8 @@ async function generateEmail() {
     payload = {
       template_type: 'qa',
       include_update_banner: document.getElementById('cb-update-banner').checked,
-      intro_text: document.getElementById('f-intro').value,
+      intro_text: document.getElementById('qa-intro-text').value,
+      qa_authors: _qaAuthors,
       qa1: {
         question_text: document.getElementById('qa1-question').value,
         question_author: document.getElementById('qa1-author').value,

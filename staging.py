@@ -106,19 +106,23 @@ def upload():
     if template_type == 'qa' and wp_url_1 and wp_url_2:
         try:
             from wp_fetcher import fetch_wp_article
-            from claude_client import extract_qa_content, generate_qa_intro
+            from claude_client import extract_qa_content
 
             article1 = fetch_wp_article(wp_url_1)
             article2 = fetch_wp_article(wp_url_2)
 
             qa1 = extract_qa_content(article1['content_html'])
             qa2 = extract_qa_content(article2['content_html'])
-            intro_text = generate_qa_intro(article1['title'], article2['title'])
+
+            # Build author attribution list (deduplicated)
+            author1 = article1.get('author_name', '')
+            author2 = article2.get('author_name', '')
+            qa_authors = list(dict.fromkeys(a for a in [author1, author2] if a))
 
             return jsonify({
-                'intro_text': intro_text,
                 'qa1': qa1,
                 'qa2': qa2,
+                'qa_authors': qa_authors,
             })
         except Exception as e:
             return jsonify({'error': str(e)}), 500
@@ -132,9 +136,16 @@ def upload():
             article = fetch_wp_article(wordpress_url)
             reformatted = reformat_wp_content(article['content_html'], template_type)
 
+            # Use WP excerpt as subtitle; fall back to Claude-generated if absent
+            excerpt_text = article.get('excerpt_text', '')
+            subtitle_lines = (
+                [excerpt_text] if excerpt_text
+                else reformatted.get('subtitle_lines', [])
+            )
+
             response_data = {
                 'title':               article.get('title', ''),
-                'subtitle_lines':      reformatted.get('subtitle_lines', []),
+                'subtitle_lines':      subtitle_lines,
                 'author_name':         article.get('author_name', ''),
                 'author_url':          article.get('author_url', 'https://parentdata.org/author/eoster/'),
                 'author_title':        article.get('author_title', ''),

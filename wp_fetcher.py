@@ -83,9 +83,24 @@ def _slug_from_url(url: str) -> str:
 
 
 def _parse_post(post: dict) -> dict:
+    import re as _re
     title = post.get('title', {}).get('rendered', '')
     content_html = post.get('content', {}).get('rendered', '')
     embedded = post.get('_embedded', {})
+
+    # Extract plain-text excerpt for use as subtitle
+    excerpt_html = post.get('excerpt', {}).get('rendered', '')
+    excerpt_text = _re.sub(r'<[^>]+>', '', excerpt_html).strip()
+
+    # If the API returns a full HTML page instead of article content, it means
+    # the post content is stored in a non-standard way (e.g. paywall HTML or
+    # an imported full-page HTML blob). The tool cannot process this.
+    if content_html.lstrip().startswith('<!DOCTYPE') or content_html.lstrip().startswith('<html'):
+        raise ValueError(
+            f'The WordPress API returned a full HTML page instead of article content for "{title}". '
+            'This article may be stored in a non-standard format in WordPress. '
+            'Please use the DOCX upload path instead.'
+        )
 
     # Author
     author_name = ''
@@ -115,7 +130,7 @@ def _parse_post(post: dict) -> dict:
 
     return {
         'title': title,
-        'subtitle_lines': [],      # Claude extracts from content
+        'excerpt_text': excerpt_text,  # Plain-text excerpt for use as subtitle
         'author_name': author_name,
         'author_url': author_url,
         'author_title': '',        # Not in WP API; user can fill in
