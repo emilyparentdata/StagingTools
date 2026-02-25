@@ -114,9 +114,9 @@ def upload():
             qa1 = extract_qa_content(article1['content_html'])
             qa2 = extract_qa_content(article2['content_html'])
 
-            # Build author attribution list (deduplicated)
-            author1 = article1.get('author_name', '')
-            author2 = article2.get('author_name', '')
+            # Build author attribution list (deduplicated, credentials stripped)
+            author1 = _strip_name_credentials(article1.get('author_name', ''))
+            author2 = _strip_name_credentials(article2.get('author_name', ''))
             qa_authors = list(dict.fromkeys(a for a in [author1, author2] if a))
 
             return jsonify({
@@ -272,6 +272,15 @@ def _apply_staging_instructions(data: dict, staging: dict) -> None:
     ]
     if graphs:
         data['inline_graphs'] = graphs
+
+
+def _strip_name_credentials(name: str) -> str:
+    """Return just the person's name, removing title prefixes and credential suffixes."""
+    # Strip prefixes: Dr., Prof., Mr., Ms., etc.
+    name = re.sub(r'^(Dr|Prof|Professor|Mr|Ms|Mrs|Mx)\.?\s+', '', name, flags=re.IGNORECASE).strip()
+    # Strip suffixes after a comma: ", MD", ", PhD", ", OB-GYN", etc.
+    name = re.sub(r'\s*,.*$', '', name).strip()
+    return name
 
 
 def _title_from_slug(url: str) -> str:
