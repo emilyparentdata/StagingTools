@@ -169,7 +169,7 @@ def _replace_article_sections(soup, fields):
             )
             # Row B: intro paragraphs + featured image
             image_div = (
-                f'<div style="position: relative; display: inline-block; width: 100%;">'
+                f'<div style="position: relative; display: inline-block; width: 100%; margin-bottom: 24px;">'
                 f'<img alt="{img_alt}" class="fluid"'
                 f' src="{img_url}"'
                 f' style="width: 100%; max-width: 552px; height: auto; display: block; border-radius: 16px;">'

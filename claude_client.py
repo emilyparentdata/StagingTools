@@ -16,10 +16,10 @@ STYLE_GUIDE = """
 EMAIL HTML INLINE STYLE REFERENCE
 ===================================
 H1 heading:
-  style="margin: 0 0 24px 0; font-family: 'Lora', Georgia, serif; font-weight: bold; font-size: 30px; line-height: 36px; letter-spacing: -1.2px; color: #000000;"
+  style="margin: 0 0 24px 0; font-family: 'Lora', Georgia, serif; font-weight: bold; font-size: 30px; line-height: 36px; letter-spacing: -1.2px; color: #000000; padding-bottom: 4px;"
 
 H2 heading:
-  style="margin: 0 0 24px 0; font-family: 'Lora', Georgia, serif; font-weight: bold; font-size: 24px; line-height: 28px; letter-spacing: -1.2px; color: #000000;"
+  style="margin: 0 0 24px 0; font-family: 'Lora', Georgia, serif; font-weight: bold; font-size: 24px; line-height: 28px; letter-spacing: -1.2px; color: #000000; padding-bottom: 4px;"
 
 Regular paragraph (article body):
   style="margin: 0 0 24px 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; color: #000000;"
@@ -52,10 +52,10 @@ STYLE_GUIDE_FERTILITY = """
 EMAIL HTML INLINE STYLE REFERENCE
 ===================================
 H1 heading:
-  style="margin: 0 0 24px 0; font-family: 'Lora', Georgia, serif; font-weight: bold; font-size: 30px; line-height: 36px; letter-spacing: -1.2px; color: #000000;"
+  style="margin: 0 0 24px 0; font-family: 'Lora', Georgia, serif; font-weight: bold; font-size: 30px; line-height: 36px; letter-spacing: -1.2px; color: #000000; padding-bottom: 4px;"
 
 H2 heading:
-  style="margin: 0 0 24px 0; font-family: 'Lora', Georgia, serif; font-weight: bold; font-size: 24px; line-height: 28px; letter-spacing: -1.2px; color: #000000;"
+  style="margin: 0 0 24px 0; font-family: 'Lora', Georgia, serif; font-weight: bold; font-size: 24px; line-height: 28px; letter-spacing: -1.2px; color: #000000; padding-bottom: 4px;"
 
 Regular paragraph (article body):
   style="margin: 0 0 24px 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; color: #000000;"
