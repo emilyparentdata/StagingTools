@@ -260,6 +260,12 @@
         <textarea id="qa2-answer" rows="16" class="code-area" placeholder="Answer HTML will appear here after fetch…"></textarea>
       </details>
     </div>
+
+    <div class="field-group" style="margin-top:8px;">
+      <label for="qa-author-line">Author attribution line</label>
+      <p class="hint">Appears at the bottom of the email in italic. Edit freely.</p>
+      <input type="text" id="qa-author-line" placeholder="Today&#8217;s answers come from Emily Oster and Nathan Fox.">
+    </div>
   </section>
 
   <!-- ── Step 5: Related Articles (standard only) ─────────────────────── -->
@@ -549,6 +555,16 @@ function populateQAFields(data) {
   document.getElementById('qa2-question').value = qa2.question_text || '';
   document.getElementById('qa2-author').value = qa2.question_author || '';
   document.getElementById('qa2-answer').value = qa2.answer_html || '';
+
+  // Pre-populate editable attribution line from fetched author names
+  const authors = _qaAuthors;
+  let authorLine = '';
+  if (authors.length === 1) {
+    authorLine = `Today\u2019s answers come from ${authors[0]}.`;
+  } else if (authors.length >= 2) {
+    authorLine = `Today\u2019s answers come from ${authors.slice(0, -1).join(', ')} and ${authors[authors.length - 1]}.`;
+  }
+  document.getElementById('qa-author-line').value = authorLine;
 }
 
 // ── Related Articles ────────────────────────────────────────────────────────
@@ -654,7 +670,7 @@ async function generateEmail() {
       template_type: 'qa',
       include_update_banner: document.getElementById('cb-update-banner').checked,
       intro_text: document.getElementById('qa-intro-text').value,
-      qa_authors: _qaAuthors,
+      qa_author_line: document.getElementById('qa-author-line').value,
       qa1: {
         question_text: document.getElementById('qa1-question').value,
         question_author: document.getElementById('qa1-author').value,

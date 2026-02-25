@@ -521,7 +521,7 @@ def _update_qa_pairs(soup, fields):
             italic_p.clear()
             italic_p.append(BeautifulSoup(content, 'html.parser'))
 
-    qa_authors = fields.get('qa_authors', [])
+    qa_author_line = fields.get('qa_author_line', '').strip()
 
     for i, a_img in enumerate(answer_imgs):
         qa = fields.get(f'qa{i + 1}', {})
@@ -538,16 +538,15 @@ def _update_qa_pairs(soup, fields):
                 if answer_html:
                     div.append(BeautifulSoup(answer_html, 'html.parser'))
 
-            # Add "Today's answers come from …" line after the last answer
-            if i == len(answer_imgs) - 1 and qa_authors:
-                names = ' and '.join(qa_authors)
+            # Add the author attribution line after the last answer
+            if i == len(answer_imgs) - 1 and qa_author_line:
                 author_line_html = (
                     '<div><p style="white-space-collapse: preserve; '
                     "font-family: 'DM Sans', Arial, Helvetica, sans-serif; "
                     'font-weight: normal; font-size: 16px; line-height: 24px; color: #000000;">'
                     '<span class="g-italic-fnt" style="font-style: italic; font-size: 16px; '
                     "font-family: 'DM Sans', Arial, Helvetica, sans-serif;\">"
-                    f"Today\u2019s answers come from {names}."
+                    f"{_escape_attr(qa_author_line)}"
                     '</span></p></div>'
                 )
                 tablebox_td.append(BeautifulSoup(author_line_html, 'html.parser'))
