@@ -72,7 +72,15 @@ def fetch_wp_article(url: str) -> dict:
             f'Check that the URL is correct and the article is published.'
         )
 
-    return _parse_post(posts[0])
+    result = _parse_post(posts[0])
+
+    # The subtitle is stored in a private WP meta field not exposed by the REST
+    # API. Fetch the public article page and parse <p class="sub-title">.
+    subtitle = _fetch_subtitle_from_page(url)
+    if subtitle:
+        result['excerpt_text'] = subtitle
+
+    return result
 
 
 def _slug_from_url(url: str) -> str:
@@ -80,6 +88,31 @@ def _slug_from_url(url: str) -> str:
     path = urlparse(url).path.strip('/')
     parts = [p for p in path.split('/') if p]
     return parts[-1] if parts else ''
+
+
+def _fetch_subtitle_from_page(url: str) -> str:
+    """
+    Fetch the public article page and extract the subtitle from
+    <p class="sub-title">, which is rendered by the WP theme from a private
+    meta field not exposed via the REST API.  Returns '' on any failure.
+    """
+    try:
+        from bs4 import BeautifulSoup
+        browser_headers = {
+            'User-Agent': (
+                'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
+                'AppleWebKit/537.36 (KHTML, like Gecko) '
+                'Chrome/120.0.0.0 Safari/537.36'
+            )
+        }
+        resp = _requests.get(url, headers=browser_headers, timeout=15)
+        if resp.status_code != 200:
+            return ''
+        soup = BeautifulSoup(resp.text, 'html.parser')
+        p = soup.find('p', class_='sub-title')
+        return p.get_text(strip=True) if p else ''
+    except Exception:
+        return ''
 
 
 def _parse_post(post: dict) -> dict:
