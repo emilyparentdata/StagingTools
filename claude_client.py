@@ -43,6 +43,10 @@ Author bio paragraph (Emily's plain-text intro of the guest author, not italic):
 Signature line "—Emily":
   Same style as welcome paragraphs above
 
+Inline image within article body (chart, figure, illustrative image mid-article):
+  <div style="width: 100%; margin: 0 0 24px 0;"><img src="..." alt="..." style="display: block; width: 100%; max-width: 552px; height: auto; border-radius: 8px; margin: 0 auto;"></div>
+  If the image has a caption, add it as a regular paragraph immediately after the div.
+
 Bottom line list (fertility template only):
   <ul style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 26px; color: #000000; padding-left: 16px;">
 """
@@ -70,6 +74,10 @@ List item <li>:
 
 Welcome/intro section paragraphs:
   style="padding-bottom: 24px; margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; color: #000000;"
+
+Inline image within article body (chart, figure, illustrative image mid-article):
+  <div style="width: 100%; margin: 0 0 24px 0;"><img src="..." alt="..." style="display: block; width: 100%; max-width: 552px; height: auto; border-radius: 8px; margin: 0 auto;"></div>
+  If the image has a caption, add it as a regular paragraph immediately after the div.
 
 Bottom line list (fertility template only):
   <ul style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 26px; color: #000000; padding-left: 16px;">
@@ -264,7 +272,8 @@ Convert the WordPress HTML to email-ready HTML. Return a single JSON object with
   - Preserve ALL hyperlinks with their original href values.
   - Convert WordPress entities (&nbsp;, &rsquo;, etc.) to their proper Unicode/HTML equivalents.
   - Remove WordPress-only elements like share buttons, author bio boxes, comment sections.
-  - Do NOT include any standalone featured/header/cover image. The article's main image is placed in the template separately — omit any <img> or <figure> block that serves as the article's hero or header image at the top of the content.
+  - Do NOT include the featured/hero image that appears at the very top of the article — it is placed in the template separately. Only omit that one image.
+  - Preserve ALL other inline images (charts, figures, illustrative images mid-article). Apply the inline image style from the Style Guide to each one.
 
 {bottom_line_instruction}
 
