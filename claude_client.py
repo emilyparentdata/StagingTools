@@ -324,7 +324,7 @@ The complete answer body as HTML with inline styles from the Style Guide. Rules:
   - Use <p> with the regular paragraph inline style for body text.
   - Preserve ALL hyperlinks with their original href values.
   - Do NOT include the reader's question — only the answer.
-  - Do NOT include any featured/header image.
+  - Do NOT include any images — no featured image, no inline images, no figures.
   - Strip WordPress block classes (wp-block-*, etc.).
 </ANSWER_HTML>
 
