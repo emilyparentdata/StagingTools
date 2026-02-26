@@ -299,23 +299,44 @@ def extract_qa_content(content_html: str) -> dict:
 {STYLE_GUIDE_FERTILITY}
 
 ## YOUR TASK:
-Extract and return a JSON object with EXACTLY these keys:
+Extract the fields below and return them using the exact XML-style delimiters shown. Do NOT wrap anything in JSON or markdown.
 
-- "question_text": The reader's full question as plain text (no HTML tags). This is usually at the beginning of the article in italic or blockquote formatting. Do not include the sign-off (the "—Name" part).
+<QUESTION_TEXT>
+The reader's full question as plain text (no HTML tags). Usually at the beginning of the article in italic or blockquote formatting. Do not include the sign-off (the "—Name" part).
+</QUESTION_TEXT>
 
-- "question_author": The reader's sign-off name only — e.g. if the article ends the question with "—Anne Marie", return "Anne Marie". If no name is given, return "A reader".
+<QUESTION_AUTHOR>
+The reader's sign-off name only — e.g. "Anne Marie". If no name is given, write: A reader
+</QUESTION_AUTHOR>
 
-- "answer_html": The complete answer body as HTML with inline styles from the Style Guide. Rules:
+<ANSWER_HTML>
+The complete answer body as HTML with inline styles from the Style Guide. Rules:
   - Use <h2> for any section headings.
   - Use <p> with the regular paragraph inline style for body text.
   - Preserve ALL hyperlinks with their original href values.
   - Do NOT include the reader's question — only the answer.
   - Do NOT include any featured/header image.
   - Strip WordPress block classes (wp-block-*, etc.).
+</ANSWER_HTML>
 
-IMPORTANT: Return ONLY the raw JSON object. No markdown fences, no explanation."""
+Return ONLY the three delimited sections above, in order. No explanation, no extra text."""
 
-    return _call_claude(prompt, max_tokens=16000)
+    response = client.messages.create(
+        model=MODEL,
+        max_tokens=16000,
+        messages=[{'role': 'user', 'content': prompt}],
+    )
+    text = response.content[0].text.strip()
+
+    def _extract(tag: str) -> str:
+        m = re.search(rf'<{tag}>(.*?)</{tag}>', text, re.DOTALL)
+        return m.group(1).strip() if m else ''
+
+    return {
+        'question_text':   _extract('QUESTION_TEXT'),
+        'question_author': _extract('QUESTION_AUTHOR'),
+        'answer_html':     _extract('ANSWER_HTML'),
+    }
 
 
 def generate_qa_intro(title1: str, title2: str) -> str:
