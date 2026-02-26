@@ -634,8 +634,8 @@ function buildDigestCards(articles) {
           <textarea id="digest-art-desc-${i}" rows="2" style="width:100%;">${_esc(art.description || '')}</textarea>
         </div>
         <div class="field-group image-url-field">
-          <label for="digest-art-img-${i}">Image URL${art.image_url ? ' <span style="font-weight:400;color:#2a7a2a;">(auto-fetched — replace with Iterable CDN URL if needed)</span>' : ' <span class="required">*</span>'}</label>
-          <input type="url" id="digest-art-img-${i}" value="${_esc(art.image_url || '')}" placeholder="https://library.iterable.com/…">
+          <label for="digest-art-img-${i}">Image URL${art.image_url ? ' <span style="font-weight:400;color:#2a7a2a;">(auto-fetched)</span>' : ' <span class="required">*</span>'}</label>
+          <input type="url" id="digest-art-img-${i}" value="${_esc(art.image_url || '')}" placeholder="https://parentdata.org/wp-content/uploads/…">
         </div>
       </div>
     `);
