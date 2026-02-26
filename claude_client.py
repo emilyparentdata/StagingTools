@@ -315,7 +315,7 @@ Extract and return a JSON object with EXACTLY these keys:
 
 IMPORTANT: Return ONLY the raw JSON object. No markdown fences, no explanation."""
 
-    return _call_claude(prompt)
+    return _call_claude(prompt, max_tokens=16000)
 
 
 def generate_qa_intro(title1: str, title2: str) -> str:
@@ -342,11 +342,11 @@ Return ONLY the plain text intro. No quotes around it, no extra explanation."""
     return response.content[0].text.strip()
 
 
-def _call_claude(prompt: str) -> dict:
+def _call_claude(prompt: str, max_tokens: int = 8000) -> dict:
     """Send a prompt to Claude and parse the JSON response."""
     response = client.messages.create(
         model=MODEL,
-        max_tokens=8000,
+        max_tokens=max_tokens,
         messages=[{'role': 'user', 'content': prompt}],
     )
 
