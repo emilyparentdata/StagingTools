@@ -142,7 +142,11 @@ def upload():
             from claude_client import reformat_wp_content
 
             article = fetch_wp_article(wordpress_url)
-            reformatted = reformat_wp_content(article['content_html'], template_type)
+            content_html = _strip_featured_image(
+                article['content_html'],
+                article.get('featured_image_url', ''),
+            )
+            reformatted = reformat_wp_content(content_html, template_type)
 
             # Use WP excerpt as subtitle; fall back to Claude-generated if absent
             excerpt_text = article.get('excerpt_text', '')
@@ -305,6 +309,37 @@ def _apply_staging_instructions(data: dict, staging: dict) -> None:
     ]
     if graphs:
         data['inline_graphs'] = graphs
+
+
+def _strip_featured_image(content_html: str, featured_image_url: str) -> str:
+    """
+    Remove any <figure> blocks from content_html that reference the featured image.
+
+    WordPress often embeds the featured image both as the post's featured_media
+    AND as the first block in the article content, which would cause it to appear
+    twice in the email. This strips the duplicate before Claude sees the content.
+
+    Matches by base filename so resized variants (e.g. -800x600) are also caught.
+    """
+    if not featured_image_url or not content_html:
+        return content_html
+
+    # Derive base name: "pregnancy-test-800x600.jpg" → "pregnancy-test"
+    filename = featured_image_url.rstrip('/').rsplit('/', 1)[-1]
+    base = re.sub(r'-\d+x\d+(\.[a-z0-9]+)$', r'\1', filename, flags=re.I)
+    stem = re.sub(r'\.[a-z0-9]+$', '', base, flags=re.I)
+    if not stem:
+        return content_html
+
+    from bs4 import BeautifulSoup
+    soup = BeautifulSoup(content_html, 'html.parser')
+    for figure in soup.find_all('figure'):
+        img = figure.find('img')
+        if img:
+            src = img.get('src', '') + ' ' + img.get('srcset', '')
+            if stem in src:
+                figure.decompose()
+    return str(soup)
 
 
 def _strip_name_credentials(name: str) -> str:
