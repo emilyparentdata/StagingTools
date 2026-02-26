@@ -406,9 +406,16 @@ def _replace_fertility_body(soup, fields):
         - td            → featured image (img[alt="Article Image"])
       Row 5 (direct td.tablebox.table-box-mobile.no-top-pad):
         → main body (from first H2 onward)
+
+    If the article has no section headings, split after the 2nd paragraph
+    so the featured image lands between paragraphs 2 and 3 rather than at
+    the end of all the content.
     """
     body_html = fields.get('article_body_html', '')
     intro_html, main_html = _split_at_first_heading(body_html)
+    if not main_html:
+        # No headings — split after 2nd paragraph so image has a natural position
+        intro_html, main_html = _split_after_nth_paragraph(body_html, n=2)
 
     # --- Intro body td (first td.tablebox that is NOT also table-box-mobile) ---
     intro_td = None
@@ -807,6 +814,25 @@ def _split_at_first_heading(html: str):
     if m:
         return html[:m.start()], html[m.start():]
     return html, ''
+
+
+def _split_after_nth_paragraph(html: str, n: int = 2):
+    """
+    Split HTML immediately after the nth closing </p> tag.
+    Returns (first_n_paragraphs_html, remaining_html).
+    If there are fewer than n paragraphs, returns (html, '').
+    """
+    if not html:
+        return '', ''
+    count = 0
+    pos = 0
+    while count < n:
+        m = re.search(r'</p>', html[pos:], re.IGNORECASE)
+        if not m:
+            return html, ''
+        pos += m.end()
+        count += 1
+    return html[:pos], html[pos:]
 
 
 def _escape_attr(value: str) -> str:
