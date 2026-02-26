@@ -34,6 +34,10 @@
         <strong>Marketing Article</strong>
         <span>Trial upgrade email &middot; featured article &middot; upgrade CTA</span>
       </button>
+      <button type="button" class="template-card" id="tcard-fertility_digest" onclick="selectTemplate('fertility_digest', this)">
+        <strong>Fertility Digest</strong>
+        <span>5 curated article cards &middot; editorial intro &middot; Google Doc source</span>
+      </button>
     </div>
   </section>
 
@@ -60,9 +64,9 @@
         <p class="hint" style="margin-top:5px;">Doc must be shared as "Anyone with the link can view".</p>
       </div>
 
-      <div class="upload-or">— or —</div>
+      <div class="upload-or" id="wp-url-row-divider">— or —</div>
 
-      <div class="field-group" style="margin-bottom:0;">
+      <div class="field-group" id="wp-url-row" style="margin-bottom:0;">
         <label for="wp-url">ParentData article URL</label>
         <div style="display:flex;gap:8px;align-items:center;">
           <input type="url" id="wp-url" placeholder="https://parentdata.org/…" style="flex:1;" onkeydown="if(event.key==='Enter') handleWpUrl()">
@@ -337,6 +341,23 @@
     </div>
   </section>
 
+  <!-- ── Step 2 (Digest): Extracted Fields ───────────────────────────── -->
+  <section id="section-digest" class="card" hidden>
+    <h2>2. Review Digest Fields</h2>
+
+    <div class="field-group">
+      <label for="digest-title">Email Title</label>
+      <input type="text" id="digest-title" placeholder="e.g. Choosing a donor or surrogate">
+    </div>
+
+    <div class="field-group">
+      <label for="digest-intro">Intro Text</label>
+      <textarea id="digest-intro" rows="3" style="width:100%;" placeholder="Editorial intro paragraph…"></textarea>
+    </div>
+
+    <div id="digest-cards"></div>
+  </section>
+
   <!-- ── Generate ─────────────────────────────────────────────────────── -->
   <section id="section-generate" class="card" hidden>
     <h2>Generate Email</h2>
@@ -375,21 +396,30 @@ function selectTemplate(type, btn) {
 
   // Toggle upload area
   const isQA = type === 'qa';
+  // Digest uses standard upload area (DOCX / Google Doc only — no WP URL)
   document.getElementById('standard-upload-area').style.display = isQA ? 'none' : '';
   document.getElementById('qa-upload-area').style.display = isQA ? '' : 'none';
-  // Marketing uses the same standard upload area (single WP URL)
+  // Hide WP URL input for digest (digests come from editorial Google Docs)
+  const isDigest = type === 'fertility_digest';
+  const wpRow = document.getElementById('wp-url-row');
+  const wpDivider = document.getElementById('wp-url-row-divider');
+  if (wpRow) wpRow.style.display = isDigest ? 'none' : '';
+  if (wpDivider) wpDivider.style.display = isDigest ? 'none' : '';
 }
 
-function _showPostUploadSections(isQA, isFertility, isMarketing) {
+function _showPostUploadSections(isQA, isFertility, isMarketing, isDigest) {
+  // Digest has its own dedicated section; hide all other post-upload sections
+  const showStandardSections = !isQA && !isDigest;
+
   // Sections common to standard + fertility + marketing
   ['section-fields', 'section-image', 'section-body', 'section-generate'].forEach(id => {
-    document.getElementById(id).style.display = isQA ? 'none' : '';
-    if (!isQA) document.getElementById(id).removeAttribute('hidden');
+    document.getElementById(id).style.display = showStandardSections ? '' : 'none';
+    if (showStandardSections) document.getElementById(id).removeAttribute('hidden');
   });
 
   // Standard-only
-  document.getElementById('section-related').style.display = (isQA || isFertility || isMarketing) ? 'none' : '';
-  if (!isQA && !isFertility && !isMarketing) document.getElementById('section-related').removeAttribute('hidden');
+  document.getElementById('section-related').style.display = (isQA || isFertility || isMarketing || isDigest) ? 'none' : '';
+  if (!isQA && !isFertility && !isMarketing && !isDigest) document.getElementById('section-related').removeAttribute('hidden');
 
   // Fertility-only
   document.getElementById('section-bottomline').style.display = isFertility ? '' : 'none';
@@ -402,6 +432,10 @@ function _showPostUploadSections(isQA, isFertility, isMarketing) {
   });
   // section-intro is no longer shown post-upload; intro text lives in the upload form
   document.getElementById('section-intro').style.display = 'none';
+
+  // Digest-only
+  document.getElementById('section-digest').style.display = isDigest ? '' : 'none';
+  if (isDigest) document.getElementById('section-digest').removeAttribute('hidden');
 
   // Always show generate
   const genSection = document.getElementById('section-generate');
@@ -453,7 +487,10 @@ async function handleGoogleDocUrl() {
   const url = document.getElementById('gdoc-url').value.trim();
   if (!url) return;
   document.getElementById('file-name').textContent = '';
-  showStatus('upload-status', 'Downloading Google Doc and extracting fields… this may take 20–40 seconds.', 'info');
+  const digestMsg = currentTemplate === 'fertility_digest'
+    ? 'Downloading Google Doc, extracting article links, and fetching article images… this may take 30–60 seconds.'
+    : 'Downloading Google Doc and extracting fields… this may take 20–40 seconds.';
+  showStatus('upload-status', digestMsg, 'info');
   const formData = new FormData();
   formData.append('google_doc_url', url);
   formData.append('template_type', currentTemplate);
@@ -500,11 +537,14 @@ async function _submitUpload(formData) {
     const isQA = currentTemplate === 'qa';
     const isFertility = currentTemplate === 'fertility';
     const isMarketing = currentTemplate === 'marketing';
+    const isDigest = currentTemplate === 'fertility_digest';
 
     if (data.article_url) uploadedArticleUrl = data.article_url;
 
     if (isQA) {
       populateQAFields(data);
+    } else if (isDigest) {
+      populateDigestFields(data);
     } else {
       populateFields(data);
 
@@ -520,7 +560,7 @@ async function _submitUpload(formData) {
       }
     }
 
-    _showPostUploadSections(isQA, isFertility, isMarketing);
+    _showPostUploadSections(isQA, isFertility, isMarketing, isDigest);
     showStatus('upload-status', 'Fields extracted successfully.', 'success');
 
   } catch (err) {
@@ -565,6 +605,45 @@ function populateQAFields(data) {
     authorLine = `Today\u2019s answers come from ${authors.slice(0, -1).join(', ')} and ${authors[authors.length - 1]}.`;
   }
   document.getElementById('qa-author-line').value = authorLine;
+}
+
+function populateDigestFields(data) {
+  document.getElementById('digest-title').value = data.title || '';
+  document.getElementById('digest-intro').value = data.intro_text || '';
+  buildDigestCards(data.articles || []);
+}
+
+function buildDigestCards(articles) {
+  const container = document.getElementById('digest-cards');
+  container.innerHTML = '';
+  for (let i = 1; i <= 5; i++) {
+    const art = articles[i - 1] || {};
+    container.insertAdjacentHTML('beforeend', `
+      <div class="digest-card-slot" style="border-top:1px solid #e0e0e0;margin-top:20px;padding-top:16px;">
+        <h3>Article ${i}</h3>
+        <div class="field-group">
+          <label for="digest-art-title-${i}">Title</label>
+          <input type="text" id="digest-art-title-${i}" value="${_esc(art.title || '')}" placeholder="Article title">
+        </div>
+        <div class="field-group">
+          <label for="digest-art-url-${i}">URL</label>
+          <input type="url" id="digest-art-url-${i}" value="${_esc(art.url || '')}" placeholder="https://parentdata.org/…">
+        </div>
+        <div class="field-group">
+          <label for="digest-art-desc-${i}">Description</label>
+          <textarea id="digest-art-desc-${i}" rows="2" style="width:100%;">${_esc(art.description || '')}</textarea>
+        </div>
+        <div class="field-group image-url-field">
+          <label for="digest-art-img-${i}">Image URL${art.image_url ? ' <span style="font-weight:400;color:#2a7a2a;">(auto-fetched — replace with Iterable CDN URL if needed)</span>' : ' <span class="required">*</span>'}</label>
+          <input type="url" id="digest-art-img-${i}" value="${_esc(art.image_url || '')}" placeholder="https://library.iterable.com/…">
+        </div>
+      </div>
+    `);
+  }
+}
+
+function _esc(str) {
+  return str.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 // ── Related Articles ────────────────────────────────────────────────────────
@@ -662,10 +741,24 @@ async function generateEmail() {
   const isQA = currentTemplate === 'qa';
   const isFertility = currentTemplate === 'fertility';
   const isMarketing = currentTemplate === 'marketing';
+  const isDigest = currentTemplate === 'fertility_digest';
 
   let payload;
 
-  if (isQA) {
+  if (isDigest) {
+    payload = {
+      template_type: 'fertility_digest',
+      title: document.getElementById('digest-title').value,
+      intro_text: document.getElementById('digest-intro').value,
+      articles: [1,2,3,4,5].map(i => ({
+        title:       document.getElementById(`digest-art-title-${i}`).value,
+        url:         document.getElementById(`digest-art-url-${i}`).value,
+        description: document.getElementById(`digest-art-desc-${i}`).value,
+        image_url:   document.getElementById(`digest-art-img-${i}`).value,
+        image_alt:   document.getElementById(`digest-art-title-${i}`).value,
+      })),
+    };
+  } else if (isQA) {
     payload = {
       template_type: 'qa',
       include_update_banner: document.getElementById('cb-update-banner').checked,

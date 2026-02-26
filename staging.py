@@ -60,6 +60,14 @@ TEMPLATES = {
         'has_related_reading': False,
         'has_bottom_line': False,
     },
+    'fertility_digest': {
+        'label': 'Fertility Digest',
+        'file': BASE_DIR / 'email_templates' / 'template_fertilitydigest.html',
+        'has_welcome': False,
+        'has_author_block': False,
+        'has_related_reading': False,
+        'has_bottom_line': False,
+    },
 }
 
 
@@ -205,9 +213,34 @@ def upload():
 def _process_docx(tmp_path: str, template_type: str = 'standard') -> dict:
     """Parse the DOCX at tmp_path and return the full response dict."""
     from docx_parser import parse_docx
-    from claude_client import extract_fields
 
     parsed = parse_docx(tmp_path)
+
+    if template_type == 'fertility_digest':
+        from docx_parser import parse_digest_docx
+        from wp_fetcher import fetch_article_image
+
+        digest = parse_digest_docx(tmp_path)
+        articles = digest.get('articles', [])
+
+        # Fetch featured image for each article (fails gracefully per article)
+        for article in articles:
+            img = {'image_url': '', 'image_alt': ''}
+            if article.get('url'):
+                try:
+                    img = fetch_article_image(article['url'])
+                except Exception:
+                    pass
+            article['image_url'] = img.get('image_url', '')
+            article['image_alt'] = img.get('image_alt', '') or article.get('title', '')
+
+        return {
+            'title':      digest.get('title', ''),
+            'intro_text': digest.get('intro_text', ''),
+            'articles':   articles,
+        }
+
+    from claude_client import extract_fields
     fields = extract_fields(parsed['raw_text'], parsed['mammoth_html'], template_type)
 
     # Claude's output takes priority; fall back to parser-detected values

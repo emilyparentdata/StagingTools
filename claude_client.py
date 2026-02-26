@@ -363,6 +363,35 @@ Return ONLY the plain text intro. No quotes around it, no extra explanation."""
     return response.content[0].text.strip()
 
 
+def extract_digest_fields(raw_text: str, mammoth_html: str) -> dict:
+    """
+    Use Claude to extract fields from a fertility digest Google Doc.
+
+    Returns dict with keys: title, intro_text, articles (list of 5 dicts with
+    title, url, description).
+    """
+    prompt = f"""You are reading a Google Doc containing content for a ParentData fertility digest email.
+
+## RAW DOCUMENT TEXT:
+{raw_text}
+
+## YOUR TASK:
+Return a single JSON object with EXACTLY these keys:
+
+- "title": The short email headline (plain text, e.g. "Choosing a donor or surrogate")
+
+- "intro_text": The editorial intro paragraph below the headline (plain text, no HTML)
+
+- "articles": Array of exactly 5 objects, each with:
+  - "title": Article title (plain text)
+  - "url": Full article URL
+  - "description": Short teaser (1-2 sentences, plain text)
+
+IMPORTANT: Return ONLY the raw JSON object. No markdown fences, no explanation."""
+
+    return _call_claude(prompt)
+
+
 def _call_claude(prompt: str, max_tokens: int = 8000) -> dict:
     """Send a prompt to Claude and parse the JSON response."""
     response = client.messages.create(

@@ -62,6 +62,8 @@ def build_email_html(template_path: str, fields: dict, template_type: str = 'sta
         _inject_fertility(soup, fields)
     elif template_type == 'marketing':
         _inject_marketing(soup, fields)
+    elif template_type == 'fertility_digest':
+        _inject_fertility_digest(soup, fields)
     else:
         _update_title(soup, fields)
         _update_headline(soup, fields)
@@ -475,6 +477,69 @@ def _update_fertility_bottom_line(soup, fields):
     if ul:
         new_ul = BeautifulSoup(bottom_line_html, 'html.parser')
         ul.replace_with(new_ul)
+
+
+# ── Fertility Digest template injection ──────────────────────────────────────
+
+def _inject_fertility_digest(soup, fields):
+    """Inject all fields into the fertility digest template."""
+    _update_title(soup, fields)
+    _update_headline(soup, fields)
+    _update_digest_intro(soup, fields)
+    _update_digest_cards(soup, fields)
+    _update_copyright(soup)
+
+
+def _update_digest_intro(soup, fields):
+    """Update the editorial intro paragraph (p.sub-text inside td.top-box-header-m)."""
+    subtitle_td = soup.find('td', class_='top-box-header-m')
+    if not subtitle_td:
+        return
+    p = subtitle_td.find('p', class_='sub-text')
+    if p:
+        p.clear()
+        p.append(NavigableString(fields.get('intro_text', '')))
+
+
+def _update_digest_cards(soup, fields):
+    """
+    Update the 5 article card rows in the fertility digest template.
+
+    Each card row is identified by containing a div.read-more-btn.
+    Updates: image src/alt, article title (strong inside Lora p),
+    description (DM Sans p), and READ MORE button href.
+    """
+    articles = fields.get('articles', [])
+    # Each card is a nested-table structure: an outer <tr> contains both the
+    # article-card-img AND the read-more-btn (via inner tables).  Inner <tr>
+    # rows also contain the button but not the image, so filtering by both
+    # gives us exactly the 5 outer card rows.
+    card_rows = [tr for tr in soup.find_all('tr')
+                 if tr.find('div', class_='read-more-btn')
+                 and tr.find('img', class_='article-card-img')]
+    for tr, article in zip(card_rows, articles):
+        img = tr.find('img', class_='article-card-img')
+        if img:
+            img['src'] = article.get('image_url', '')
+            img['alt'] = _escape_attr(article.get('image_alt') or article.get('title', ''))
+
+        title_p = tr.find('p', style=re.compile(r'Lora', re.I))
+        if title_p:
+            strong = title_p.find('strong')
+            if strong:
+                strong.clear()
+                strong.append(NavigableString(article.get('title', '')))
+
+        desc_p = tr.find('p', style=re.compile(r'DM Sans', re.I))
+        if desc_p:
+            desc_p.clear()
+            desc_p.append(NavigableString(article.get('description', '')))
+
+        btn_div = tr.find('div', class_='read-more-btn')
+        if btn_div:
+            a = btn_div.find('a')
+            if a:
+                a['href'] = article.get('url', '#')
 
 
 # ── Q&A template injection ───────────────────────────────────────────────────

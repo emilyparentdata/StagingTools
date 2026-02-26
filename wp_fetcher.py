@@ -83,6 +83,71 @@ def fetch_wp_article(url: str) -> dict:
     return result
 
 
+def fetch_article_image(url: str) -> dict:
+    """
+    Fetch the featured image for a parentdata.org article URL.
+
+    Tries the WP REST API (requires auth) first, then falls back to scraping
+    the og:image meta tag from the public article page.
+
+    Returns {'image_url': str, 'image_alt': str}. Both empty strings on failure.
+    """
+    # Try WP REST API if credentials are available
+    auth = _wp_auth()
+    if auth:
+        try:
+            slug = _slug_from_url(url)
+            resp = _requests.get(
+                f'{WP_BASE}/posts',
+                params={
+                    'slug': slug,
+                    '_embed': 'wp:featuredmedia',
+                    'status': 'publish',
+                    '_fields': 'title,_embedded',
+                },
+                headers=HEADERS,
+                auth=auth,
+                timeout=15,
+            )
+            if resp.ok:
+                posts = resp.json()
+                if posts:
+                    post = posts[0]
+                    media = post.get('_embedded', {}).get('wp:featuredmedia', [])
+                    if media and isinstance(media[0], dict):
+                        m = media[0]
+                        img_url = m.get('source_url', '')
+                        img_alt = m.get('alt_text', '') or post.get('title', {}).get('rendered', '')
+                        if img_url:
+                            return {'image_url': img_url, 'image_alt': img_alt}
+        except Exception:
+            pass
+
+    # Fallback: scrape og:image from the public article page
+    try:
+        from bs4 import BeautifulSoup
+        browser_headers = {
+            'User-Agent': (
+                'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
+                'AppleWebKit/537.36 (KHTML, like Gecko) '
+                'Chrome/120.0.0.0 Safari/537.36'
+            )
+        }
+        resp = _requests.get(url, headers=browser_headers, timeout=15)
+        if resp.status_code == 200:
+            soup = BeautifulSoup(resp.text, 'html.parser')
+            og_img = soup.find('meta', property='og:image')
+            if og_img and og_img.get('content'):
+                img_url = og_img['content']
+                og_title = soup.find('meta', property='og:title')
+                img_alt = og_title.get('content', '') if og_title else ''
+                return {'image_url': img_url, 'image_alt': img_alt}
+    except Exception:
+        pass
+
+    return {'image_url': '', 'image_alt': ''}
+
+
 def _slug_from_url(url: str) -> str:
     """Extract the slug (last non-empty path segment) from a URL."""
     path = urlparse(url).path.strip('/')

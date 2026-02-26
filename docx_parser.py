@@ -123,6 +123,106 @@ def parse_docx(file_path: str) -> dict:
     }
 
 
+def parse_digest_docx(file_path: str) -> dict:
+    """
+    Parse a fertility digest DOCX (exported from Google Doc).
+
+    Expected document structure:
+      Subject line: <email title>
+      Preheader: <preheader>   (skipped)
+      <intro paragraph(s)>
+      <Article title>          (bold run)
+      <Article description>
+      BUTTON: Read more        (paragraph with hyperlink — any hyperlink text)
+      ... (repeat for up to 5 articles)
+
+    Returns:
+        {
+            title:      str,
+            intro_text: str,
+            articles:   [{title, url, description}] × up to 5
+        }
+    """
+    from docx.oxml.ns import qn as _qn
+
+    doc = Document(file_path)
+
+    email_title = ''
+    intro_lines = []
+    articles = []
+    current_article = None
+    seen_first_bold = False
+
+    for para in doc.paragraphs:
+        text = para.text.strip()
+        if not text:
+            continue
+
+        # "Subject line: …" → email title
+        m = re.match(r'^Subject\s+line\s*:\s*(.+)$', text, re.I)
+        if m:
+            email_title = m.group(1).strip()
+            continue
+
+        # "Preheader: …" → skip
+        if re.match(r'^Preheader\s*:', text, re.I):
+            continue
+
+        # "BUTTON: …" → CTA paragraph; extract hyperlink URL
+        if re.match(r'^BUTTON\s*:', text, re.I):
+            url = _get_hyperlink_url(para, doc, _qn)
+            if current_article is not None:
+                current_article['url'] = url
+                articles.append(current_article)
+                current_article = None
+            continue
+
+        # Bold paragraph → new article title
+        if _is_bold_para(para):
+            seen_first_bold = True
+            current_article = {'title': text, 'description': '', 'url': ''}
+            continue
+
+        # Plain text
+        if current_article is not None:
+            # First plain line after the title is the description
+            if not current_article['description']:
+                current_article['description'] = text
+        elif not seen_first_bold:
+            # We're before the first article — collect as intro
+            intro_lines.append(text)
+
+    # Flush any incomplete trailing article
+    if current_article is not None:
+        articles.append(current_article)
+
+    return {
+        'title':      email_title,
+        'intro_text': ' '.join(intro_lines),
+        'articles':   articles[:5],
+    }
+
+
+def _get_hyperlink_url(para, doc, qn) -> str:
+    """Return the URL of the first hyperlink in a paragraph, or ''."""
+    for hl in para._element.findall('.//' + qn('w:hyperlink')):
+        r_id = hl.get(qn('r:id'), '')
+        if r_id and r_id in doc.part.rels:
+            rel = doc.part.rels[r_id]
+            target = getattr(rel, '_target', None)
+            if target and target.startswith('http'):
+                return target
+    return ''
+
+
+def _is_bold_para(para) -> bool:
+    """Return True if the first non-empty run in the paragraph is bold."""
+    for run in para.runs:
+        if run.text.strip():
+            return bool(run.bold)
+    return False
+
+
 def _strip_staging_from_html(html: str, heading_text: str) -> str:
     """
     Remove the staging instructions section from mammoth HTML.
