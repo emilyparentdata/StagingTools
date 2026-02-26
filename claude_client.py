@@ -272,8 +272,8 @@ Convert the WordPress HTML to email-ready HTML. Return a single JSON object with
   - Preserve ALL hyperlinks with their original href values.
   - Convert WordPress entities (&nbsp;, &rsquo;, etc.) to their proper Unicode/HTML equivalents.
   - Remove WordPress-only elements like share buttons, author bio boxes, comment sections.
-  - Do NOT include the featured/hero image that appears at the very top of the article — it is placed in the template separately. Only omit that one image.
-  - Preserve ALL other inline images (charts, figures, illustrative images mid-article). Apply the inline image style from the Style Guide to each one.
+  - Do NOT include the featured/hero image. This is the first <figure> or <img> block at the very top of the article content — it is placed in the template separately. Omit only that one image.
+  - Preserve ALL other images that appear later in the article body (charts, diagrams, figures, illustrative images mid-article). Apply the inline image style from the Style Guide to each one.
 
 {bottom_line_instruction}
 
