@@ -1480,11 +1480,11 @@ def _inject_gmail_ios_css(html: str) -> str:
     inherit font-size/family through spans (observed in some app versions for
     both link spans and plain bold/italic formatting spans).
 
-    The rules target .tablebox only, so headings (Lora), subtitle lines, and
-    article-card title links (outside .tablebox) are not affected.
+    Also targets paid-digest .newsletter-card elements (h3, p, a) and
+    h2.section-title headings to lock their font-size/family.
     """
     gmail_css = (
-        "\n/* Gmail iOS: fix font-size/family on all .tablebox / .table-box spans */\n"
+        "\n/* Gmail iOS: fix font-size/family on body text + article card spans */\n"
         "u + #body .tablebox a,"
         "u + #body .table-box a{font-size:16px!important}\n"
         "u + #body .tablebox li,"
@@ -1495,6 +1495,35 @@ def _inject_gmail_ios_css(html: str) -> str:
         "u + #body .table-box li span{"
         "font-size:16px!important;"
         "font-family:'DM Sans',Arial,Helvetica,sans-serif!important"
+        "}\n"
+        "/* Gmail iOS: fix paid-digest article card fonts */\n"
+        "u + #body .newsletter-card h3{"
+        "font-size:20px!important;"
+        "font-family:'Lora',Georgia,serif!important"
+        "}\n"
+        "u + #body .newsletter-card p{"
+        "font-size:16px!important;"
+        "font-family:'DM Sans',Arial,Helvetica,sans-serif!important"
+        "}\n"
+        "u + #body .newsletter-card p span{"
+        "font-size:16px!important;"
+        "font-family:'DM Sans',Arial,Helvetica,sans-serif!important"
+        "}\n"
+        "u + #body .newsletter-card a{"
+        "font-size:13px!important;"
+        "font-family:'DM Sans',Arial,Helvetica,sans-serif!important"
+        "}\n"
+        "u + #body .newsletter-card a span{"
+        "font-size:13px!important;"
+        "font-family:'DM Sans',Arial,Helvetica,sans-serif!important"
+        "}\n"
+        "u + #body h2.section-title{"
+        "font-size:25px!important;"
+        "font-family:'Lora',Georgia,serif!important"
+        "}\n"
+        "u + #body p.sub-text{"
+        "font-size:18px!important;"
+        "font-family:'Lora',Georgia,serif!important"
         "}\n"
     )
     # Ensure <body> has id="body" so the selector can match
