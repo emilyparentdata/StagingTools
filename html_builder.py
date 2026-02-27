@@ -459,7 +459,7 @@ def _inject_teaser_body(soup, fields):
 
         # Italic intro — split on blank lines to support multiple paragraphs
         intro_style = (
-            "padding-bottom: 16px; margin: 0; "
+            "padding-bottom: 24px; margin: 0; "
             "font-family: 'DM Sans', Arial, Helvetica, sans-serif; "
             "font-weight: 400; font-style: italic; font-size: 16px; line-height: 24px; color: #000000;"
         )
@@ -467,6 +467,12 @@ def _inject_teaser_body(soup, fields):
         if not intro_paras and intro_text.strip():
             intro_paras = [intro_text.strip()]
         for para in intro_paras:
+            # Boldface "The Latest" wherever it appears in the intro
+            para = re.sub(
+                r'\bThe Latest\b',
+                r'<strong>The Latest</strong>',
+                para,
+            )
             new_p = BeautifulSoup(
                 f'<p style="{intro_style}">{para}</p>', 'html.parser'
             ).p

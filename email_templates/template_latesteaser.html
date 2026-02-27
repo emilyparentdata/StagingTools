@@ -1,0 +1,466 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="x-apple-disable-message-reformatting" />
+    <title>The Pregnancy Dataset We Can't Afford to Lose - ParentData</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=DM+Sans:ital,wght@0,400;0,500;0,700;0,800;1,300;1,700&display=swap" rel="stylesheet">
+    
+    <style type="text/css">
+/* Email Client Resets */
+body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+body { margin: 0; padding: 0; width: 100% !important; height: 100% !important; }
+
+/* Remove spacing on Outlook */
+table { border-collapse: collapse !important; }
+
+/* Prevent WebKit and Windows mobile changing default text sizes */
+body, table, td, p, a, li, blockquote { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+
+/* What it does: Remove spaces around the email design added by some email clients. */
+html, body { margin: 0 auto !important; padding: 0 !important; height: 100% !important; width: 100% !important; }
+
+/* What it does: Stops email clients resizing small text. */
+* { -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; }
+
+/* Center the email */
+.email-container { max-width: 600px; margin: 0 auto; }
+
+/* Force Outlook to provide a "view in browser" link */
+#outlook a { padding: 0; }
+
+/* Prevent Webkit and Windows mobile from changing default text sizes */
+.ExternalClass { width: 100%; }
+.ExternalClass, .ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td, .ExternalClass div {
+    line-height: 100%;
+}
+
+/* Force Hotmail to display normal line spacing */
+.ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td, .ExternalClass div {
+    line-height: 100%;
+}
+
+/* Remove spacing on images */
+a[x-apple-data-detectors] {
+    color: inherit !important;
+    text-decoration: none !important;
+    font-size: inherit !important;
+    font-family: inherit !important;
+    font-weight: inherit !important;
+    line-height: inherit !important;
+}
+
+.fade-out-medium { opacity: .5; }
+.fade-out-light { opacity: .2; }
+
+/* Responsive styles */
+@media only screen and (max-width: 480px) {
+    .email-container { width: 100% !important; min-width: 100% !important; }
+    .fluid { max-width: 100% !important; height: auto !important; margin-left: auto !important; margin-right: auto !important; }
+    .stack-column, .stack-column-center { 
+        display: block !important; 
+        width: 100% !important; 
+        max-width: 100% !important; 
+        direction: ltr !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+    .center-on-mobile { text-align: center !important; }
+    .welcome-message { font-size: 14px !important; line-height: 20px !important; padding: 8px 12px !important; }
+    .sub-text { font-size: 16px !important; }
+    .mobile-padding { padding: 12px 0px !important; }
+    .mobile-hide { display: none !important; }
+    .mobile-show { display: block !important; max-height: none !important; }
+    .headline-mobile { font-size: 32px !important; line-height: 36px !important; letter-spacing: -1.6px !important; padding: 0px 12px !important; }
+    .upgrade-headline-mobile { font-size: 30px !important; line-height: 36px !important; letter-spacing: -1.5px !important; }
+    .logo-mobile { width: 123px !important; height: 36px !important; }
+    .button-mobile { width: 250px !important; padding: 19px 27px !important; }
+    .subscribe-btn-mobile a { padding: 20px 24px !important; font-size: 20px !important; }
+    .continue-reading-btn a { padding: 16px !important; font-size: 18px !important; }
+    .box-pad { padding: 0px !important; }
+    
+    /* Fix horizontal scroll issues */
+    body { width: 100% !important; min-width: 100% !important; }
+    table[class=email-container] { width: 100% !important; }
+    img { max-width: 100% !important; height: auto !important; }
+    
+    /* Fix price image overflow */
+    .price-image { width: 100% !important; max-width: 300px !important; height: auto !important; }
+    
+    /* Force pricing table to stack */
+    .pricing-container { 
+        width: 100% !important; 
+        max-width: 100% !important;
+    }
+    
+    .pricing-row { 
+        display: block !important; 
+        width: 100% !important;
+    }
+    
+    .pricing-old, .pricing-new { 
+        display: block !important; 
+        width: 100% !important; 
+        max-width: 100% !important;
+        text-align: center !important;
+        padding: 0 20px !important;
+    }
+    
+    .pricing-old { 
+        padding-bottom: 16px !important; 
+    }
+    
+    /* Force nested table inside pricing-new to be 100% width */
+    .pricing-new table { 
+        width: 100% !important; 
+        max-width: 100% !important;
+    }
+    
+    .pricing-new td { 
+        display: block !important; 
+        width: 100% !important;
+    }
+    
+    .brush-bg { 
+        max-width: 280px !important; 
+        width: 100% !important; 
+        height: auto !important;
+    }
+    
+    .pricing-old p { 
+        font-size: 48px !important; 
+    }
+    
+    .pricing-new p { 
+        font-size: 48px !important; 
+    }
+}
+</style>
+    
+    <!--[if gte mso 9]>
+    <style type="text/css">
+        /* Outlook-specific styles */
+        table { border-collapse: collapse; }
+        .outlook-fallback { font-family: Arial, sans-serif !important; }
+    </style>
+    <![endif]-->
+</head>
+
+<body style="margin: 0; padding: 0; background-color: #f4f4f4; font-family: 'DM Sans', Arial, Helvetica, sans-serif;">
+<!-- Main Email Container --><center style="width: 100%; background-color: #f4f4f4;">
+<table align="center" border="0" cellpadding="0" cellspacing="0" class="email-container" role="presentation" style="max-width: 600px; margin: 0px auto; background-color: rgb(255, 255, 255);" width="100%"><!-- HEADER SECTION: Cream Background with Logo -->
+<tbody>
+<tr>
+<td style="background-color: rgb(255, 252, 238); padding: 20px 0px 24px; text-align: center;"><img alt="ParentData Logo" class="fluid" height="75" src="https://library.iterable.com/3244/21559/1bd174994cea45598cd4d7f4ad5b173d-prarentdata-logo.png" width="179">
+<table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+<tbody>
+<tr>
+<td style="text-align: center; position: relative;"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<!-- HERO SECTION: Headline and Subtitle -->
+<tr>
+<td style="background-color: rgb(255, 252, 238); padding: 0px 24px 0px;">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%"><!-- Headline -->
+<tbody>
+<tr>
+<td style="text-align: center; padding-bottom: 16px;">
+<h1 class="headline-mobile" style="margin: 0; font-family: 'Lora', Georgia, serif; font-weight: bold; font-size: 40px; line-height: 48px; letter-spacing: -2.4px; color: #000000; padding: 0px 54px;">Why Is Everyone Afraid of Sleep Training?</h1>
+</td>
+</tr>
+<!-- Subtitle -->
+<tr>
+<td style="text-align: center; padding-bottom: 24px;">
+<p class="sub-text" style="margin: 0; font-family: 'Lora', Georgia, serif; font-weight: 400; font-size: 18px; line-height: 32px; letter-spacing: -0.8px; color: #000000;">Addressing panic headlines and deciding on an approach</p>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<!-- WELCOME BANNER -->
+<tr>
+<td style="background-color: rgb(255, 255, 255); padding: 12px 24px 20px;">
+<table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+<tbody>
+<tr>
+<td align="center">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" style="max-width: 444px; width: 100%;">
+<tbody>
+<tr>
+<td class="mobile-padding" style="background-color: #a9ddf3; border-radius: 50px; padding: 12px 52px; text-align: center;">
+<p class="welcome-message" style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 300; font-style: italic; font-size: 18px; line-height: 32px; color: #000000;">Welcome to the Free Digest, ParentData's weekly newsletter for free subscribers.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<!-- ARTICLE BODY CONTENT -->
+<tr>
+<td style="background-color: rgb(255, 255, 255); padding: 24px 24px 20px;">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%"><!-- Author -->
+<tbody><!--
+<tr>
+<td style="padding-bottom: 24px;">
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: bold; font-style: italic; font-size: 16px; line-height: 24px; color: #000000;">Emily Oster</p>
+</td>
+</tr>--> <!-- First Bold Paragraph -->
+<tr>
+<td>
+<p style="padding-bottom: 24px; margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: bold; font-size: 16px; line-height: 24px; color: #000000;">INTRO TEXT HERE</p>
+<!-- Body Paragraph -->
+<p style="padding-bottom: 24px; margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; color: #000000;">Every few weeks, someone on Instagram shares a reel or post with me on the evils of <a href="https://parentdata.org/babies/do-i-really-have-to-sleep-train/">sleep training</a>. Many of these posts are quite alarming, and the messages I get range from confused to panicked. I have been asked, much more than once, a form of&nbsp;<em>Did I ruin my baby? </em></p>
+<p style="padding-bottom: 24px; margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; color: #000000;">There has been no significant new data on sleep training in the last several years. The data remains very reassuring. However, it feels like some of the noise is getting louder, so I wanted to take this time to talk about why we&rsquo;re hearing such scary things when the data doesn&rsquo;t support them.</p>
+<p style="padding-bottom: 24px; margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; color: #000000;">When I talk about &ldquo;sleep training,&rdquo; I mean any form of behavioral sleep intervention that involves some form of leaving the baby alone to fall asleep, with the possibility of some crying.&nbsp;</p>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<!-- TWO COLUMN SECTION: Text + Image (Desktop) / Stacked (Mobile) -->
+<tr>
+<td style="background-color: rgb(255, 255, 255); padding: 0px 24px 12px;">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+<tbody>
+<tr>
+<td class="stack-column box-pad" style="width: 50%; max-width: 273px; vertical-align: top; padding-right: 13px;" width="50%">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+<tbody>
+<tr>
+<td class="mobile-padding">
+<p style="margin: 0 0 24px 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; color: #000000;">This can include systems where the parents stay in the room, systems where they leave, and various forms where people leave and return. These approaches almost always include an organized bedtime routine. If you&rsquo;re looking for more concrete advice about what type of sleep training to use,&nbsp;<a href="https://parentdata.org/babies/is-there-a-best-method-for-sleep-training/">we&rsquo;ve got that here</a>.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td class="stack-column box-pad" style="width: 50%; max-width: 253px; vertical-align: top; padding-left: 13px;" width="50%">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+<tbody>
+<tr>
+<td style="padding-bottom: 24px;"><img alt="Person using mobile device" class="fluid" height="207" src="https://library.iterable.com/3244/21559/cdbaf9a8c4f649048e2f06549ea0686e-sleep_training_newsletter-2.png" style="width: 100%; max-width: 253px; height: auto; display: block; border-radius: 8px;" width="253"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<!-- SECTION HEADER -->
+<tr>
+<td style="background-color: rgb(255, 255, 255); padding: 0px 24px 8px;">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+<tbody>
+<tr>
+<td>
+<h2 style="margin-top: 12px; font-family: Lora, Georgia, serif; font-weight: bold; font-size: 24px; line-height: 40px; letter-spacing: -1.2px; color: rgb(0, 0, 0);">Data on sleep training</h2>
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; color: #000000;">My goal here is not to deliver a full discussion of the data on sleep training. If you want to read the full rundown with references, please <a href="https://parentdata.org/babies/sleep-training-is-it-bad/">find it here</a>&nbsp;&mdash; the studies I reference in this article are discussed in much more detail there. To summarize briefly, here&rsquo;s what we see from the data.</p>
+<ul>
+<li style="font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; color: rgb(0, 0, 0);">Sleep training increases infant sleep on average and reduces night wakings.</li>
+<li style="font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; color: rgb(0, 0, 0);">Sleep training reduces maternal depression and improves overall parental mental health.</li>
+<li style="font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; color: rgb(0, 0, 0);">Babies who are sleep trained do not show differences in mood or development either in the short term or in longer-term follow-up through early childhood.&nbsp;</li>
+</ul>
+<div>All of these findings are based on randomized controlled trials. To be clear, sleep training isn&rsquo;t a panacea, and it works better for some babies than others, but the overall effects are positive.&nbsp;<span class="fade-out-light">.</span></div>
+<div>
+<h2 style="margin-top: 12px; font-family: Lora, Georgia, serif; font-weight: bold; font-size: 24px; line-height: 40px; letter-spacing: -1.2px; color: rgb(0, 0, 0);">Why do I hear so many scary things?&nbsp;</h2>
+<p style="padding-bottom: 24px; margin: 0px; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; color: rgb(0, 0, 0);">If the evidence doesn&rsquo;t support these claims about risk, what are the scary claims in the media based on?</p>
+<p style="padding-bottom: 24px; margin: 0px; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; color: rgb(0, 0, 0);">Let&rsquo;s start with what they are&nbsp;<em>not</em> based on, which is any concrete evidence of harm from sleep training. These claims can make it seem like we have a litany of evidence showing that some kids are clearly damaged by sleep training. This is not true. As noted above, when we look at randomized studies of sleep training, we see (if anything) the opposite effect.&nbsp;</p>
+<p style="padding-bottom: 24px; margin: 0px; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; color: rgb(0, 0, 0);">Instead, the concerns are based on three theoretical or conceptual arguments.</p>
+<p style="padding-bottom: 24px; margin: 0px; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; color: rgb(0, 0, 0);">First, we know that when children are significantly neglected (in <a href="https://parentdata.org/babies/sleep-training-is-it-bad/">Romanian orphanages</a> or in parenting situations with abuse and neglect), this has long-term consequences for many things, including the children&rsquo;s ability to form attachments. The argument is that sleep training is like this neglect and maybe has similar consequences. The issue with this argument is one of degree; cry-it-out sleep training with a baby who is loved and cared for is just completely different from this overall neglect.&nbsp;</p>
+<p style="padding-bottom: 24px; margin: 0px; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; color: rgb(0, 0, 0);">Second, there is an argument based on cortisol. One study showed that when babies cry during sleep training, their cortisol is elevated, and this elevation continues for at least one night after they sleep better. The concern is that perhaps these babies are then always exposed to very high cortisol levels, which could, in principle, be bad.<span class="fade-out-medium"> However, we have no reason to think that the high levels of cortisol would continue and, perhaps more importantly, no way to compare them to overall cortisol levels in general. Moreover, if this were an issue, we would, again, expect to see it show up in some outcomes for children. Which it does not.</span></p>
+<p class="fade-out-medium" style="padding-bottom: 24px; margin: 0px; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; color: rgb(0, 0, 0);">Finally, there is the evolutionary argument. For the length of human history, families mostly slept together, and the idea of sleeping separately, <span class="fade-out-medium">including sleep training, is new to modern times. This is true! But, again, it&rsquo;s not clear what to take from this. We also have vaccines, sanitation, antibiotics, and an infant mortality rate well below 50%. Modern life differs in many ways and, as a result, may require different approaches.&nbsp;</span></p>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<!-- GRADIENT FADE SECTION -->
+<tr>
+<td style="background-color: #ffffff; padding: 0 24px 12px 24px; text-align: center;"><!-- Fade gradient image (you'll need to create/upload this) -->
+<table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation">
+<tbody>
+<tr>
+<td align="center" style="padding: 20px;">
+<div class="continue-reading-btn" style="display: inline-block; mso-hide: all; width: auto; border-radius: 15px; border: 2px solid #28A9E2;"><a href="https://parentdata.org/babies/why-is-everyone-afraid-of-sleep-training/" rel="noopener" style="display: block; padding: 16px 27px; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 800; font-size: 18px; line-height: 20px; color: #000000; text-decoration: none; text-transform: uppercase; white-space: nowrap;" target="_blank"> CONTINUE READING </a></div>
+</td>
+</tr>
+<!-- <tr>
+<td align="center" class="button-mobile" style="border-radius: 15px; border: 2px solid #28A9E2;"><a href="#" style="display: inline-block; padding: 16px 27px; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 800; font-size: 18px; line-height: 20px; color: #000000; text-decoration: none; text-transform: uppercase;"> CONTINUE READING </a></td>
+</tr> --></tbody>
+</table>
+</td>
+</tr>
+<!-- UPGRADE SECTION: Cream Background -->
+<tr>
+<td style="background-color: rgb(255, 252, 238); padding: 36px 24px;">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%"><!-- Unlock Headline -->
+<tbody>
+<tr>
+<td style="text-align: center; padding-bottom: 16px;">
+<h2 class="upgrade-headline-mobile" style="margin: 0; font-family: 'Lora', Georgia, serif; font-weight: bold; font-size: 30px; line-height: 36px; letter-spacing: -1.5px; color: #000000;">Unlock this article. Upgrade today.</h2>
+</td>
+</tr>
+<!-- Pricing Section -->
+<tr>
+<td style="text-align: center; padding-bottom: 12px;">
+<table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="width: 100%; max-width: 368px;">
+<tbody>
+<tr><!-- Promo Price with Brush Background -->
+<td style="vertical-align: middle; width: 100%;"><img alt="$69 per year discount" class="price-image fluid" src="https://library.iterable.com/3244/21559/9de573e61e4a4298b1c987a2251509ac-price.png" style="max-width: 100%; height: auto;" width="368"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<!-- Subscribe Button -->
+<tr>
+<td align="center" style="padding-bottom: 0px;">
+<table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="max-width: 288px; width: 100%;">
+<tbody>
+<tr>
+<td align="center" style="padding: 20px;">
+<div class="subscribe-btn-mobile" style="display: inline-block; mso-hide: all; width: auto; /* html/webmail styles */                border-radius: 15px; background-color: #fceea9; border: 2px solid #000000; box-shadow: 0px 4px 4px 0px rgba(0,0,0,0.25);"><a href="#" rel="noopener" style="display: block; /* link padding &amp; text styles */                                        padding: 20px 16px; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 800; font-size: 24px; line-height: 24px; color: #000000; text-decoration: none; text-transform: uppercase; text-align: center;" target="_blank"> SUBSCRIBE NOW </a></div>
+</td>
+</tr>
+<!-- <tr>
+<td align="center" style="border-radius: 15px; background-color: #fceea9; border: 2px solid #000000; box-shadow: 0px 4px 4px 0px rgba(0,0,0,0.25);"><a href="#" style="display: inline-block; padding: 21px 12px; width: 100%; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 800; font-size: 24px; line-height: 20px; color: #000000; text-decoration: none; text-transform: uppercase; text-align: center;"> SUBSCRIBE NOW </a></td>
+</tr> --></tbody>
+</table>
+</td>
+</tr>
+<!-- Cancel Anytime Text -->
+<tr>
+<td style="text-align: center;">
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 500; font-size: 16px; line-height: 20px; color: #000000;">cancel anytime</p>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<!-- MORE FROM PARENTDATA SECTION -->
+<tr>
+<td style="background-color: rgb(255, 255, 255); padding: 28px 24px;">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%"><!-- Section Title -->
+<tbody>
+<tr>
+<td style="text-align: center; padding-bottom: 24px;">
+<h2 style="margin: 0; font-family: 'Lora', Georgia, serif; font-weight: bold; font-size: 24px; line-height: 41px; letter-spacing: -1.2px; color: #000000;">More from ParentData</h2>
+</td>
+</tr>
+<!-- Article Card 1 -->
+<tr>
+<td style="padding-bottom: 32px;">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" style="height: 248px;" width="100%">
+<tbody>
+<tr style="height: 144px;">
+<td align="center" style="padding-bottom: 16px; height: 144px;"><a href="https://parentdata.org/babies/is-there-a-best-method-for-sleep-training/" style="display: block;"> <img alt="Are Classroom Screens Good for Learning?" class="fluid" height="144" src="https://library.iterable.com/3244/21559/46f0d2d6a4e4434f8cd0254a8a65e59b-sleep_train_20250205-1.png" style="width: 100%; max-width: 330px; height: auto; display: block; border-radius: 12px;" width="330"> </a></td>
+</tr>
+<tr style="height: 56px;">
+<td style="text-align: center; height: 56px;">
+<h3 class="h3-heading" style="margin: 0 0 8px 0; font-family: 'Lora', Georgia, serif; font-weight: bold; font-size: 18px; line-height: 24px; letter-spacing: -0.8px; color: #000000;"><a href="https://parentdata.org/babies/is-there-a-best-method-for-sleep-training/" style="color: #000000; text-decoration: none;">Is There a Best Method for Sleep Training?</a></h3>
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; color: #000000;">What about a best age?</p>
+</td>
+</tr>
+<tr style="height: 48px;">
+<td style="text-align: center; padding-top: 12px; height: 48px;">
+<div class="read-more-btn" style="display: inline-block; border-radius: 10px; background-color: #fceea9; border: 2px solid #000000;"><a href="https://parentdata.org/babies/is-there-a-best-method-for-sleep-training/" rel="noopener" style="display: block; padding: 12px 32px; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 800; font-size: 16px; line-height: 20px; color: #000000; text-decoration: none; text-transform: uppercase; text-align: center;" target="_blank">READ MORE</a></div>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<!-- Article Card 2 -->
+<tr>
+<td>
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+<tbody>
+<tr>
+<td align="center" style="padding-bottom: 16px;"><a href="https://parentdata.org/babies/should-you-also-sleep-train-for-naps/" style="display: block;"> <img alt="What Fall Vaccines Should We Get?" class="fluid" height="150" src="https://library.iterable.com/3244/21559/d1e53988aa5e4fd4855e3dedba9e28cf-sleeptrain_naps_03202025-copy-2.png" style="width: 100%; max-width: 330px; height: auto; display: block; border-radius: 12px;" width="330"> </a></td>
+</tr>
+<tr>
+<td style="text-align: center;">
+<h3 class="h3-heading" style="margin: 0 0 8px 0; font-family: 'Lora', Georgia, serif; font-weight: bold; font-size: 18px; line-height: 24px; letter-spacing: -0.8px; color: #000000;"><a href="https://parentdata.org/babies/should-you-also-sleep-train-for-naps/" style="color: #000000; text-decoration: none;">Should You Also Sleep Train for Naps?</a></h3>
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 18px; line-height: 24px; color: #000000;">Q&amp;A on bedtime routine</p>
+</td>
+</tr>
+<tr>
+<td style="text-align: center; padding-top: 12px;">
+<div class="read-more-btn" style="display: inline-block; border-radius: 10px; background-color: #fceea9; border: 2px solid #000000;"><a href="https://parentdata.org/babies/should-you-also-sleep-train-for-naps/" rel="noopener" style="display: block; padding: 12px 32px; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 800; font-size: 16px; line-height: 20px; color: #000000; text-decoration: none; text-transform: uppercase; text-align: center;" target="_blank">READ MORE</a></div>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<!-- FOOTER -->
+<tr>
+<td style="background-color: rgb(169, 221, 243); padding: 20px 40px 40px;">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%"><!-- Logo -->
+<tbody>
+<tr>
+<td style="text-align: left; padding-bottom: 24px;"><img alt="Footer Logo" class="fluid" src="https://library.iterable.com/3244/21559/0c234709315b456daeae8158543952a5-footerlogo.png" style="max-width: 120px; height: auto;" width="120"></td>
+</tr>
+<!-- Footer Text -->
+<tr>
+<td style="text-align: left; padding-bottom: 16px;">
+<p style="margin: 0 0 8px 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 14px; line-height: normal; color: #000000;">You are receiving this email because you opted in via our website.</p>
+</td>
+</tr>
+<!-- Change Preferences -->
+<tr>
+<td style="text-align: left; padding-bottom: 12px;">
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 800; font-size: 14px; line-height: normal; color: #000000;">Want to change how you receive these emails?</p>
+</td>
+</tr>
+<!-- Unsubscribe Link -->
+<tr>
+<td style="text-align: left; padding-bottom: 16px;">
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 14px; line-height: normal; color: #000000;"><a href="{{hostedUnsubscribeUrl}}" style="color: #000000; text-decoration: underline;">Unsubscribe from this list</a></p>
+</td>
+</tr>
+<!-- Manage Preferences -->
+<tr>
+<td style="text-align: left; padding-bottom: 20px;">
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 14px; line-height: normal; color: #000000;">To manage all of your newsletter preferences or cancel, please <a href="https://parentdata.org/account/" style="color: #000000; text-decoration: underline;">visit your account</a>.</p>
+</td>
+</tr>
+<!-- Copyright -->
+<tr>
+<td style="text-align: left;">
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 14px; line-height: normal; color: #000000;">Copyright &copy; 2025 ParentData, All rights reserved.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</center>
+</body>
+</html>
