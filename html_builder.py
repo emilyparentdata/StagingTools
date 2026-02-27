@@ -64,6 +64,10 @@ def build_email_html(template_path: str, fields: dict, template_type: str = 'sta
         _inject_marketing(soup, fields)
     elif template_type == 'fertility_digest':
         _inject_fertility_digest(soup, fields)
+    elif template_type == 'paid_digest':
+        _inject_paid_digest(soup, fields)
+    elif template_type == 'latest_teaser':
+        _inject_latest_teaser(soup, fields)
     else:
         _update_title(soup, fields)
         _update_headline(soup, fields)
@@ -319,6 +323,203 @@ def _update_copyright(soup):
             break
 
 
+# ── Latest Teaser template injection ─────────────────────────────────────────
+
+def _inject_latest_teaser(soup, fields):
+    """Inject all fields into the latest teaser template."""
+    _update_title(soup, fields)
+    _update_headline(soup, fields)
+    _update_subtitle(soup, fields)
+    _remove_welcome_banner(soup)
+    _inject_teaser_body(soup, fields)
+    _update_teaser_continue_link(soup, fields)
+    _update_related_articles(soup, fields.get('related_articles', []))
+    _update_copyright(soup)
+
+
+def _update_teaser_continue_link(soup, fields):
+    """Update the CONTINUE READING button href."""
+    btn = soup.find('div', class_='continue-reading-btn')
+    if btn:
+        a = btn.find('a')
+        if a:
+            a['href'] = fields.get('article_url', '#')
+
+
+def _inject_teaser_body(soup, fields):
+    """
+    Split article_body_html at fade_from and distribute content across
+    sections 4 (article body) and 6 (faded content).
+
+    Section 4: italic intro paragraph(s) + <hr> + all visible blocks,
+               with featured image inserted inline before the first <h2>
+    Section 5 (two-column row): removed entirely — image is now inline
+    Section 6: faded blocks (from fade_from paragraph onwards)
+    """
+    intro_text = fields.get('intro_text', '')
+    fade_from = (fields.get('fade_from') or '').strip().lower()
+    article_body_html = fields.get('article_body_html', '')
+    img_url = fields.get('featured_image_url', '')
+    img_alt = _escape_attr(fields.get('featured_image_alt', ''))
+
+    # Parse article body into top-level block elements
+    body_soup = BeautifulSoup(article_body_html, 'html.parser')
+    blocks = [el for el in body_soup.children
+              if hasattr(el, 'name') and el.name is not None]
+
+    # Find fade split index: first block whose text contains fade_from.
+    # Use only the first 60 chars of fade_from (a few words is enough to
+    # identify the paragraph) and normalize Unicode punctuation before
+    # comparing, since the doc and WP content may encode quotes differently.
+    fade_idx = len(blocks)
+    if fade_from:
+        fade_key = _norm_fade(fade_from[:60])
+        for i, el in enumerate(blocks):
+            if fade_key and fade_key in _norm_fade(el.get_text()):
+                fade_idx = i
+                break
+
+    visible_blocks = list(blocks[:fade_idx])
+    faded_blocks = blocks[fade_idx:]
+
+    # Strip image-only blocks that appear before the first <h2>.
+    # WordPress often places an editorial/secondary image near the top of the
+    # article body.  Since we inject the featured image before the H2 ourselves,
+    # any existing pre-H2 image would create a duplicate.  Graphs and figures
+    # that appear AFTER the H2 are left untouched.
+    clean_visible = []
+    h2_found = False
+    for el in visible_blocks:
+        if el.name and el.name.lower() == 'h2':
+            h2_found = True
+        if not h2_found and _is_image_only_block(el):
+            continue
+        clean_visible.append(el)
+    visible_blocks = clean_visible
+
+    # Insert featured image before the first <h2> in visible blocks; append if none
+    if img_url:
+        img_el = BeautifulSoup(
+            f'<div style="position: relative; display: inline-block; width: 100%; margin-bottom: 24px;">'
+            f'<img alt="{img_alt}" class="fluid"'
+            f' src="{img_url}"'
+            f' style="width: 100%; max-width: 552px; height: auto; display: block; border-radius: 16px;">'
+            f'</div>',
+            'html.parser',
+        ).find('div')
+        img_inserted = False
+        for i, el in enumerate(visible_blocks):
+            if el.name and el.name.lower() == 'h2':
+                visible_blocks.insert(i, img_el)
+                img_inserted = True
+                break
+        if not img_inserted:
+            visible_blocks.append(img_el)
+
+    # ── Capture DOM targets before any manipulation ───────────────────────────
+    intro_p_tmpl = soup.find(
+        lambda tag: tag.name == 'p' and 'INTRO TEXT HERE' in (tag.get_text() or '')
+    )
+    section4_td = intro_p_tmpl.find_parent('td') if intro_p_tmpl else None
+
+    two_col_tr = None
+    for tr in soup.find_all('tr'):
+        stack_tds = [td for td in tr.find_all('td', recursive=False)
+                     if 'stack-column' in (td.get('class') or [])]
+        if len(stack_tds) >= 2:
+            two_col_tr = tr
+            break
+
+    two_col_outer_tr = _outer_email_tr(two_col_tr, soup) if two_col_tr else None
+
+    # Find section 6 content td (navigating inner table structure)
+    section6_content_td = None
+    if two_col_outer_tr:
+        main_table = soup.find('table', class_='email-container')
+        if main_table:
+            main_tbody = main_table.find('tbody')
+            main_rows = list(main_tbody.find_all('tr', recursive=False))
+            if two_col_outer_tr in main_rows:
+                idx = main_rows.index(two_col_outer_tr)
+                if idx + 1 < len(main_rows):
+                    section6_outer_tr = main_rows[idx + 1]
+                    outer_td = section6_outer_tr.find('td')
+                    if outer_td:
+                        table = outer_td.find('table')
+                        if table:
+                            tbody = table.find('tbody')
+                            if tbody:
+                                inner_tr = tbody.find('tr')
+                                if inner_tr:
+                                    section6_content_td = inner_tr.find('td')
+
+    # ── Section 4: italic intro + hr + all visible blocks ────────────────────
+    if section4_td:
+        section4_td.clear()
+
+        # Italic intro — split on blank lines to support multiple paragraphs
+        intro_style = (
+            "padding-bottom: 16px; margin: 0; "
+            "font-family: 'DM Sans', Arial, Helvetica, sans-serif; "
+            "font-weight: 400; font-style: italic; font-size: 16px; line-height: 24px; color: #000000;"
+        )
+        intro_paras = [p.strip() for p in intro_text.split('\n\n') if p.strip()]
+        if not intro_paras and intro_text.strip():
+            intro_paras = [intro_text.strip()]
+        for para in intro_paras:
+            new_p = BeautifulSoup(
+                f'<p style="{intro_style}">{para}</p>', 'html.parser'
+            ).p
+            section4_td.append(new_p)
+
+        # Horizontal rule separating intro from article body
+        section4_td.append(BeautifulSoup(
+            '<hr style="border: none; border-top: 1px solid #e0e0e0; margin: 8px 0 24px 0;">',
+            'html.parser',
+        ).hr)
+
+        # All visible blocks (image already spliced in before first h2)
+        for el in visible_blocks:
+            section4_td.append(el)
+
+    # ── Section 6: single faded paragraph, medium → light ────────────────────
+    # Only the indicated paragraph is shown — everything after it is discarded.
+    # Both halves live inside ONE element so there is no paragraph gap.
+    # First half is fade-out-medium (opacity 0.5); second half is fade-out-light
+    # (opacity 0.2) so the text grows lighter toward the bottom of the visible
+    # content, reinforcing the "more below the paywall" effect.
+    if section6_content_td:
+        section6_content_td.clear()
+        if faded_blocks:
+            fade_el = faded_blocks[0]
+            tag = fade_el.name or 'p'
+            base_style = (fade_el.get('style') or '').rstrip(';')
+            base_classes = [c for c in (fade_el.get('class') or [])
+                            if c not in ('fade-out-light', 'fade-out-medium')]
+
+            first_html, second_html = _split_fade_paragraph(fade_el)
+
+            parts = []
+            if first_html:
+                parts.append(f'<span style="opacity:0.5;">{first_html}</span>')
+            if second_html:
+                parts.append(f'<span style="opacity:0.2;">{second_html}</span>')
+
+            if parts:
+                cls_attr = (' class="' + ' '.join(base_classes) + '"') if base_classes else ''
+                sty = (base_style + ';') if base_style else ''
+                el = BeautifulSoup(
+                    f'<{tag}{cls_attr} style="{sty}">{"".join(parts)}</{tag}>',
+                    'html.parser',
+                ).find(tag)
+                if el:
+                    section6_content_td.append(el)
+
+    # ── Remove section 5 (two-column row) — image is now inline in section 4 ─
+    if two_col_outer_tr:
+        two_col_outer_tr.decompose()
+
+
 # ── Fertility template injection ──────────────────────────────────────────────
 
 def _inject_fertility(soup, fields):
@@ -540,6 +741,75 @@ def _update_digest_cards(soup, fields):
             a = btn_div.find('a')
             if a:
                 a['href'] = article.get('url', '#')
+
+
+# ── Paid Digest template injection ────────────────────────────────────────────
+
+def _inject_paid_digest(soup, fields):
+    """Inject section names and article data into the paid digest template."""
+    _update_paid_digest_cards(soup, fields)
+    _update_copyright(soup)
+
+
+def _update_paid_digest_cards(soup, fields):
+    """
+    Update the 5 section headings and 6 article cards in the paid digest template.
+
+    The template has h2.section-title elements (5) and table.newsletter-card
+    elements (6) in DOM order. Sections map 1:1 to headings. Articles are
+    assigned to cards in flattened order across all sections.
+    """
+    sections = fields.get('sections', [])
+
+    # Update section headings (h2.section-title)
+    section_headings = soup.find_all('h2', class_='section-title')
+    for i, h2 in enumerate(section_headings):
+        if i < len(sections):
+            h2.clear()
+            h2.append(NavigableString(sections[i].get('name', '')))
+
+    # Flatten all articles across sections into a single ordered list
+    all_articles = []
+    for section in sections:
+        for article in section.get('articles', []):
+            all_articles.append(article)
+
+    # Update article cards (table.newsletter-card)
+    card_tables = soup.find_all('table', class_='newsletter-card')
+    for i, card in enumerate(card_tables):
+        if i >= len(all_articles):
+            break
+        article = all_articles[i]
+
+        title = article.get('title', '')
+        subtitle = article.get('subtitle', '')
+        url = article.get('url', '#')
+        image_url = article.get('image_url', '')
+        image_alt = _escape_attr(article.get('image_alt', '') or title)
+
+        # Update all img tags in the card (mobile + desktop variants)
+        for img in card.find_all('img'):
+            if image_url:
+                img['src'] = image_url
+            img['alt'] = image_alt
+
+        # Update h3 title
+        h3 = card.find('h3')
+        if h3:
+            h3.clear()
+            h3.append(NavigableString(title))
+
+        # Update subtitle <p> (the p after h3 with DM Sans font)
+        subtitle_p = card.find('p', style=re.compile(r'DM Sans', re.I))
+        if subtitle_p:
+            subtitle_p.clear()
+            subtitle_p.append(NavigableString(subtitle))
+
+        # Update Read more link href
+        for a in card.find_all('a'):
+            if 'read more' in (a.get_text() or '').lower().strip():
+                a['href'] = url
+                break
 
 
 # ── Q&A template injection ───────────────────────────────────────────────────
@@ -900,6 +1170,80 @@ def _split_after_nth_paragraph(html: str, n: int = 2):
     return html[:pos], html[pos:]
 
 
+def _is_image_only_block(el) -> bool:
+    """Return True if el is a block element containing an image but no visible text."""
+    if not hasattr(el, 'name') or not el.name:
+        return False
+    return bool(el.find('img')) and not el.get_text(strip=True)
+
+
+def _norm_fade(s: str) -> str:
+    """
+    Lowercase and normalise Unicode punctuation so fade_from matching is
+    robust to apostrophe/quote encoding differences between the Google Doc
+    (which may produce \ufffd replacement chars) and the WP article body.
+    """
+    return (
+        s.lower()
+        .replace('\u2018', "'").replace('\u2019', "'")   # curly single quotes
+        .replace('\u201c', '"').replace('\u201d', '"')   # curly double quotes
+        .replace('\u2013', '-').replace('\u2014', '-')   # en/em dashes
+        .replace('\ufffd', "'")                          # replacement char
+    )
+
+
+def _text_pos_to_html_pos(html: str, text_target: int) -> int:
+    """
+    Map a plain-text character position to the corresponding index in an HTML
+    string.  Tags are zero-width; HTML entities count as one character.
+    """
+    text_count = 0
+    i = 0
+    while i < len(html) and text_count < text_target:
+        if html[i] == '<':
+            close = html.find('>', i)
+            i = close + 1 if close >= 0 else len(html)
+        elif html[i] == '&':
+            semi = html.find(';', i)
+            i = semi + 1 if semi >= 0 else i + 1
+            text_count += 1
+        else:
+            text_count += 1
+            i += 1
+    return i
+
+
+def _split_fade_paragraph(el):
+    """
+    Split a BeautifulSoup block element at the sentence boundary closest to
+    50 % of its plain text, for the light → medium fade effect.
+
+    Returns (first_half_inner_html, second_half_inner_html).
+    Falls back to the nearest word boundary if no sentence boundary exists.
+    """
+    inner_html = el.decode_contents()
+    plain_text = el.get_text()
+    if not plain_text.strip():
+        return inner_html, ''
+
+    mid = len(plain_text) // 2
+
+    # Prefer sentence-ending punctuation followed by whitespace or end-of-string
+    sentence_ends = [m.end() for m in re.finditer(r'[.!?](?:\s|$)', plain_text)]
+    if sentence_ends:
+        split_pos = min(sentence_ends, key=lambda p: abs(p - mid))
+    else:
+        # Fall back to word boundary (end of a whitespace run)
+        word_ends = [m.end() for m in re.finditer(r'\S+\s*', plain_text)]
+        if word_ends:
+            split_pos = min(word_ends, key=lambda p: abs(p - mid))
+        else:
+            split_pos = mid
+
+    html_pos = _text_pos_to_html_pos(inner_html, split_pos)
+    return inner_html[:html_pos].rstrip(), inner_html[html_pos:].lstrip()
+
+
 def _escape_attr(value: str) -> str:
     """Escape a string for safe use in an HTML attribute value."""
     return value.replace('&', '&amp;').replace('"', '&quot;').replace('<', '&lt;').replace('>', '&gt;')
@@ -931,6 +1275,15 @@ def _replace_graph_placeholders(html: str, inline_graphs: list) -> str:
         )
 
     return re.sub(r'\[\[GRAPH_(\d+)\]\]', replace_graph, html)
+
+
+# ── Letter-spacing fix ────────────────────────────────────────────────────────
+
+def fix_letter_spacing(html: str) -> str:
+    """Remove letter-spacing: -0.8px from all inline styles and CSS rules."""
+    # Inline styles: " letter-spacing: -0.8px;" or "letter-spacing:-0.8px;"
+    html = re.sub(r'\s*letter-spacing\s*:\s*-0\.8px\s*;?', '', html)
+    return html
 
 
 # ── Email compatibility fixes (mirrors email-checker applyFixes engine) ───────

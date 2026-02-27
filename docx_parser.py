@@ -203,6 +203,78 @@ def parse_digest_docx(file_path: str) -> dict:
     }
 
 
+def parse_paid_digest_docx(file_path: str) -> dict:
+    """
+    Parse a paid digest DOCX (exported from Google Doc).
+
+    Supports two formats:
+
+    Format A — section name and URL on the same line:
+      Popular this week 1: https://parentdata.org/…
+      Popular this week 2: https://parentdata.org/…
+      Pregnancy: https://parentdata.org/…
+
+    Format B — section name and URL on separate lines:
+      Popular this week
+      https://parentdata.org/…
+      Pregnancy
+      https://parentdata.org/…
+
+    Headings like "Popular this week 1" and "Popular this week 2" are
+    normalised into a single section with 2 articles.
+
+    Returns:
+        {
+            sections: [
+                {name: str, articles: [{url: str}]},
+                ...
+            ]
+        }
+    """
+    doc = Document(file_path)
+
+    sections = []
+    url_re = re.compile(r'https?://(?:www\.)?parentdata\.org/\S+', re.I)
+    # Strip trailing numbers from headings: "Popular this week 1" → "Popular this week"
+    trailing_num_re = re.compile(r'\s+\d+\s*$')
+
+    for para in doc.paragraphs:
+        text = para.text.strip()
+        if not text:
+            continue
+
+        url_match = url_re.search(text)
+
+        if url_match:
+            url = url_match.group(0).rstrip('.,;:')
+
+            # Check if there's section name text before the URL on the same line
+            prefix = text[:url_match.start()].strip().rstrip(':').strip()
+            if prefix:
+                # "Section name 1: https://…" — extract both section name and URL
+                name = trailing_num_re.sub('', prefix).strip()
+                if name:
+                    if not sections or sections[-1]['name'].lower() != name.lower():
+                        sections.append({'name': name, 'articles': []})
+
+            # Append the URL to the current section
+            if sections:
+                sections[-1]['articles'].append({'url': url})
+        else:
+            # Pure text line — treat as a section heading
+            name = trailing_num_re.sub('', text).strip()
+            if not name:
+                continue
+
+            # Merge into existing section if name matches the last one
+            if sections and sections[-1]['name'].lower() == name.lower():
+                continue
+
+            sections.append({'name': name, 'articles': []})
+
+    return {'sections': sections}
+
+
 def _get_hyperlink_url(para, doc, qn) -> str:
     """Return the URL of the first hyperlink in a paragraph, or ''."""
     for hl in para._element.findall('.//' + qn('w:hyperlink')):
@@ -266,6 +338,8 @@ def _parse_staging_instructions(paragraphs) -> dict:
         'featured_image_alt': '',
         'related_articles': [],
         'graphs': [],
+        'wp_url': '',
+        'fade_from': '',
     }
 
     # Collect non-empty lines, skipping the heading line itself
@@ -283,8 +357,15 @@ def _parse_staging_instructions(paragraphs) -> dict:
     while i < len(lines):
         line = lines[i]
 
+        # ── Top-level labeled fields (detected anywhere in staging section) ─
+        if re.match(r'wp\s*(url)?\s*:', line, re.I):
+            result['wp_url'] = re.sub(r'^[^:]+:\s*', '', line).strip()
+
+        elif re.match(r'fade\s*from\s*:', line, re.I):
+            result['fade_from'] = re.sub(r'^[^:]+:\s*', '', line).strip()
+
         # ── Section header detection ──────────────────────────────────────
-        if re.match(r'featured\s+image\s*:?\s*$', line, re.I):
+        elif re.match(r'featured\s+image\s*:?\s*$', line, re.I):
             if current_type:
                 sections.append((current_type, dict(current_data)))
             current_type = 'featured'

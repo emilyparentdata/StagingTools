@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email Checker — ParentData</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    .checker-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 12px;
+    }
+    .checker-col { display: flex; flex-direction: column; }
+    .checker-col label { font-weight: 600; margin-bottom: 6px; }
+    .checker-col textarea {
+      flex: 1;
+      min-height: 420px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      resize: vertical;
+      tab-size: 2;
+    }
+    .checker-col textarea:focus { border-color: #3b82f6; outline: none; box-shadow: 0 0 0 2px rgba(59,130,246,0.15); }
+    .checker-actions { display: flex; gap: 10px; align-items: center; margin-top: 14px; }
+    .fix-summary { margin-top: 10px; font-size: 14px; color: #555; }
+    .fix-summary span { font-weight: 600; color: #333; }
+    @media (max-width: 900px) {
+      .checker-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Email Checker</h1>
+  <p style="margin:4px 0 0;font-size:14px;color:#666;"><a href="/" style="color:#3b82f6;text-decoration:none;">Back to Staging Tool</a></p>
+</header>
+
+<main>
+  <section class="card">
+    <h2>Paste &amp; Fix Email HTML</h2>
+    <p class="hint">Paste a one-off email's HTML on the left, click Fix, and copy the cleaned version from the right.</p>
+
+    <div class="checker-grid">
+      <div class="checker-col">
+        <label for="input-html">Input HTML</label>
+        <textarea id="input-html" placeholder="Paste your email HTML here..."></textarea>
+      </div>
+      <div class="checker-col">
+        <label for="output-html">Fixed HTML</label>
+        <textarea id="output-html" readonly placeholder="Fixed HTML will appear here after you click Fix..."></textarea>
+      </div>
+    </div>
+
+    <div class="checker-actions">
+      <button type="button" class="btn-primary" onclick="runFix()">Fix Email HTML</button>
+      <button type="button" class="btn-secondary" onclick="copyOutput()">Copy Fixed HTML</button>
+      <button type="button" class="btn-secondary" onclick="previewOutput()">Preview</button>
+      <div id="checker-status" class="status-bar" hidden></div>
+    </div>
+
+    <div id="fix-summary" class="fix-summary" hidden></div>
+  </section>
+</main>
+
+<script>
+async function runFix() {
+  const input = document.getElementById('input-html').value;
+  if (!input.trim()) {
+    showStatus('Please paste some HTML first.', 'error');
+    return;
+  }
+
+  showStatus('Applying fixes...', 'info');
+  document.getElementById('fix-summary').hidden = true;
+
+  try {
+    const resp = await fetch('/check-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ html: input }),
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({ error: resp.statusText }));
+      showStatus('Error: ' + (err.error || resp.statusText), 'error');
+      return;
+    }
+
+    const fixed = await resp.text();
+    document.getElementById('output-html').value = fixed;
+
+    // Show summary of what changed
+    const summary = describeFixes(input, fixed);
+    const summaryEl = document.getElementById('fix-summary');
+    summaryEl.innerHTML = summary;
+    summaryEl.hidden = false;
+
+    showStatus('Fixes applied.', 'success');
+  } catch (err) {
+    showStatus('Network error: ' + err.message, 'error');
+  }
+}
+
+function describeFixes(before, after) {
+  const counts = [];
+
+  const countTag = (html, tag) => (html.match(new RegExp('<' + tag + '[\\s>]', 'gi')) || []).length;
+
+  const strongBefore = countTag(before, 'strong') + countTag(before, 'b');
+  if (strongBefore > 0) counts.push('<span>' + strongBefore + '</span> bold tags converted');
+
+  const emBefore = countTag(before, 'em') + countTag(before, 'i');
+  if (emBefore > 0) counts.push('<span>' + emBefore + '</span> italic tags converted');
+
+  const uBefore = countTag(before, 'u');
+  if (uBefore > 0) counts.push('<span>' + uBefore + '</span> underline tags converted');
+
+  const lsBefore = (before.match(/letter-spacing\s*:\s*-0\.8px/gi) || []).length;
+  if (lsBefore > 0) counts.push('<span>' + lsBefore + '</span> letter-spacing declarations removed');
+
+  const linksBefore = (before.match(/<a\b[^>]*href/gi) || []).length;
+  if (linksBefore > 0) counts.push('<span>' + linksBefore + '</span> links processed for Gmail iOS');
+
+  const gmailCss = after.includes('u + #body');
+  if (gmailCss) counts.push('Gmail iOS CSS injected');
+
+  if (counts.length === 0) return 'No changes needed — HTML was already clean.';
+  return 'Fixes applied: ' + counts.join(', ') + '.';
+}
+
+async function copyOutput() {
+  const output = document.getElementById('output-html').value;
+  if (!output) {
+    showStatus('Nothing to copy — run Fix first.', 'error');
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(output);
+    showStatus('Copied to clipboard.', 'success');
+  } catch (err) {
+    showStatus('Copy failed: ' + err.message, 'error');
+  }
+}
+
+function previewOutput() {
+  const output = document.getElementById('output-html').value;
+  if (!output) {
+    showStatus('Nothing to preview — run Fix first.', 'error');
+    return;
+  }
+  const blob = new Blob([output], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  window.open(url, '_blank');
+}
+
+function showStatus(message, type) {
+  const el = document.getElementById('checker-status');
+  el.textContent = message;
+  el.className = 'status-bar status-' + type;
+  el.removeAttribute('hidden');
+}
+</script>
+
+</body>
+</html>

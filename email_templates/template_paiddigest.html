@@ -1,0 +1,481 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="x-apple-disable-message-reformatting" />
+    <title>Paid Digest Template</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=DM+Sans:ital,wght@0,400;0,500;0,700;0,800;1,300;1,700&display=swap" rel="stylesheet">
+    
+    <style type="text/css">
+/* Email Client Resets */
+body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+body { margin: 0; padding: 0; width: 100% !important; height: 100% !important; }
+
+/* Remove spacing on Outlook */
+table { border-collapse: collapse !important; }
+
+/* Prevent WebKit and Windows mobile changing default text sizes */
+body, table, td, p, a, li, blockquote { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+
+/* What it does: Remove spaces around the email design added by some email clients. */
+html, body { margin: 0 auto !important; padding: 0 !important; height: 100% !important; width: 100% !important; }
+
+/* What it does: Stops email clients resizing small text. */
+* { -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; }
+
+/* Center the email */
+.email-container { max-width: 600px; margin: 0 auto; }
+
+/* Force Outlook to provide a "view in browser" link */
+#outlook a { padding: 0; }
+
+/* Prevent Webkit and Windows mobile from changing default text sizes */
+.ExternalClass { width: 100%; }
+.ExternalClass, .ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td, .ExternalClass div {
+    line-height: 100%;
+}
+
+/* Force Hotmail to display normal line spacing */
+.ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td, .ExternalClass div {
+    line-height: 100%;
+}
+
+/* Remove spacing on images */
+a[x-apple-data-detectors] {
+    color: inherit !important;
+    text-decoration: none !important;
+    font-size: inherit !important;
+    font-family: inherit !important;
+    font-weight: inherit !important;
+    line-height: inherit !important;
+}
+
+
+
+li a{color:#054F8B !important;text-decoration:underline!important; }
+.apple-link p a{color:#054F8B !important;text-decoration:underline!important; }
+  .table-box,  .table-box p{
+  		font-size: 16px !important;
+        line-height: 22px !important;
+	}
+   .table-box a, .table-box li a {
+    color: #054F8B !important;
+    text-decoration: underline !important;
+    font-size: 16px !important;
+  }
+  
+  
+.fade-out-medium { opacity: .5; }
+.fade-out-light { opacity: .2; }
+
+/* Responsive styles */
+@media only screen and (max-width: 480px) {
+    .email-container { width: 100% !important; min-width: 100% !important; }
+    .fluid { max-width: 100% !important; height: auto !important; margin-left: auto !important; margin-right: auto !important; }
+    .stack-column, .stack-column-center { 
+        display: block !important; 
+        width: 100% !important; 
+        max-width: 100% !important; 
+        direction: ltr !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+    .center-on-mobile { text-align: center !important; }
+    .welcome-message { font-size: 14px !important; line-height: 20px !important; padding: 8px 12px !important; }
+    .sub-text { font-size: 16px !important; }
+    .mobile-padding { padding: 12px 0px !important; }
+    .mobile-hide { display: none !important; }
+    .mobile-show { display: block !important; max-height: none !important; }
+    .headline-mobile { font-size: 32px !important; line-height: 36px !important; letter-spacing: -1.6px !important; padding: 0px 12px !important; }
+    .upgrade-headline-mobile { font-size: 30px !important; line-height: 36px !important; letter-spacing: -1.5px !important; }
+    .logo-mobile { width: 123px !important; height: 36px !important; }
+    .button-mobile { width: 250px !important; padding: 19px 27px !important; }
+    .subscribe-btn-mobile a { padding: 20px 24px !important; font-size: 20px !important; }
+    .continue-reading-btn a { padding: 16px !important; font-size: 18px !important; }
+    .box-pad { padding: 0px !important; }
+    
+    /* Fix horizontal scroll issues */
+    body { width: 100% !important; min-width: 100% !important; }
+    table[class=email-container] { width: 100% !important; }
+    img { max-width: 100% !important; height: auto !important; }
+    
+    /* Fix price image overflow */
+    .price-image { width: 100% !important; max-width: 300px !important; height: auto !important; }
+    
+    /* Force pricing table to stack */
+    .pricing-container { 
+        width: 100% !important; 
+        max-width: 100% !important;
+    }
+    
+    .pricing-row { 
+        display: block !important; 
+        width: 100% !important;
+    }
+    
+    .pricing-old, .pricing-new { 
+        display: block !important; 
+        width: 100% !important; 
+        max-width: 100% !important;
+        text-align: center !important;
+        padding: 0 20px !important;
+    }
+    
+    .pricing-old { 
+        padding-bottom: 16px !important; 
+    }
+    
+    /* Force nested table inside pricing-new to be 100% width */
+    .pricing-new table { 
+        width: 100% !important; 
+        max-width: 100% !important;
+    }
+    
+    .pricing-new td { 
+        display: block !important; 
+        width: 100% !important;
+    }
+    
+    .brush-bg { 
+        max-width: 280px !important; 
+        width: 100% !important; 
+        height: auto !important;
+    }
+    
+    .pricing-old p {
+        font-size: 48px !important;
+    }
+
+    .pricing-new p {
+        font-size: 48px !important;
+    }
+}
+
+/* Digest Section Styles */
+.section-title {
+    font-family: 'Lora', Georgia, serif !important;
+    font-size: 25px !important;
+    color: #282828 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-weight: 800 !important;
+}
+
+.newsletter-card h3 {
+    font-family: 'Lora', Georgia, serif !important;
+    font-size: 18px !important;
+    color: #282828 !important;
+    margin: 0 0 6px 0 !important;
+    font-weight: 400 !important;
+}
+
+/* Show/Hide for Desktop/Mobile */
+.show-mobile { display: none; mso-hide: all; }
+
+@media only screen and (max-width: 600px) {
+    .column { width: 100% !important; display: block !important; }
+    .column-40 { width: 100% !important; display: block !important; }
+    .column-60 { width: 100% !important; display: block !important; }
+    .newsletter-card { width: 100% !important; }
+    .newsletter-card td { display: block; width: 100% !important; padding: 0px !important; }
+    .newsletter-card img { width: 100% !important; max-width: 100% !important; height: auto !important; margin-bottom: 20px !important; }
+    .content-right { padding: 0 !important; }
+    .show-mobile { display: block !important; width: 100% !important; max-width: 100% !important; height: auto !important; overflow: visible !important; }
+    .show-desktop { display: none !important; mso-hide: all !important; }
+    .btn { width: 100% !important; margin: 16px auto 20px !important; text-align: center !important; }
+    .explore-btn-container { width: 100% !important; }
+    .explore-btn-container td { width: 100% !important; }
+    .explore-btn-container a { width: 100% !important; display: block !important; box-sizing: border-box !important; text-align: center !important; }
+    .section-title { font-size: 25px !important; }
+    .section img { max-width: 100% !important; height: auto !important; display: block !important; margin: 16px auto !important; }
+    .content-pad { padding-left: 20px !important; padding-right: 20px !important; }
+}
+</style>
+    
+    <!--[if gte mso 9]>
+    <style type="text/css">
+        /* Outlook-specific styles */
+        table { border-collapse: collapse; }
+        .outlook-fallback { font-family: Arial, sans-serif !important; }
+    </style>
+    <![endif]-->
+</head>
+
+<body style="margin: 0; padding: 0; background-color: #f4f4f4; font-family: 'DM Sans', Arial, Helvetica, sans-serif;">
+<!-- Main Email Container --><center style="width: 100%; background-color: #f4f4f4;">
+<table align="center" border="0" cellpadding="0" cellspacing="0" class="email-container" role="presentation" style="max-width: 600px; margin: 0px auto; background-color: rgb(255, 255, 255);" width="100%"><!-- HEADER SECTION: Cream Background with Logo -->
+<tbody>
+<tr>
+<td style="background-color: rgb(255, 252, 238); padding: 20px 0px 24px; text-align: center;"><img alt="ParentData Logo" class="fluid" height="75" src="https://library.iterable.com/3244/21559/1bd174994cea45598cd4d7f4ad5b173d-prarentdata-logo.png" width="179">
+<table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+<tbody>
+<tr>
+<td style="text-align: center; position: relative;"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr>
+<td style="background-color: rgb(255, 252, 238); padding: 0px 24px 0px;">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%"><!-- Headline -->
+<tbody>
+<tr>
+<td style="text-align: center; padding-bottom: 16px;">
+<h1 class="headline-mobile" style="margin: 0; font-family: 'Lora', Georgia, serif; font-weight: bold; font-size: 40px; line-height: 48px; letter-spacing: -2.4px; color: #000000; padding: 0px 54px;">This Week on ParentData</h1>
+</td>
+</tr>
+<!-- Subtitle -->
+<tr>
+<td style="text-align: center; padding-bottom: 24px;">
+<p class="sub-text" style="margin: 0; font-family: 'Lora', Georgia, serif; font-weight: 400; font-size: 18px; line-height: 32px; color: #000000;">Your next read</p>
+<!-- <p class="sub-text" style="margin: 0; font-family: 'Lora', Georgia, serif; font-weight: 400; font-size: 18px; line-height: 32px; color: #000000;">Here's what that means for&nbsp;maternal health research.</p> --></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr>
+<td class="content-pad table-box" style="padding: 12px 40px;">
+<p style="margin: 0px 0px 16px; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-size: 16px; line-height: 160%; color: rgb(40, 40, 40);">{{#or (eq tier "plus") (eq tier "premium")}}</p>
+<p style="margin: 0px 0px 16px; padding-bottom: 8px; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-size: 16px; line-height: 160%; color: rgb(40, 40, 40);">Welcome to the Digest!&nbsp;</p>
+<p style="margin: 0px 0px 16px; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-size: 16px; line-height: 160%; color: rgb(40, 40, 40);">With your subscription, you have unlimited access to <a href="http://parentdata.org/" rel="noopener" target="_blank">ParentData.org</a>&nbsp;and your choice of personalized newsletters in your inbox. To select the newsletters you want, visit&nbsp;<a href="https://parentdata.org/account/" rel="noopener" target="_blank">your Account page</a>&nbsp;(you can also opt out of this Digest).</p>
+<p style="margin: 0px 0px 16px; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-size: 16px; line-height: 160%; color: rgb(40, 40, 40);">Reading on your phone? When you log in to&nbsp;<em data-end="393" data-start="377">ParentData.org</em>, be sure to check <strong data-end="429" data-start="412">&ldquo;Remember me&rdquo;</strong> after entering your username and password. You&rsquo;ll stay signed in, making it effortless to open every article in this newsletter (and all your other ParentData newsletters) with a single tap.</p>
+<p style="margin: 0px; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-size: 16px; line-height: 160%; color: rgb(40, 40, 40);">Here&rsquo;s our recommended reading for the week:</p>
+<p style="margin: 0px 0px 16px; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-size: 16px; line-height: 160%; color: rgb(40, 40, 40);"><span style="color: rgb(0, 0, 0); font-family: Times; font-size: medium; white-space: normal; float: none; display: inline;">{{else}}{{#or (eq tier "web-access")}}</span></p>
+<p style="margin: 0px 0px 16px; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-size: 16px; line-height: 160%; color: rgb(40, 40, 40);">Welcome to the Digest!</p>
+<p style="margin: 0px 0px 16px; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-size: 16px; line-height: 160%; color: rgb(40, 40, 40);">With your Web Access subscription, you have unlimited access to&nbsp;<a href="http://parentdata.org/" style="color: rgb(0, 123, 255);">ParentData.org</a>. If you&rsquo;d like to receive personalized newsletters in your inbox on trying to conceive, pregnancy, babies, and toddlers,&nbsp;<a href="https://parentdata.org/account/" style="color: rgb(0, 123, 255);">you can upgrade to a Plus subscription</a>.</p>
+<p style="margin: 0px 0px 16px; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-size: 16px; line-height: 160%; color: rgb(40, 40, 40);">Reading on your phone? When you log in to&nbsp;<em data-end="393" data-start="377">ParentData.org</em>, be sure to check <strong data-end="429" data-start="412">&ldquo;Remember me&rdquo;</strong> after entering your username and password. You&rsquo;ll stay signed in, making it effortless to open every article in this newsletter with a single tap.</p>
+<p style="margin: 0px; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-size: 16px; line-height: 160%; color: rgb(40, 40, 40);">For now, here's our recommended reading for the week:</p>
+<p style="margin: 0px; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-size: 16px; line-height: 160%; color: rgb(40, 40, 40);"><span style="color: rgb(0, 0, 0); font-family: Times; font-size: medium; white-space: normal; float: none; display: inline;">{{else}}{{#or (eq tier "free")}}</span></p>
+<p style="margin: 0px 0px 16px; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-size: 16px; line-height: 160%; color: rgb(40, 40, 40);">Welcome to the Digest!</p>
+<p style="margin: 0px; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-size: 16px; line-height: 160%; color: rgb(40, 40, 40);">Here's our recommended reading for the week:</p>
+<p style="margin: 0px 0px 16px; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-size: 18px; line-height: 160%; color: rgb(40, 40, 40);"><span style="color: rgb(0, 0, 0); font-family: Times; font-size: medium; white-space: normal; float: none; display: inline;">{{/or}}{{/or}}<span style="color: rgb(0, 0, 0); font-family: Times; font-size: medium; white-space: normal; float: none; display: inline;">{{/or}}</span></span></p>
+</td>
+</tr>
+<tr>
+<td class="content-pad" style="padding: 0 40px;">
+<h2 class="section-title">Popular this week</h2>
+<div style="background-color: #fffcee; height: 7px; width: 100%; margin: 8px 0 20px 0;"></div>
+</td>
+</tr>
+<tr>
+<td class="content-pad" style="padding: 0 40px 20px 40px;">
+<table border="0" cellpadding="0" cellspacing="0" class="newsletter-card" role="presentation" width="100%">
+<tbody>
+<tr><!-- Mobile Image -->
+<td class="show-mobile" style="display: none;"><img alt="Article image" src="https://library.iterable.com/3244/21559/9258ef2fe1674e78b7ca81d7ff2340d5-autism_rates_20250428.png" style="display: block; width: 100%; height: auto;" width="100%"></td>
+</tr>
+<tr>
+<td class="column-60" style="width: 60%; padding-right: 20px; vertical-align: top;">
+<h3 style="margin: 0 0 6px 0; font-family: 'Lora', Georgia, serif; font-size: 20px; color: #282828;">Why Are Autism Rates Going Up?</h3>
+<p style="margin: 0 0 8px 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-size: 16px; line-height: 150%; color: #1a1a1a;">A look at the data driving the debate</p>
+<table border="0" cellpadding="0" cellspacing="0" class="btn" role="presentation" style="margin-bottom: 20px; margin-top: 16px;">
+<tbody>
+<tr>
+<td style="outline: 2px solid #000000; outline-offset: -2px; border-radius: 3px;"><a href="https://parentdata.org/why-are-autism-rates-going-up/" rel="noopener" style="display: inline-block; padding: 10px 20px; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-size: 13px; font-weight: 600; color: #000000; text-decoration: none;" target="_blank">Read more</a></td>
+</tr>
+</tbody>
+</table>
+</td>
+<td class="column-40 show-desktop" style="width: 40%; vertical-align: top;"><img alt="Article image" height="144" src="https://library.iterable.com/3244/21559/9258ef2fe1674e78b7ca81d7ff2340d5-autism_rates_20250428.png" style="display: block; width: 100%; max-width: 216px; height: auto;" width="216"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr>
+<td class="content-pad" style="padding: 0 40px 0px 40px;">
+<table border="0" cellpadding="0" cellspacing="0" class="newsletter-card" role="presentation" width="100%">
+<tbody>
+<tr><!-- Mobile Image -->
+<td class="show-mobile" style="display: none;"><img alt="Article image" src="https://library.iterable.com/3244/21559/9258ef2fe1674e78b7ca81d7ff2340d5-autism_rates_20250428.png" style="display: block; width: 100%; height: auto;" width="100%"></td>
+</tr>
+<tr>
+<td class="column-60" style="width: 60%; padding-right: 20px; vertical-align: top;">
+<h3 style="margin: 0 0 6px 0; font-family: 'Lora', Georgia, serif; font-size: 20px; color: #282828;">Why Are Autism Rates Going Up?</h3>
+<p style="margin: 0 0 8px 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-size: 16px; line-height: 150%; color: #1a1a1a;">A look at the data driving the debate</p>
+<table border="0" cellpadding="0" cellspacing="0" class="btn" role="presentation" style="margin-bottom: 20px; margin-top: 16px;">
+<tbody>
+<tr>
+<td style="outline: 2px solid #000000; outline-offset: -2px; border-radius: 3px;"><a href="https://parentdata.org/why-are-autism-rates-going-up/" rel="noopener" style="display: inline-block; padding: 10px 20px; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-size: 13px; font-weight: 600; color: #000000; text-decoration: none;" target="_blank">Read more</a></td>
+</tr>
+</tbody>
+</table>
+</td>
+<td class="column-40 show-desktop" style="width: 40%; vertical-align: top;"><img alt="Article image" height="144" src="https://library.iterable.com/3244/21559/9258ef2fe1674e78b7ca81d7ff2340d5-autism_rates_20250428.png" style="display: block; width: 100%; max-width: 216px; height: auto;" width="216"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr>
+<td class="content-pad" style="padding: 20px 40px 0 40px;">
+<h2 class="section-title">Pregnancy</h2>
+<div style="background-color: #d2edf9; height: 7px; width: 100%; margin: 8px 0 20px 0;"></div>
+</td>
+</tr>
+<tr>
+<td class="content-pad" style="padding: 0 40px 20px 40px;">
+<table border="0" cellpadding="0" cellspacing="0" class="newsletter-card" role="presentation" width="100%">
+<tbody>
+<tr>
+<td class="column-40" style="width: 40%; padding-right: 16px; vertical-align: top;"><img alt="Article image" height="147" src="https://library.iterable.com/3244/21559/46c34cbe1f6743ff8fb7d4e384a136b0-creatine_pregnant_04292025-2.png" style="display: block; width: 100%; max-width: 220px; height: auto;" width="220"></td>
+<td class="column-60 content-right" style="width: 60%; vertical-align: top; padding: 0 0 0 16px;">
+<h3 style="margin: 0 0 2px 0; font-family: 'Lora', Georgia, serif; font-size: 20px; color: #282828;">Can I Take Creatine While Pregnant?</h3>
+<p style="margin: 0 0 4px 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-size: 16px; line-height: 150%; color: #1a1a1a;">Q&amp;A on workout supplements</p>
+<table border="0" cellpadding="0" cellspacing="0" class="btn" role="presentation" style="margin-bottom: 20px; margin-top: 16px;">
+<tbody>
+<tr>
+<td style="outline: 2px solid #000000; outline-offset: -2px; border-radius: 3px;"><a href="https://parentdata.org/when-do-babies-start-walking/" rel="noopener" style="display: inline-block; padding: 10px 20px; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-size: 13px; font-weight: 600; color: #000000; text-decoration: none;" target="_blank">Read more</a></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr>
+<td class="content-pad" style="padding: 0 40px 0 40px;">
+<h2 class="section-title">Babies</h2>
+<div style="background-color: #fffcee; height: 7px; width: 100%; margin: 8px 0 20px 0;"></div>
+</td>
+</tr>
+<tr>
+<td class="content-pad" style="padding: 0 40px 20px 40px;">
+<table border="0" cellpadding="0" cellspacing="0" class="newsletter-card" role="presentation" width="100%">
+<tbody>
+<tr><!-- Mobile Image -->
+<td class="show-mobile" style="display: none;"><img alt="Article image" src="https://library.iterable.com/3244/21559/d214a97aa19744c89aa48e861e8ec4a5-babies_walking_04262025-2.png" style="display: block; width: 100%; height: auto;" width="100%"></td>
+</tr>
+<tr>
+<td class="column-60" style="width: 60%; padding-right: 20px; vertical-align: top;">
+<h3 style="margin: 0 0 6px 0; font-family: 'Lora', Georgia, serif; font-size: 20px; color: #282828;">When Do Babies Start Walking?</h3>
+<p style="margin: 0 0 8px 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-size: 16px; line-height: 150%; color: #1a1a1a;">What&rsquo;s normal and when you should worry (if at all)</p>
+<table border="0" cellpadding="0" cellspacing="0" class="btn" role="presentation" style="margin-bottom: 20px; margin-top: 16px;">
+<tbody>
+<tr>
+<td style="outline: 2px solid #000000; outline-offset: -2px; border-radius: 3px;"><a href="https://parentdata.org/when-do-babies-start-walking/" rel="noopener" style="display: inline-block; padding: 10px 20px; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-size: 13px; font-weight: 600; color: #000000; text-decoration: none;" target="_blank">Read more</a></td>
+</tr>
+</tbody>
+</table>
+</td>
+<td class="column-40 show-desktop" style="width: 40%; vertical-align: top;"><img alt="Article image" height="144" src="https://library.iterable.com/3244/21559/d214a97aa19744c89aa48e861e8ec4a5-babies_walking_04262025-2.png" style="display: block; width: 100%; max-width: 216px; height: auto;" width="216"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr>
+<td class="content-pad" style="padding: 0 40px 0 40px;">
+<h2 class="section-title">Toddlers</h2>
+<div style="background-color: #d2edf9; height: 7px; width: 100%; margin: 8px 0 20px 0;"></div>
+</td>
+</tr>
+<tr>
+<td class="content-pad" style="padding: 0 40px 20px 40px;">
+<table border="0" cellpadding="0" cellspacing="0" class="newsletter-card" role="presentation" width="100%">
+<tbody>
+<tr>
+<td class="column-40" style="width: 40%; padding-right: 16px; vertical-align: top;"><img alt="Article image" height="147" src="https://library.iterable.com/3244/21559/d214a97aa19744c89aa48e861e8ec4a5-babies_walking_04262025-2.png" style="display: block; width: 100%; max-width: 220px; height: auto;" width="220"></td>
+<td class="column-60 content-right" style="width: 60%; vertical-align: top; padding: 0 0 0 16px;">
+<h3 style="margin: 0 0 2px 0; font-family: 'Lora', Georgia, serif; font-size: 20px; color: #282828;">When Do Toddles Start Speaking?</h3>
+<p style="margin: 0 0 4px 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-size: 16px; line-height: 150%; color: #1a1a1a;">What&rsquo;s normal and when you should worry (if at all)</p>
+<table border="0" cellpadding="0" cellspacing="0" class="btn" role="presentation" style="margin-bottom: 20px; margin-top: 16px;">
+<tbody>
+<tr>
+<td style="outline: 2px solid #000000; outline-offset: -2px; border-radius: 3px;"><a href="https://parentdata.org/when-do-babies-start-walking/" rel="noopener" style="display: inline-block; padding: 10px 20px; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-size: 13px; font-weight: 600; color: #000000; text-decoration: none;" target="_blank">Read more</a></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr>
+<td class="content-pad" style="padding: 0 40px 0 40px;">
+<h2 class="section-title">Big kids</h2>
+<div style="background-color: #fffcee; height: 7px; width: 100%; margin: 8px 0 20px 0;"></div>
+</td>
+</tr>
+<tr>
+<td class="content-pad" style="padding: 0 40px 20px 40px;">
+<table border="0" cellpadding="0" cellspacing="0" class="newsletter-card" role="presentation" width="100%">
+<tbody>
+<tr><!-- Mobile Image -->
+<td class="show-mobile" style="display: none;"><img alt="Article image" src="https://library.iterable.com/3244/21559/d214a97aa19744c89aa48e861e8ec4a5-babies_walking_04262025-2.png" style="display: block; width: 100%; height: auto;" width="100%"></td>
+</tr>
+<tr>
+<td class="column-60" style="width: 60%; padding-right: 20px; vertical-align: top;">
+<h3 style="margin: 0 0 6px 0; font-family: 'Lora', Georgia, serif; font-size: 20px; color: #282828;">When Do Babies Start Walking?</h3>
+<p style="margin: 0 0 8px 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-size: 16px; line-height: 150%; color: #1a1a1a;">What&rsquo;s normal and when you should worry (if at all)</p>
+<table border="0" cellpadding="0" cellspacing="0" class="btn" role="presentation" style="margin-bottom: 20px; margin-top: 16px;">
+<tbody>
+<tr>
+<td style="outline: 2px solid #000000; outline-offset: -2px; border-radius: 3px;"><a href="https://parentdata.org/when-do-babies-start-walking/" rel="noopener" style="display: inline-block; padding: 10px 20px; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-size: 13px; font-weight: 600; color: #000000; text-decoration: none;" target="_blank">Read more</a></td>
+</tr>
+</tbody>
+</table>
+</td>
+<td class="column-40 show-desktop" style="width: 40%; vertical-align: top;"><img alt="Article image" height="144" src="https://library.iterable.com/3244/21559/d214a97aa19744c89aa48e861e8ec4a5-babies_walking_04262025-2.png" style="display: block; width: 100%; max-width: 216px; height: auto;" width="216"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr>
+<td style="background-color: rgb(169, 221, 243); padding: 20px 40px 40px;">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%"><!-- Logo -->
+<tbody>
+<tr>
+<td style="text-align: left; padding-bottom: 24px;"><img alt="Footer Logo" class="fluid" src="https://library.iterable.com/3244/21559/0c234709315b456daeae8158543952a5-footerlogo.png" style="max-width: 120px; height: auto;" width="120"></td>
+</tr>
+<!-- Footer Text -->
+<tr>
+<td style="text-align: left; padding-bottom: 16px;">
+<p style="margin: 0 0 8px 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 14px; line-height: normal; color: #000000;">You are receiving this email because you opted in via our website.</p>
+</td>
+</tr>
+<!-- Change Preferences -->
+<tr>
+<td style="text-align: left; padding-bottom: 12px;">
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 800; font-size: 14px; line-height: normal; color: #000000;">Want to change how you receive these emails?</p>
+</td>
+</tr>
+<!-- Unsubscribe Link -->
+<tr>
+<td style="text-align: left; padding-bottom: 16px;">
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 14px; line-height: normal; color: #000000;"><a href="{{hostedUnsubscribeUrl}}" style="color: #000000; text-decoration: underline;">Unsubscribe from this list</a></p>
+</td>
+</tr>
+<!-- Manage Preferences -->
+<tr>
+<td style="text-align: left; padding-bottom: 20px;">
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 14px; line-height: normal; color: #000000;">To manage all of your newsletter preferences or cancel, please <a href="https://parentdata.org/account/" style="color: #000000; text-decoration: underline;">visit your account</a>.</p>
+</td>
+</tr>
+<!-- Copyright -->
+<tr>
+<td style="text-align: left;">
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 14px; line-height: normal; color: #000000;">Copyright &copy; 2025 ParentData, All rights reserved.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</center>
+</body>
+</html>

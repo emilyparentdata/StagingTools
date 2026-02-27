@@ -29,7 +29,7 @@ BASE_DIR = Path(__file__).parent
 
 TEMPLATES = {
     'standard': {
-        'label': 'Standard newsletter article',
+        'label': 'Latest',
         'file': BASE_DIR / 'email_templates' / 'latest_template.html',
         'has_welcome': True,
         'has_author_block': True,
@@ -53,7 +53,7 @@ TEMPLATES = {
         'has_bottom_line': False,
     },
     'marketing': {
-        'label': 'Marketing article',
+        'label': 'Marketing - Full Article Send',
         'file': BASE_DIR / 'email_templates' / 'template_marketing.html',
         'has_welcome': False,
         'has_author_block': True,
@@ -63,6 +63,22 @@ TEMPLATES = {
     'fertility_digest': {
         'label': 'Fertility Digest',
         'file': BASE_DIR / 'email_templates' / 'template_fertilitydigest.html',
+        'has_welcome': False,
+        'has_author_block': False,
+        'has_related_reading': False,
+        'has_bottom_line': False,
+    },
+    'latest_teaser': {
+        'label': 'Latest Teaser',
+        'file': BASE_DIR / 'email_templates' / 'template_latesteaser.html',
+        'has_welcome': True,
+        'has_author_block': False,
+        'has_related_reading': True,
+        'has_bottom_line': False,
+    },
+    'paid_digest': {
+        'label': 'Paid Digest',
+        'file': BASE_DIR / 'email_templates' / 'template_paiddigest.html',
         'has_welcome': False,
         'has_author_block': False,
         'has_related_reading': False,
@@ -220,6 +236,63 @@ def _process_docx(tmp_path: str, template_type: str = 'standard') -> dict:
 
     parsed = parse_docx(tmp_path)
 
+    if template_type == 'latest_teaser':
+        from wp_fetcher import fetch_wp_article
+        from claude_client import reformat_wp_content
+
+        staging = parsed.get('staging_instructions', {})
+        raw_text = parsed.get('raw_text', '')
+
+        # WP URL: accept "Article Link:", "WP URL:", or "WP:" in the doc body
+        # or "WP URL:" in the staging section (belt-and-suspenders).
+        wp_url = (
+            staging.get('wp_url', '')
+            or _extract_raw_field(raw_text, r'article\s+link|wp\s*url?')
+        )
+        if not wp_url:
+            raise ValueError(
+                'No article URL found. Add "Article Link: https://…" to the doc.'
+            )
+
+        # Fade-from: accept "Grey out paragraph:", "Fade from:" etc.
+        fade_from = (
+            staging.get('fade_from', '')
+            or _extract_raw_field(raw_text, r'grey\s+out\s+paragraph|fade\s*from')
+        )
+
+        # Intro text: the value of the "Intro text:" labeled line
+        intro_text = _extract_raw_field(raw_text, r'intro\s+text') or ''
+
+        article = fetch_wp_article(wp_url)
+        content_html = _strip_featured_image(
+            article['content_html'],
+            article.get('featured_image_url', ''),
+        )
+        reformatted = reformat_wp_content(content_html, 'standard')
+
+        excerpt_text = article.get('excerpt_text', '')
+        subtitle_lines = (
+            [excerpt_text] if excerpt_text
+            else reformatted.get('subtitle_lines', [])
+        )
+
+        response_data = {
+            'title':              article.get('title', ''),
+            'subtitle_lines':     subtitle_lines,
+            'featured_image_url': article.get('featured_image_url', ''),
+            'featured_image_alt': article.get('featured_image_alt', ''),
+            'article_url':        wp_url,
+            'intro_text':         intro_text,
+            'fade_from':          fade_from,
+            'article_body_html':  reformatted.get('article_body_html', ''),
+            'topic_tags':         article.get('topic_tags', []),
+        }
+
+        if staging.get('related_articles'):
+            _apply_staging_instructions(response_data, staging)
+
+        return response_data
+
     if template_type == 'fertility_digest':
         from docx_parser import parse_digest_docx
         from wp_fetcher import fetch_article_image
@@ -243,6 +316,30 @@ def _process_docx(tmp_path: str, template_type: str = 'standard') -> dict:
             'intro_text': digest.get('intro_text', ''),
             'articles':   articles,
         }
+
+    if template_type == 'paid_digest':
+        from docx_parser import parse_paid_digest_docx
+        from wp_fetcher import fetch_article_metadata
+
+        digest = parse_paid_digest_docx(tmp_path)
+        sections = digest.get('sections', [])
+
+        for section in sections:
+            for article in section.get('articles', []):
+                if article.get('url'):
+                    try:
+                        meta = fetch_article_metadata(article['url'])
+                        article['title'] = meta.get('title', '')
+                        article['subtitle'] = meta.get('subtitle', '')
+                        article['image_url'] = meta.get('image_url', '')
+                        article['image_alt'] = meta.get('image_alt', '') or meta.get('title', '')
+                    except Exception:
+                        article.setdefault('title', '')
+                        article.setdefault('subtitle', '')
+                        article.setdefault('image_url', '')
+                        article.setdefault('image_alt', '')
+
+        return {'sections': sections}
 
     from claude_client import extract_fields
     fields = extract_fields(parsed['raw_text'], parsed['mammoth_html'], template_type)
@@ -311,6 +408,24 @@ def _apply_staging_instructions(data: dict, staging: dict) -> None:
         data['inline_graphs'] = graphs
 
 
+def _extract_raw_field(raw_text: str, pattern: str) -> str:
+    """
+    Extract the value of a labeled field from raw text.
+
+    Scans each line for `<label>: <value>` where label matches `pattern`
+    (case-insensitive).  Returns the first match value, or ''.
+
+    Example:
+        _extract_raw_field(text, r'article\\s+link|wp\\s*url?')
+        -> matches "Article Link: https://..." -> "https://..."
+    """
+    for line in raw_text.splitlines():
+        m = re.match(r'(?:' + pattern + r')\s*:\s*(.+)', line.strip(), re.I)
+        if m:
+            return m.group(1).strip()
+    return ''
+
+
 def _strip_featured_image(content_html: str, featured_image_url: str) -> str:
     """
     Remove any <figure> blocks from content_html that reference the featured image.
@@ -324,12 +439,24 @@ def _strip_featured_image(content_html: str, featured_image_url: str) -> str:
     if not featured_image_url or not content_html:
         return content_html
 
-    # Derive base name: "pregnancy-test-800x600.jpg" → "pregnancy-test"
+    # Derive the canonical base name, stripping any WP size suffix.
+    # e.g. "measles-800x600.png" → "measles.png"
     filename = featured_image_url.rstrip('/').rsplit('/', 1)[-1]
     base = re.sub(r'-\d+x\d+(\.[a-z0-9]+)$', r'\1', filename, flags=re.I)
-    stem = re.sub(r'\.[a-z0-9]+$', '', base, flags=re.I)
-    if not stem:
+    m_parts = re.match(r'^(.+?)(\.[a-z0-9]+)$', base, re.I)
+    if not m_parts:
         return content_html
+    stem, ext = m_parts.group(1), m_parts.group(2)
+
+    # Match the base filename (with or without a WP size variant) only when
+    # it appears as a COMPLETE filename after a path separator.  A simple stem
+    # substring match is too broad: "measles" would also match the graph-chart
+    # filenames like "JyVOb-cases-of-measles-are-growing-...-1024x746.png".
+    img_re = re.compile(
+        r'(?:^|/)' + re.escape(stem) + r'(?:-\d+x\d+)?' + re.escape(ext)
+        + r'(?![A-Za-z0-9_-])',
+        re.I,
+    )
 
     from bs4 import BeautifulSoup
     soup = BeautifulSoup(content_html, 'html.parser')
@@ -337,7 +464,7 @@ def _strip_featured_image(content_html: str, featured_image_url: str) -> str:
         img = figure.find('img')
         if img:
             src = img.get('src', '') + ' ' + img.get('srcset', '')
-            if stem in src:
+            if img_re.search(src):
                 figure.decompose()
     return str(soup)
 
@@ -399,6 +526,29 @@ def generate():
             html,
             mimetype='text/html; charset=utf-8',
         )
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/email-checker')
+def email_checker():
+    """Serve the one-off email checker UI."""
+    return render_template('email_checker.html')
+
+
+@app.route('/check-email', methods=['POST'])
+def check_email():
+    """Accept raw HTML, apply all email compatibility fixes, return cleaned HTML."""
+    data = request.get_json(force=True)
+    raw_html = data.get('html', '')
+    if not raw_html.strip():
+        return jsonify({'error': 'No HTML provided'}), 400
+
+    try:
+        from html_builder import apply_email_fixes, fix_letter_spacing
+        fixed = fix_letter_spacing(raw_html)
+        fixed = apply_email_fixes(fixed)
+        return Response(fixed, mimetype='text/html; charset=utf-8')
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

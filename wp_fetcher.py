@@ -83,6 +83,95 @@ def fetch_wp_article(url: str) -> dict:
     return result
 
 
+def fetch_article_metadata(url: str) -> dict:
+    """
+    Fetch title, subtitle, and featured image for a parentdata.org article URL.
+
+    Uses the WP REST API (with auth if available) to get the title and featured
+    image, plus a page scrape for the subtitle (stored in a private meta field).
+
+    Returns:
+        {'title': str, 'subtitle': str, 'image_url': str, 'image_alt': str}
+    """
+    slug = _slug_from_url(url)
+    if not slug:
+        return {'title': '', 'subtitle': '', 'image_url': '', 'image_alt': ''}
+
+    import re as _re
+
+    title = ''
+    image_url = ''
+    image_alt = ''
+
+    # WP REST API — works without auth for title + featured image on public posts
+    auth = _wp_auth()
+    try:
+        resp = _requests.get(
+            f'{WP_BASE}/posts',
+            params={
+                'slug': slug,
+                '_embed': 'wp:featuredmedia',
+                'status': 'publish',
+                '_fields': 'title,_embedded',
+            },
+            headers=HEADERS,
+            auth=auth,
+            timeout=15,
+        )
+        if resp.ok:
+            posts = resp.json()
+            if posts:
+                post = posts[0]
+                title = _re.sub(r'<[^>]+>', '', post.get('title', {}).get('rendered', '')).strip()
+                media = post.get('_embedded', {}).get('wp:featuredmedia', [])
+                if media and isinstance(media[0], dict):
+                    m = media[0]
+                    image_url = m.get('source_url', '')
+                    image_alt = m.get('alt_text', '') or title
+    except Exception:
+        pass
+
+    # Fallback for image: scrape og:image if API didn't provide one
+    if not image_url:
+        fallback = fetch_article_image(url)
+        image_url = fallback.get('image_url', '')
+        image_alt = fallback.get('image_alt', '') or title
+
+    # Fallback for title: scrape og:title if API didn't provide one
+    if not title:
+        try:
+            from bs4 import BeautifulSoup
+            browser_headers = {
+                'User-Agent': (
+                    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
+                    'AppleWebKit/537.36 (KHTML, like Gecko) '
+                    'Chrome/120.0.0.0 Safari/537.36'
+                )
+            }
+            resp = _requests.get(url, headers=browser_headers, timeout=15)
+            if resp.status_code == 200:
+                soup = BeautifulSoup(resp.text, 'html.parser')
+                og_title = soup.find('meta', property='og:title')
+                if og_title:
+                    # Strip site branding suffix like " | ParentData by Emily Oster"
+                    title = _re.sub(r'\s*\|.*$', '', og_title.get('content', '')).strip()
+        except Exception:
+            pass
+
+    subtitle = _fetch_subtitle_from_page(url)
+
+    # Prefer the clean title for alt text over whatever og:title the fallback gave us
+    if not image_alt or '|' in image_alt:
+        image_alt = title
+
+    return {
+        'title': title,
+        'subtitle': subtitle,
+        'image_url': image_url,
+        'image_alt': image_alt or title,
+    }
+
+
 def fetch_article_image(url: str) -> dict:
     """
     Fetch the featured image for a parentdata.org article URL.

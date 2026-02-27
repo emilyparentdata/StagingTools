@@ -10,6 +10,7 @@
 
 <header>
   <h1>ParentData Email Staging Tool</h1>
+  <p style="margin:4px 0 0;font-size:14px;color:#666;"><a href="/email-checker" style="color:#3b82f6;text-decoration:none;">One-off Email Checker</a></p>
 </header>
 
 <main>
@@ -17,27 +18,16 @@
   <!-- ── Choose Template ─────────────────────────────────────────────── -->
   <section id="section-template" class="card">
     <h2>Choose Template</h2>
-    <div class="template-selector">
-      <button type="button" class="template-card selected" id="tcard-standard" onclick="selectTemplate('standard', this)">
-        <strong>Standard Newsletter</strong>
-        <span>Emily's intro &middot; author block &middot; related reading</span>
-      </button>
-      <button type="button" class="template-card" id="tcard-fertility" onclick="selectTemplate('fertility', this)">
-        <strong>Fertility Article</strong>
-        <span>Guest author headline &middot; purple bottom line box</span>
-      </button>
-      <button type="button" class="template-card" id="tcard-qa" onclick="selectTemplate('qa', this)">
-        <strong>Fertility Q&amp;A</strong>
-        <span>Two reader questions &middot; intro sentence &middot; two WP articles</span>
-      </button>
-      <button type="button" class="template-card" id="tcard-marketing" onclick="selectTemplate('marketing', this)">
-        <strong>Marketing Article</strong>
-        <span>Trial upgrade email &middot; featured article &middot; upgrade CTA</span>
-      </button>
-      <button type="button" class="template-card" id="tcard-fertility_digest" onclick="selectTemplate('fertility_digest', this)">
-        <strong>Fertility Digest</strong>
-        <span>5 curated article cards &middot; editorial intro &middot; Google Doc source</span>
-      </button>
+    <div class="field-group" style="margin-bottom:0;">
+      <select id="template-select" onchange="selectTemplate(this.value)">
+        <option value="fertility">Fertility Article</option>
+        <option value="fertility_digest">Fertility Digest</option>
+        <option value="qa">Fertility Q&amp;A</option>
+        <option value="standard" selected>Latest</option>
+        <option value="latest_teaser">Latest Teaser</option>
+        <option value="marketing">Marketing - Full Article Send</option>
+        <option value="paid_digest">Paid Digest</option>
+      </select>
     </div>
   </section>
 
@@ -47,32 +37,38 @@
 
     <!-- Standard / Fertility upload options -->
     <div id="standard-upload-area">
-      <div class="upload-zone" id="upload-zone">
-        <input type="file" id="file-input" accept=".docx" hidden>
-        <p>Drag &amp; drop your <strong>.docx</strong> file here, or <button type="button" class="link-btn" id="browse-btn">browse</button></p>
-        <p id="file-name" class="file-name"></p>
+      <div id="docx-upload-row">
+        <div class="upload-zone" id="upload-zone">
+          <input type="file" id="file-input" accept=".docx" hidden>
+          <p>Drag &amp; drop your <strong>.docx</strong> file here, or <button type="button" class="link-btn" id="browse-btn">browse</button></p>
+          <p id="file-name" class="file-name"></p>
+        </div>
       </div>
 
-      <div class="upload-or">— or —</div>
+      <div class="upload-or" id="docx-gdoc-divider">— or —</div>
 
-      <div class="field-group">
-        <label for="gdoc-url">Google Doc link</label>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <input type="url" id="gdoc-url" placeholder="https://docs.google.com/document/d/…" style="flex:1;" onkeydown="if(event.key==='Enter') handleGoogleDocUrl()">
-          <button type="button" class="btn-small" onclick="handleGoogleDocUrl()" style="padding:6px 16px;">Use this doc</button>
+      <div id="gdoc-url-row">
+        <div class="field-group" style="margin-bottom:0;">
+          <label for="gdoc-url">Google Doc link</label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="url" id="gdoc-url" placeholder="https://docs.google.com/document/d/…" style="flex:1;" onkeydown="if(event.key==='Enter') handleGoogleDocUrl()">
+            <button type="button" class="btn-small" onclick="handleGoogleDocUrl()" style="padding:6px 16px;">Use this doc</button>
+          </div>
+          <p class="hint" style="margin-top:5px;">Doc must be shared as "Anyone with the link can view".</p>
         </div>
-        <p class="hint" style="margin-top:5px;">Doc must be shared as "Anyone with the link can view".</p>
       </div>
 
       <div class="upload-or" id="wp-url-row-divider">— or —</div>
 
-      <div class="field-group" id="wp-url-row" style="margin-bottom:0;">
-        <label for="wp-url">ParentData article URL</label>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <input type="url" id="wp-url" placeholder="https://parentdata.org/…" style="flex:1;" onkeydown="if(event.key==='Enter') handleWpUrl()">
-          <button type="button" class="btn-small" onclick="handleWpUrl()" style="padding:6px 16px;">Use this article</button>
+      <div id="wp-url-row" style="margin-bottom:0;">
+        <div class="field-group" style="margin-bottom:0;">
+          <label for="wp-url">ParentData article URL</label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="url" id="wp-url" placeholder="https://parentdata.org/…" style="flex:1;" onkeydown="if(event.key==='Enter') handleWpUrl()">
+            <button type="button" class="btn-small" onclick="handleWpUrl()" style="padding:6px 16px;">Use this article</button>
+          </div>
+          <p class="hint" style="margin-top:5px;">Pull from an already-published ParentData article.</p>
         </div>
-        <p class="hint" style="margin-top:5px;">Pull from an already-published ParentData article. Requires WP credentials in .env.</p>
       </div>
     </div>
 
@@ -358,6 +354,55 @@
     <div id="digest-cards"></div>
   </section>
 
+  <!-- ── Step 2 (Latest Teaser): All fields ──────────────────────────── -->
+  <section id="section-latest-teaser" class="card" hidden>
+    <h2>2. Review Latest Teaser Fields</h2>
+
+    <div class="field-group">
+      <label for="lt-title">Title</label>
+      <input type="text" id="lt-title" placeholder="Article title">
+    </div>
+
+    <div class="field-group">
+      <label for="lt-subtitle">Subtitle</label>
+      <p class="hint">One line per subtitle row (press Enter for a new row).</p>
+      <textarea id="lt-subtitle" rows="2" placeholder="Subtitle line 1&#10;Subtitle line 2"></textarea>
+    </div>
+
+    <div class="field-group">
+      <label for="lt-intro">Intro Text</label>
+      <p class="hint">Emily's editorial intro paragraph(s) — plain text from the Google Doc.</p>
+      <textarea id="lt-intro" rows="4" style="width:100%;" placeholder="This week, I want to talk about…"></textarea>
+    </div>
+
+    <div class="field-group">
+      <label for="lt-fade-from">Fade From</label>
+      <p class="hint">First words of the paragraph where greying begins (e.g. "Finally, there is the evolutionary").</p>
+      <input type="text" id="lt-fade-from" placeholder="First words of the paragraph where greying starts">
+    </div>
+
+    <div class="field-group image-url-field">
+      <label for="lt-img-url">Featured Image URL <span style="font-weight:400;color:#2a7a2a;">(auto-fetched)</span></label>
+      <input type="url" id="lt-img-url" placeholder="https://parentdata.org/wp-content/uploads/…">
+    </div>
+
+    <div class="field-group">
+      <label for="lt-img-alt">Featured Image Alt Text</label>
+      <input type="text" id="lt-img-alt" placeholder="Brief description of the image">
+    </div>
+
+    <div class="field-group">
+      <label>Article URL <span style="font-weight:400;">(from staging section)</span></label>
+      <input type="url" id="lt-article-url" readonly style="background:#f5f5f5;color:#555;">
+    </div>
+  </section>
+
+  <!-- ── Step 2 (Paid Digest): Extracted Fields ────────────────────── -->
+  <section id="section-paid-digest" class="card" hidden>
+    <h2>2. Review Paid Digest Fields</h2>
+    <div id="paid-digest-sections"></div>
+  </section>
+
   <!-- ── Generate ─────────────────────────────────────────────────────── -->
   <section id="section-generate" class="card" hidden>
     <h2>Generate Email</h2>
@@ -387,29 +432,41 @@ let allSuggestions = [];
 let slotData = [{}, {}];
 let lastGeneratedHtml = '';
 let uploadedArticleUrl = '';
+let ltArticleBodyHtml = '';
+let _paidDigestStructure = [];  // [{articleCount: N}, ...] — tracks how many articles per section
+const LT_DEFAULT_INTRO = "Today\u2019s featured article is a preview of what paid subscribers get every week \u2013 our most popular newsletter, The Latest.\n\nEver see a headline and wonder, \u201cShould I actually be worried about this?\u201d That\u2019s exactly what The Latest is for. Each week, Emily breaks down new research and trending headlines, separating what\u2019s worth paying attention to from what doesn\u2019t hold up in the data.\n\nThe Latest is included with a paid subscription so you can make decisions for your family based on evidence, not TikTok trends.";
 
 // ── Template selection ──────────────────────────────────────────────────────
-function selectTemplate(type, btn) {
+function selectTemplate(type) {
   currentTemplate = type;
-  document.querySelectorAll('.template-card').forEach(b => b.classList.remove('selected'));
-  btn.classList.add('selected');
 
-  // Toggle upload area
   const isQA = type === 'qa';
-  // Digest uses standard upload area (DOCX / Google Doc only — no WP URL)
   document.getElementById('standard-upload-area').style.display = isQA ? 'none' : '';
   document.getElementById('qa-upload-area').style.display = isQA ? '' : 'none';
-  // Hide WP URL input for digest (digests come from editorial Google Docs)
-  const isDigest = type === 'fertility_digest';
-  const wpRow = document.getElementById('wp-url-row');
-  const wpDivider = document.getElementById('wp-url-row-divider');
-  if (wpRow) wpRow.style.display = isDigest ? 'none' : '';
-  if (wpDivider) wpDivider.style.display = isDigest ? 'none' : '';
+
+  if (!isQA) {
+    // Per-template input visibility:
+    //   Latest (standard)      → Google Doc only
+    //   Fertility Article      → ParentData URL only
+    //   Marketing              → ParentData URL only
+    //   Fertility Digest       → Google Doc only
+    //   Latest Teaser          → DOCX + Google Doc
+    //   (Q&A has its own area)
+    const showDocx = type === 'latest_teaser';
+    const showGdoc = type === 'standard' || type === 'fertility_digest' || type === 'latest_teaser' || type === 'paid_digest';
+    const showWp   = type === 'fertility' || type === 'marketing';
+
+    document.getElementById('docx-upload-row').style.display    = showDocx ? '' : 'none';
+    document.getElementById('docx-gdoc-divider').style.display  = (showDocx && showGdoc) ? '' : 'none';
+    document.getElementById('gdoc-url-row').style.display       = showGdoc ? '' : 'none';
+    document.getElementById('wp-url-row-divider').style.display = 'none';
+    document.getElementById('wp-url-row').style.display         = showWp ? '' : 'none';
+  }
 }
 
-function _showPostUploadSections(isQA, isFertility, isMarketing, isDigest) {
-  // Digest has its own dedicated section; hide all other post-upload sections
-  const showStandardSections = !isQA && !isDigest;
+function _showPostUploadSections(isQA, isFertility, isMarketing, isDigest, isLatestTeaser, isPaidDigest) {
+  // Digest, LatestTeaser, and PaidDigest have dedicated sections; hide all other post-upload sections
+  const showStandardSections = !isQA && !isDigest && !isLatestTeaser && !isPaidDigest;
 
   // Sections common to standard + fertility + marketing
   ['section-fields', 'section-image', 'section-body', 'section-generate'].forEach(id => {
@@ -417,9 +474,10 @@ function _showPostUploadSections(isQA, isFertility, isMarketing, isDigest) {
     if (showStandardSections) document.getElementById(id).removeAttribute('hidden');
   });
 
-  // Standard-only
-  document.getElementById('section-related').style.display = (isQA || isFertility || isMarketing || isDigest) ? 'none' : '';
-  if (!isQA && !isFertility && !isMarketing && !isDigest) document.getElementById('section-related').removeAttribute('hidden');
+  // Standard-only related reading (also shown for latest_teaser)
+  const showRelated = !isQA && !isFertility && !isMarketing && !isDigest && !isPaidDigest;
+  document.getElementById('section-related').style.display = showRelated ? '' : 'none';
+  if (showRelated) document.getElementById('section-related').removeAttribute('hidden');
 
   // Fertility-only
   document.getElementById('section-bottomline').style.display = isFertility ? '' : 'none';
@@ -436,6 +494,14 @@ function _showPostUploadSections(isQA, isFertility, isMarketing, isDigest) {
   // Digest-only
   document.getElementById('section-digest').style.display = isDigest ? '' : 'none';
   if (isDigest) document.getElementById('section-digest').removeAttribute('hidden');
+
+  // Latest Teaser-only
+  document.getElementById('section-latest-teaser').style.display = isLatestTeaser ? '' : 'none';
+  if (isLatestTeaser) document.getElementById('section-latest-teaser').removeAttribute('hidden');
+
+  // Paid Digest-only
+  document.getElementById('section-paid-digest').style.display = isPaidDigest ? '' : 'none';
+  if (isPaidDigest) document.getElementById('section-paid-digest').removeAttribute('hidden');
 
   // Always show generate
   const genSection = document.getElementById('section-generate');
@@ -487,8 +553,8 @@ async function handleGoogleDocUrl() {
   const url = document.getElementById('gdoc-url').value.trim();
   if (!url) return;
   document.getElementById('file-name').textContent = '';
-  const digestMsg = currentTemplate === 'fertility_digest'
-    ? 'Downloading Google Doc, extracting article links, and fetching article images… this may take 30–60 seconds.'
+  const digestMsg = (currentTemplate === 'fertility_digest' || currentTemplate === 'paid_digest')
+    ? 'Downloading Google Doc, extracting article links, and fetching article metadata… this may take 30–60 seconds.'
     : 'Downloading Google Doc and extracting fields… this may take 20–40 seconds.';
   showStatus('upload-status', digestMsg, 'info');
   const formData = new FormData();
@@ -538,6 +604,8 @@ async function _submitUpload(formData) {
     const isFertility = currentTemplate === 'fertility';
     const isMarketing = currentTemplate === 'marketing';
     const isDigest = currentTemplate === 'fertility_digest';
+    const isLatestTeaser = currentTemplate === 'latest_teaser';
+    const isPaidDigest = currentTemplate === 'paid_digest';
 
     if (data.article_url) uploadedArticleUrl = data.article_url;
 
@@ -545,6 +613,10 @@ async function _submitUpload(formData) {
       populateQAFields(data);
     } else if (isDigest) {
       populateDigestFields(data);
+    } else if (isLatestTeaser) {
+      populateLatestTeaserFields(data);
+    } else if (isPaidDigest) {
+      populatePaidDigestFields(data);
     } else {
       populateFields(data);
 
@@ -560,7 +632,7 @@ async function _submitUpload(formData) {
       }
     }
 
-    _showPostUploadSections(isQA, isFertility, isMarketing, isDigest);
+    _showPostUploadSections(isQA, isFertility, isMarketing, isDigest, isLatestTeaser, isPaidDigest);
     showStatus('upload-status', 'Fields extracted successfully.', 'success');
 
   } catch (err) {
@@ -613,6 +685,18 @@ function populateDigestFields(data) {
   buildDigestCards(data.articles || []);
 }
 
+function populateLatestTeaserFields(data) {
+  ltArticleBodyHtml = data.article_body_html || '';
+  document.getElementById('lt-title').value = data.title || '';
+  document.getElementById('lt-subtitle').value = (data.subtitle_lines || []).join('\n');
+  document.getElementById('lt-intro').value = data.intro_text || LT_DEFAULT_INTRO;
+  document.getElementById('lt-fade-from').value = data.fade_from || '';
+  document.getElementById('lt-img-url').value = data.featured_image_url || '';
+  document.getElementById('lt-img-alt').value = data.featured_image_alt || '';
+  document.getElementById('lt-article-url').value = data.article_url || '';
+  fetchRelatedArticles(data.topic_tags || [], data.related_articles || []);
+}
+
 function buildDigestCards(articles) {
   const container = document.getElementById('digest-cards');
   container.innerHTML = '';
@@ -639,6 +723,59 @@ function buildDigestCards(articles) {
         </div>
       </div>
     `);
+  }
+}
+
+function populatePaidDigestFields(data) {
+  buildPaidDigestSections(data.sections || []);
+}
+
+function buildPaidDigestSections(sections) {
+  const container = document.getElementById('paid-digest-sections');
+  container.innerHTML = '';
+  _paidDigestStructure = sections.map(s => ({ articleCount: (s.articles || []).length }));
+  let cardIndex = 0;
+  for (let s = 0; s < sections.length; s++) {
+    const section = sections[s];
+    const articles = section.articles || [];
+    container.insertAdjacentHTML('beforeend', `
+      <div style="border-top:1px solid #e0e0e0;margin-top:20px;padding-top:16px;">
+        <h3 style="margin:0 0 12px 0;">Section ${s + 1}</h3>
+        <div class="field-group">
+          <label for="pd-section-name-${s}">Section Name</label>
+          <input type="text" id="pd-section-name-${s}" value="${_esc(section.name || '')}" placeholder="e.g. Popular this week">
+        </div>
+      </div>
+    `);
+    for (let a = 0; a < articles.length; a++) {
+      const art = articles[a];
+      container.insertAdjacentHTML('beforeend', `
+        <div style="margin-left:20px;padding-top:8px;border-left:3px solid #e0e0e0;padding-left:16px;margin-bottom:12px;">
+          <h4 style="margin:0 0 8px 0;">Article ${cardIndex + 1}</h4>
+          <div class="field-group">
+            <label for="pd-art-title-${cardIndex}">Title</label>
+            <input type="text" id="pd-art-title-${cardIndex}" value="${_esc(art.title || '')}" placeholder="Article title">
+          </div>
+          <div class="field-group">
+            <label for="pd-art-subtitle-${cardIndex}">Subtitle</label>
+            <input type="text" id="pd-art-subtitle-${cardIndex}" value="${_esc(art.subtitle || '')}" placeholder="Article subtitle">
+          </div>
+          <div class="field-group">
+            <label for="pd-art-url-${cardIndex}">URL</label>
+            <input type="url" id="pd-art-url-${cardIndex}" value="${_esc(art.url || '')}" placeholder="https://parentdata.org/…">
+          </div>
+          <div class="field-group image-url-field">
+            <label for="pd-art-img-${cardIndex}">Image URL${art.image_url ? ' <span style="font-weight:400;color:#2a7a2a;">(auto-fetched)</span>' : ''}</label>
+            <input type="url" id="pd-art-img-${cardIndex}" value="${_esc(art.image_url || '')}" placeholder="https://parentdata.org/wp-content/uploads/…">
+          </div>
+          <div class="field-group">
+            <label for="pd-art-imgalt-${cardIndex}">Image Alt</label>
+            <input type="text" id="pd-art-imgalt-${cardIndex}" value="${_esc(art.image_alt || art.title || '')}" placeholder="Brief image description">
+          </div>
+        </div>
+      `);
+      cardIndex++;
+    }
   }
 }
 
@@ -742,10 +879,57 @@ async function generateEmail() {
   const isFertility = currentTemplate === 'fertility';
   const isMarketing = currentTemplate === 'marketing';
   const isDigest = currentTemplate === 'fertility_digest';
+  const isLatestTeaser = currentTemplate === 'latest_teaser';
+  const isPaidDigest = currentTemplate === 'paid_digest';
 
   let payload;
 
-  if (isDigest) {
+  if (isPaidDigest) {
+    const sections = [];
+    let cardIdx = 0;
+    for (let s = 0; s < _paidDigestStructure.length; s++) {
+      const name = document.getElementById(`pd-section-name-${s}`).value;
+      const articles = [];
+      const count = _paidDigestStructure[s].articleCount;
+      for (let a = 0; a < count; a++) {
+        articles.push({
+          title:     document.getElementById(`pd-art-title-${cardIdx}`).value,
+          subtitle:  document.getElementById(`pd-art-subtitle-${cardIdx}`).value,
+          url:       document.getElementById(`pd-art-url-${cardIdx}`).value,
+          image_url: document.getElementById(`pd-art-img-${cardIdx}`).value,
+          image_alt: document.getElementById(`pd-art-imgalt-${cardIdx}`).value,
+        });
+        cardIdx++;
+      }
+      sections.push({ name, articles });
+    }
+    payload = {
+      template_type: 'paid_digest',
+      sections: sections,
+    };
+  } else if (isLatestTeaser) {
+    const subtitleLines = document.getElementById('lt-subtitle').value
+      .split('\n').map(s => s.trim()).filter(Boolean);
+    const relatedArticles = [0, 1].map(i => ({
+      title:       document.getElementById(`rel-${i}-title`).value,
+      url:         document.getElementById(`rel-${i}-url`).value,
+      image_url:   document.getElementById(`rel-${i}-image-url`).value,
+      image_alt:   document.getElementById(`rel-${i}-image-alt`).value,
+      description: document.getElementById(`rel-${i}-description`).value,
+    })).filter(a => a.title || a.url);
+    payload = {
+      template_type:        'latest_teaser',
+      title:                document.getElementById('lt-title').value,
+      subtitle_lines:       subtitleLines,
+      intro_text:           document.getElementById('lt-intro').value,
+      fade_from:            document.getElementById('lt-fade-from').value,
+      featured_image_url:   document.getElementById('lt-img-url').value,
+      featured_image_alt:   document.getElementById('lt-img-alt').value,
+      article_url:          document.getElementById('lt-article-url').value,
+      article_body_html:    ltArticleBodyHtml,
+      related_articles:     relatedArticles,
+    };
+  } else if (isDigest) {
     payload = {
       template_type: 'fertility_digest',
       title: document.getElementById('digest-title').value,
@@ -937,6 +1121,9 @@ function showStatus(elId, message, type) {
   el.className = `status-bar status-${type}`;
   el.removeAttribute('hidden');
 }
+
+// ── Initialise upload area for default template ─────────────────────────────
+selectTemplate(currentTemplate);
 </script>
 
 </body>
