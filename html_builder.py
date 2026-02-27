@@ -1432,13 +1432,27 @@ def _apply_link_fixes(html: str) -> str:
         c_m   = re.search(r'\bcolor\s*:\s*([^;]+)',          merged, re.I)
         td_m  = re.search(r'text-decoration\s*:\s*([^;]+)',  merged, re.I)
 
-        # Use an explicit px value (not inherit) so older iOS Mail renders the
-        # span at the correct size even when its inline style context breaks
-        # inheritance through the CSS-applied <a> rule.  16px is the article
-        # body standard; links that already carry an explicit size (e.g. 14px
-        # footer links) use that instead.
+        # Determine font-size for the span:
+        #   1. Use the link's own font-size if it has one
+        #   2. Otherwise, look at the nearest parent element's font-size
+        #      (scan backwards from the <a> tag for a font-size declaration)
+        #   3. Fall back to 16px (article body default)
+        if fz_m:
+            span_fz = fz_m.group(1).strip()
+        else:
+            # Scan backwards in the HTML from this <a> tag for the nearest
+            # parent's font-size (e.g. the containing <p style="font-size:14px">)
+            preceding = html[:m.start()]
+            parent_fz_matches = re.findall(
+                r'font-size\s*:\s*(\d+px)', preceding, re.I
+            )
+            if parent_fz_matches:
+                span_fz = parent_fz_matches[-1]
+            else:
+                span_fz = '16px'
+
         span_parts = [
-            f"font-size:{fz_m.group(1).strip() if fz_m else '16px'}",
+            f"font-size:{span_fz}",
             f"color:{c_m.group(1).strip() if c_m else '#000000'}",
             f"text-decoration:{td_m.group(1).strip() if td_m else 'underline'}",
         ]
