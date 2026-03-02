@@ -29,6 +29,45 @@ STYLE_P_SUB = (
     "font-size: 18px; line-height: 32px; letter-spacing: -0.8px; color: #000000;"
 )
 
+# ── Shared mobile CSS (injected at build time into every template) ───────────
+
+SHARED_MOBILE_CSS = (
+    "@media only screen and (max-width:480px){\n"
+    ".email-container{width:100%!important;min-width:100%!important}\n"
+    ".fluid{max-width:100%!important;height:auto!important;margin-left:auto!important;margin-right:auto!important}\n"
+    ".stack-column,.stack-column-center{display:block!important;width:100%!important;max-width:100%!important;direction:ltr!important;padding-left:0!important;padding-right:0!important}\n"
+    ".center-on-mobile{text-align:center!important}\n"
+    ".welcome-message{font-size:14px!important;line-height:20px!important;padding:8px 12px!important}\n"
+    ".sub-text{font-size:16px!important}\n"
+    ".mobile-padding{padding:12px 0px!important}\n"
+    ".mobile-hide{display:none!important}\n"
+    ".mobile-show{display:block!important;max-height:none!important}\n"
+    ".headline-mobile{font-size:32px!important;line-height:36px!important;letter-spacing:-1.6px!important;padding:0px 12px!important}\n"
+    ".upgrade-headline-mobile{font-size:30px!important;line-height:36px!important;letter-spacing:-1.5px!important}\n"
+    ".logo-mobile{width:123px!important;height:36px!important}\n"
+    ".button-mobile{width:250px!important;padding:19px 27px!important}\n"
+    ".subscribe-btn-mobile a{padding:20px 24px!important;font-size:20px!important}\n"
+    ".continue-reading-btn a{padding:16px!important;font-size:18px!important}\n"
+    ".box-pad{padding:0px!important}\n"
+    ".table-box-mobile{padding:24px 20px!important}\n"
+    ".top-box-header-m{font-size:16px!important;line-height:22px!important}\n"
+    ".no-top-pad{padding-top:0px!important}\n"
+    "body{width:100%!important;min-width:100%!important}\n"
+    "table[class=email-container]{width:100%!important}\n"
+    "img{max-width:100%!important;height:auto!important}\n"
+    ".news-top-link,.news-top-link span a{font-size:14px!important;padding:0 4px!important}\n"
+    ".news-top-link a span{font-size:14px!important}\n"
+    ".price-image{width:100%!important;max-width:300px!important;height:auto!important}\n"
+    ".pricing-container{width:100%!important;max-width:100%!important}\n"
+    ".pricing-row{display:block!important;width:100%!important}\n"
+    ".pricing-old,.pricing-new{display:block!important;width:100%!important;max-width:100%!important;text-align:center!important;padding:0 20px!important}\n"
+    ".pricing-old{padding-bottom:16px!important}\n"
+    ".pricing-new table{width:100%!important;max-width:100%!important}\n"
+    ".pricing-new td{display:block!important;width:100%!important}\n"
+    ".brush-bg{max-width:280px!important;width:100%!important;height:auto!important}\n"
+    "}\n"
+)
+
 
 # ── Public entry point ───────────────────────────────────────────────────────
 
@@ -1664,13 +1703,14 @@ def apply_email_fixes(html: str) -> str:
                 re.search(r'\bpadding\s*:\s*0px?\b', style, re.I)):
             td['class'] = classes + ['no-top-pad']
 
-    # 10. Propagate parent font-size onto <a> tags that lack one.
-    #     This ensures _apply_link_fixes can create span wrappers with
-    #     the correct px size, and also fixes non-Gmail clients where
-    #     the <a> tag's own font-size takes effect.
-    #     Skip links inside responsive-size areas (.news-top-link, footer)
-    #     where the desktop font-size would lock in and prevent mobile
-    #     CSS from overriding on older iOS devices.
+    # 10. Propagate parent font-size and font-family onto <a> tags that
+    #     lack them.  This ensures _apply_link_fixes can create span
+    #     wrappers with the correct px size, and also fixes non-Gmail
+    #     clients (especially older iOS Mail) where the <a> tag's own
+    #     inline font-size/family takes precedence.
+    #     Skip links inside .news-top-link (responsive: 18px desktop,
+    #     14px mobile) where locking in desktop size prevents mobile CSS
+    #     from overriding on older iOS devices.
     for a_tag in soup.find_all('a', href=True):
         a_style = a_tag.get('style', '')
         if re.search(r'\bfont-size\s*:', a_style, re.I):
@@ -1678,37 +1718,36 @@ def apply_email_fixes(html: str) -> str:
         # Skip links inside .news-top-link (responsive size: 18px desktop, 14px mobile)
         if a_tag.find_parent(class_='news-top-link'):
             continue
-        # Walk up ancestors looking for an explicit inline font-size
+        # Walk up ancestors looking for explicit inline font-size + font-family
         parent_size = None
+        parent_family = None
         for parent in a_tag.parents:
             p_style = parent.get('style', '') if hasattr(parent, 'get') else ''
-            fz_m = re.search(r'font-size\s*:\s*(\d+)px', p_style, re.I)
-            if fz_m:
-                parent_size = int(fz_m.group(1))
+            if parent_size is None:
+                fz_m = re.search(r'font-size\s*:\s*(\d+)px', p_style, re.I)
+                if fz_m:
+                    parent_size = int(fz_m.group(1))
+            if parent_family is None:
+                ff_m = re.search(r'font-family\s*:\s*([^;]+)', p_style, re.I)
+                if ff_m:
+                    parent_family = ff_m.group(1).strip()
+            if parent_size is not None and parent_family is not None:
                 break
-        # Skip footer links (≤ 14px parent) — let them inherit naturally
-        # so the email-footer-link CSS can control sizing
-        if parent_size is not None and parent_size <= 14:
-            continue
+        add_parts = []
+        if parent_family is not None:
+            add_parts.append(f"font-family:{parent_family};")
         if parent_size is not None:
-            a_tag['style'] = f"font-size:{parent_size}px;" + a_style
-
-    # 11. Tag footer-area <p> elements (font-size ≤ 14px with links) so
-    #     Gmail iOS CSS can target them.
-    for p_tag in soup.find_all('p'):
-        if not p_tag.find('a', href=True):
-            continue
-        p_style = p_tag.get('style', '')
-        fz_m = re.search(r'font-size\s*:\s*(\d+)px', p_style, re.I)
-        if fz_m and int(fz_m.group(1)) <= 14:
-            classes = p_tag.get('class', [])
-            if 'email-footer-link' not in classes:
-                p_tag['class'] = classes + ['email-footer-link']
+            add_parts.append(f"font-size:{parent_size}px;")
+        if add_parts:
+            a_tag['style'] = ''.join(add_parts) + a_style
 
     html = str(soup)
 
     # 7. Gmail iOS link fix (regex on string — mirrors email-checker exactly)
     html = _apply_link_fixes(html)
+
+    # 7a. Shared mobile CSS injection
+    html = _inject_shared_mobile_css(html)
 
     # 7b. Gmail iOS u+#body CSS injection — belt-and-suspenders for link spans
     html = _inject_gmail_ios_css(html)
@@ -1829,6 +1868,21 @@ def _apply_link_fixes(html: str) -> str:
     return re.sub(r'<a\b([^>]*)>([\s\S]*?)</a>', fix_link, html, flags=re.IGNORECASE)
 
 
+def _inject_shared_mobile_css(html: str) -> str:
+    """
+    Inject SHARED_MOBILE_CSS at the beginning of the first <style> block.
+
+    Shared rules come BEFORE any template-specific @media rules, so
+    template overrides win (later rule with same specificity + !important).
+    """
+    return re.sub(
+        r'(<style[^>]*>)',
+        r'\1\n' + SHARED_MOBILE_CSS,
+        html,
+        count=1,
+    )
+
+
 def _inject_gmail_ios_css(html: str) -> str:
     """
     Gmail on iOS injects a bare <u></u> element adjacent to the email body,
@@ -1890,6 +1944,10 @@ def _inject_gmail_ios_css(html: str) -> str:
         "font-size:18px!important;"
         "font-family:'DM Sans',Arial,Helvetica,sans-serif!important"
         "}\n"
+        "u + #body p.sub-text.author-line{"
+        "font-size:16px!important;"
+        "font-family:'Lora',Georgia,serif!important"
+        "}\n"
         "/* Gmail iOS: fix link sizes in welcome banner, headings + footer */\n"
         "u + #body .welcome-message a,"
         "u + #body .welcome-message a span{"
@@ -1901,10 +1959,11 @@ def _inject_gmail_ios_css(html: str) -> str:
         "font-size:18px!important;"
         "font-family:'Lora',Georgia,serif!important"
         "}\n"
-        "u + #body .email-footer-link a,"
-        "u + #body .email-footer-link a span{"
-        "font-size:14px!important;"
-        "font-family:'DM Sans',Arial,Helvetica,sans-serif!important"
+        "/* Mobile: lock author font for iOS Mail */\n"
+        "@media only screen and (max-width:480px){\n"
+        "p.author-line{"
+        "font-family:'Lora',Georgia,serif!important"
+        "}\n"
         "}\n"
     )
     # Ensure <body> has id="body" so the selector can match

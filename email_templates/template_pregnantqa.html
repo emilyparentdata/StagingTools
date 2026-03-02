@@ -74,92 +74,11 @@ a[x-apple-data-detectors] {
 .fade-out-medium { opacity: .5; }
 .fade-out-light { opacity: .2; }
 
-/* Responsive styles */
+/* Responsive styles: shared mobile CSS injected at build time by html_builder.py */
+/* Template-specific overrides only */
 @media only screen and (max-width: 480px) {
-    .email-container { width: 100% !important; min-width: 100% !important; }
-    .news-top-link, .news-top-link span a { font-size: 14px !important; padding: 0 4px !important;}
-    .news-top-link a span { font-size: 14px !important;}
-    .fluid { max-width: 100% !important; height: auto !important; margin-left: auto !important; margin-right: auto !important; }
-    .stack-column, .stack-column-center { 
-        display: block !important; 
-        width: 100% !important; 
-        max-width: 100% !important; 
-        direction: ltr !important;
-        padding-left: 0 !important;
-        padding-right: 0 !important;
-    }
-    .center-on-mobile { text-align: center !important; }
-    .welcome-message { font-size: 14px !important; line-height: 20px !important; padding: 8px 12px !important; }
-    .sub-text { font-size: 16px !important; }
-    .mobile-padding { padding: 12px 0px !important; }
-    .mobile-hide { display: none !important; }
-    .mobile-show { display: block !important; max-height: none !important; }
-    .headline-mobile { font-size: 32px !important; line-height: 36px !important; letter-spacing: -1.6px !important; padding: 0px 12px !important; }
-    .upgrade-headline-mobile { font-size: 30px !important; line-height: 36px !important; letter-spacing: -1.5px !important; }
-    .logo-mobile { width: 123px !important; height: 36px !important; }
-    .button-mobile { width: 250px !important; padding: 19px 27px !important; }
-    .subscribe-btn-mobile a { padding: 20px 24px !important; font-size: 20px !important; }
-    .continue-reading-btn a { padding: 16px !important; font-size: 18px !important; }
-    .box-pad { padding: 0px !important; }
-    .table-box-mobile { padding: 24px 20px !important; }
-    .top-box-header-m { font-size: 16px !important; line-height: 22px !important;   }
-    .no-top-pad { padding-top: 0px !important; }
-    
-    /* Fix horizontal scroll issues */
-    body { width: 100% !important; min-width: 100% !important; }
-    table[class=email-container] { width: 100% !important; }
-    img { max-width: 100% !important; height: auto !important; }
-    
-    /* Fix price image overflow */
-    .price-image { width: 100% !important; max-width: 300px !important; height: auto !important; }
-    
-    /* Force pricing table to stack */
-    .pricing-container { 
-        width: 100% !important; 
-        max-width: 100% !important;
-    }
-    
-    .pricing-row { 
-        display: block !important; 
-        width: 100% !important;
-    }
-    
-    .pricing-old, .pricing-new { 
-        display: block !important; 
-        width: 100% !important; 
-        max-width: 100% !important;
-        text-align: center !important;
-        padding: 0 20px !important;
-    }
-    
-    .pricing-old { 
-        padding-bottom: 16px !important; 
-    }
-    
-    /* Force nested table inside pricing-new to be 100% width */
-    .pricing-new table { 
-        width: 100% !important; 
-        max-width: 100% !important;
-    }
-    
-    .pricing-new td { 
-        display: block !important; 
-        width: 100% !important;
-    }
-    
-    .brush-bg { 
-        max-width: 280px !important; 
-        width: 100% !important; 
-        height: auto !important;
-    }
-    
-    .pricing-old p { 
-        font-size: 48px !important; 
-    }
-    
-    .pricing-new p { 
-        font-size: 48px !important; 
-    }
+    .pricing-old p { font-size: 48px !important; }
+    .pricing-new p { font-size: 48px !important; }
 }
 </style>
     
