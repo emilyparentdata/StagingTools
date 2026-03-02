@@ -351,6 +351,84 @@ def parse_toddler_article_docx(file_path: str) -> dict:
     }
 
 
+def parse_toddler_qa_docx(file_path: str) -> dict:
+    """
+    Parse a ToddlerData Q&A DOCX (exported from Google Doc).
+
+    Expected document structure:
+      Subject Line: …
+      Preheader: ToddlerData, 18 months
+      From Name: …                         (skipped)
+      <intro paragraph(s)>
+      <article URL 1>                      (bare URL or hyperlink)
+      <article URL 2>
+      <article URL 3>                      (optional)
+
+    Returns:
+        {
+            months_old:   str,
+            intro_text:   str,
+            article_urls: [str] × 2–3,
+        }
+    """
+    from docx.oxml.ns import qn as _qn
+
+    doc = Document(file_path)
+
+    _pd_url_re = re.compile(r'https?://(?:www\.)?parentdata\.org/\S+', re.I)
+
+    months_old = ''
+    intro_lines = []
+    article_urls = []
+    seen_first_url = False
+
+    for para in doc.paragraphs:
+        text = para.text.strip()
+        if not text:
+            continue
+
+        # "Subject line: …" → skip
+        if re.match(r'^Subject\s+line\s*:', text, re.I):
+            continue
+
+        # "Preheader: …" → extract months
+        m = re.match(r'^Preheader\s*:\s*(.+)$', text, re.I)
+        if m:
+            months_match = re.search(r'(\d+)\s*months?', m.group(1), re.I)
+            if months_match:
+                months_old = months_match.group(1)
+            continue
+
+        # "From Name: …" → skip
+        if re.match(r'^From\s+Name\s*:', text, re.I):
+            continue
+
+        # ParentData URL → article link
+        url = ''
+        url_match = _pd_url_re.search(text)
+        if url_match:
+            url = url_match.group(0).rstrip('.,;:')
+        else:
+            hl_url = _get_hyperlink_url(para, doc, _qn)
+            if hl_url and _pd_url_re.match(hl_url):
+                url = hl_url
+
+        if url:
+            seen_first_url = True
+            article_urls.append(url)
+            continue
+
+        # Plain text before first URL → intro
+        if not seen_first_url:
+            intro_lines.append(text)
+
+    return {
+        'months_old': months_old,
+        'intro_text': ' '.join(intro_lines),
+        'article_urls': article_urls[:3],
+    }
+
+
 def parse_toddler_digest_docx(file_path: str) -> dict:
     """
     Parse a ToddlerData digest DOCX (exported from Google Doc).

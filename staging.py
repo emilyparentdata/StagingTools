@@ -196,40 +196,6 @@ def upload():
         except Exception as e:
             return jsonify({'error': str(e)}), 500
 
-    # ── Toddler Q&A: two or three WordPress URLs ────────────────────────────
-    if template_type == 'toddler_qa' and wp_url_1 and wp_url_2:
-        try:
-            from wp_fetcher import fetch_wp_article
-            from claude_client import extract_qa_content
-
-            article1 = fetch_wp_article(wp_url_1)
-            article2 = fetch_wp_article(wp_url_2)
-
-            qa1 = extract_qa_content(article1['content_html'])
-            qa2 = extract_qa_content(article2['content_html'])
-
-            author1 = _strip_name_credentials(article1.get('author_name', ''))
-            author2 = _strip_name_credentials(article2.get('author_name', ''))
-            all_authors = [author1, author2]
-
-            result = {
-                'qa1': qa1,
-                'qa2': qa2,
-                'qa_authors': [],
-            }
-
-            if wp_url_3:
-                article3 = fetch_wp_article(wp_url_3)
-                qa3 = extract_qa_content(article3['content_html'])
-                author3 = _strip_name_credentials(article3.get('author_name', ''))
-                all_authors.append(author3)
-                result['qa3'] = qa3
-
-            result['qa_authors'] = list(dict.fromkeys(a for a in all_authors if a))
-            return jsonify(result)
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
-
     # ── Q&A: two WordPress URLs ──────────────────────────────────────────────
     if template_type == 'qa' and wp_url_1 and wp_url_2:
         try:
@@ -435,6 +401,44 @@ def _process_docx(tmp_path: str, template_type: str = 'standard') -> dict:
             'months_old': parsed.get('months_old', ''),
             'discussion_questions': parsed.get('discussion_questions', []),
         }
+
+    if template_type == 'toddler_qa':
+        from docx_parser import parse_toddler_qa_docx
+        from wp_fetcher import fetch_wp_article
+        from claude_client import extract_qa_content
+
+        parsed = parse_toddler_qa_docx(tmp_path)
+        urls = parsed.get('article_urls', [])
+
+        if len(urls) < 2:
+            return jsonify({'error': 'Need at least 2 article URLs in the Google Doc'}), 400
+
+        article1 = fetch_wp_article(urls[0])
+        article2 = fetch_wp_article(urls[1])
+        qa1 = extract_qa_content(article1['content_html'])
+        qa2 = extract_qa_content(article2['content_html'])
+
+        author1 = _strip_name_credentials(article1.get('author_name', ''))
+        author2 = _strip_name_credentials(article2.get('author_name', ''))
+        all_authors = [author1, author2]
+
+        result = {
+            'months_old': parsed.get('months_old', ''),
+            'intro_text': parsed.get('intro_text', ''),
+            'qa1': qa1,
+            'qa2': qa2,
+            'qa_authors': [],
+        }
+
+        if len(urls) >= 3:
+            article3 = fetch_wp_article(urls[2])
+            qa3 = extract_qa_content(article3['content_html'])
+            author3 = _strip_name_credentials(article3.get('author_name', ''))
+            all_authors.append(author3)
+            result['qa3'] = qa3
+
+        result['qa_authors'] = list(dict.fromkeys(a for a in all_authors if a))
+        return result
 
     if template_type == 'toddler_digest':
         from docx_parser import parse_toddler_digest_docx
