@@ -26,7 +26,7 @@ from bs4 import BeautifulSoup, NavigableString
 
 STYLE_P_SUB = (
     "margin: 0; font-family: 'Lora', Georgia, serif; font-weight: 400; "
-    "font-size: 18px; line-height: 32px; letter-spacing: -0.8px; color: #000000;"
+    "font-size: 18px; line-height: 32px; color: #000000;"
 )
 
 # ── Shared mobile CSS (injected at build time into every template) ───────────
@@ -340,7 +340,7 @@ def _rebuild_article_card(card_tr, article: dict, is_last: bool = False):
 <tr>
 <td style="text-align: center;">
 <h3 class="h3-heading" style="margin: 0 0 8px 0; font-family: 'Lora', Georgia, serif; font-weight: bold; font-size: 18px; line-height: 24px; letter-spacing: -0.8px; color: #000000;"><a href="{url}" style="color: #000000; text-decoration: none;">{title}</a></h3>
-<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; letter-spacing: -0.8px; color: #000000;">{description}</p>
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; color: #000000;">{description}</p>
 </td>
 </tr>
 <tr>
@@ -762,7 +762,7 @@ def _update_pregnant_banner(soup, fields):
         return
     banner_p.clear()
     new_html = (
-        f'You are {weeks} weeks pregnant!<strong> </strong>'
+        f'<span style="font-weight:bold;">You are {weeks} weeks pregnant!</span> '
         '<span style="text-decoration: underline; font-style: italic;">'
         '<a href="https://parentdata.org/account/" style="color: #000000;" '
         'title="Change Age">Change due date.</a></span>'
@@ -840,8 +840,8 @@ def _inject_toddler_qa(soup, fields):
     """Inject all fields into the ToddlerData Q&A template."""
     _update_toddler_banner(soup, fields)
     _update_qa_intro(soup, fields)
-    _update_qa_pairs(soup, fields)
     _remove_unused_qa_pairs(soup, fields)
+    _update_qa_pairs(soup, fields)
     _update_copyright(soup)
 
 
@@ -870,10 +870,10 @@ def _update_toddler_banner(soup, fields):
     banner_p['style'] = 'margin: 0; font-size: 18px; padding: 0 15px;'
     banner_p.clear()
     new_html = (
-        f'Your child is {months} months old!<strong> </strong>'
+        f'<span style="font-weight:bold;">Your child is {months} months old!</span> '
         '<span style="text-decoration: underline; font-style: italic;">'
         '<a href="https://parentdata.org/account/" style="color: #000000;" '
-        'title="Change Age">Change age.</a></span>'
+        'title="Change Age">Change age?</a></span>'
     )
     banner_p.append(BeautifulSoup(new_html, 'html.parser'))
 
