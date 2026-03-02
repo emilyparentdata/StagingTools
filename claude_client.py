@@ -44,7 +44,7 @@ Signature line "—Emily":
   Same style as welcome paragraphs above
 
 Inline image within article body (chart, figure, illustrative image mid-article):
-  <div style="width: 100%; margin: 0 0 24px 0;"><img src="..." alt="..." style="display: block; width: 100%; max-width: 552px; height: auto; border-radius: 8px; margin: 0 auto;"></div>
+  <div style="width: 100%; margin: 0 0 24px 0;"><img src="..." alt="..." style="display: block; width: 100%; max-width: 552px; height: auto; margin: 0 auto;"></div>
   If the image has a caption, add it as a regular paragraph immediately after the div.
 
 Bottom line list (fertility template only):
@@ -76,7 +76,7 @@ Welcome/intro section paragraphs:
   style="padding-bottom: 24px; margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; color: #000000;"
 
 Inline image within article body (chart, figure, illustrative image mid-article):
-  <div style="width: 100%; margin: 0 0 24px 0;"><img src="..." alt="..." style="display: block; width: 100%; max-width: 552px; height: auto; border-radius: 8px; margin: 0 auto;"></div>
+  <div style="width: 100%; margin: 0 0 24px 0;"><img src="..." alt="..." style="display: block; width: 100%; max-width: 552px; height: auto; margin: 0 auto;"></div>
   If the image has a caption, add it as a regular paragraph immediately after the div.
 
 Bottom line list (fertility template only):

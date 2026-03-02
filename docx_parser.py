@@ -280,17 +280,21 @@ def parse_toddler_article_docx(file_path: str) -> dict:
     Parse a ToddlerData article DOCX (exported from Google Doc).
 
     Expected document structure:
-      Preheader: Your child is 22 months old!
-      https://parentdata.org/some-article/      (bare URL — only PD link in the doc)
-      Discussion Questions:
-      1. What types of screens…
-      2. When are screens allowed…
-      3. How long will screen time last?
+      Subject Line: …
+      Preheader: ToddlerData, 18 Months Old
+      From Name: …                              (skipped)
+      https://parentdata.org/some-article/       (bare URL — only PD link in the doc)
+      DISCUSSION QUESTIONS                       (bold heading)
+      Here are a few questions…                  (italic intro)
+      Does my child meet the CDC milestones…
+      What percentile is my child in…
+      Do I have any concerns…
 
     Returns:
         {
             months_old:            str,
             article_url:           str,
+            discussion_intro:      str,
             discussion_questions:  [str]
         }
     """
@@ -300,6 +304,7 @@ def parse_toddler_article_docx(file_path: str) -> dict:
 
     months_old = ''
     article_url = ''
+    discussion_intro = ''
     discussion_questions = []
     in_questions = False
 
@@ -310,27 +315,44 @@ def parse_toddler_article_docx(file_path: str) -> dict:
         if not text:
             continue
 
+        # "Subject line: …" → skip
+        if re.match(r'^Subject\s+line\s*:', text, re.I):
+            continue
+
         # "Preheader: …" → extract months
         m = re.match(r'^Preheader\s*:\s*(.+)$', text, re.I)
         if m:
-            months_match = re.search(r'(\d+)\s*months?\s*old', m.group(1), re.I)
+            months_match = re.search(r'(\d+)\s*months?', m.group(1), re.I)
             if months_match:
                 months_old = months_match.group(1)
             continue
 
-        # "Discussion Questions:" heading
+        # "From Name: …" → skip
+        if re.match(r'^From\s+Name\s*:', text, re.I):
+            continue
+
+        # "Discussion Questions" heading (bold, with or without colon)
         if re.match(r'^Discussion\s+Questions?\s*:?\s*$', text, re.I):
             in_questions = True
             continue
 
-        # Numbered question lines after heading
+        # Lines after the Discussion Questions heading
         if in_questions:
+            # First italic paragraph → intro text, not a question
+            if not discussion_intro and _is_italic_para(para):
+                discussion_intro = text
+                continue
+            # Numbered question → strip the number prefix
             q_match = re.match(r'^\d+\.\s*(.+)$', text)
             if q_match:
                 discussion_questions.append(q_match.group(1).strip())
             elif text:
-                # Non-numbered text after questions section — might be a question without number
+                # Non-numbered question
                 discussion_questions.append(text)
+            continue
+
+        # Skip placeholder lines like "[Insert full draft]"
+        if re.match(r'^\[.*\]$', text):
             continue
 
         # ParentData URL — found in text or as a hyperlink in the paragraph
@@ -347,6 +369,7 @@ def parse_toddler_article_docx(file_path: str) -> dict:
     return {
         'months_old': months_old,
         'article_url': article_url,
+        'discussion_intro': discussion_intro,
         'discussion_questions': discussion_questions,
     }
 
@@ -569,6 +592,14 @@ def _is_bold_para(para) -> bool:
     for run in para.runs:
         if run.text.strip():
             return bool(run.bold)
+    return False
+
+
+def _is_italic_para(para) -> bool:
+    """Return True if the first non-empty run in the paragraph is italic."""
+    for run in para.runs:
+        if run.text.strip():
+            return bool(run.italic)
     return False
 
 

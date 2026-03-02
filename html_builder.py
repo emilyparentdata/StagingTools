@@ -827,6 +827,8 @@ def _update_toddler_banner(soup, fields):
     months = fields.get('months_old', '')
     if not months:
         return
+    # Ensure consistent margin on the <p>
+    banner_p['style'] = 'margin: 0; font-size: 18px; padding: 0 15px;'
     banner_p.clear()
     new_html = (
         f'Your child is {months} months old!<strong> </strong>'
@@ -898,17 +900,15 @@ def _update_discussion_questions(soup, fields):
     # Clear existing questions
     question_td.clear()
 
-    # Insert new questions
-    p_style = (
-        "margin: 0 0 4px 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; "
-        "font-weight: normal; font-size: 16px; line-height: 30px; color: #000000;"
-    )
+    # Insert numbered questions
     for i, q in enumerate(questions):
-        margin = '0' if i == len(questions) - 1 else '0 0 4px 0'
+        is_last = i == len(questions) - 1
+        margin = '0' if is_last else '0 0 4px 0'
+        q_text = _smart_quotes(_escape_attr(q))
         new_p = BeautifulSoup(
             f'<p style="margin: {margin}; font-family: \'DM Sans\', Arial, Helvetica, sans-serif; '
-            f'font-weight: normal; font-size: 16px; line-height: 30px; color: #000000;">'
-            f'{i + 1}. {_escape_attr(q)}</p>',
+            f'font-weight: normal; font-size: 16px; line-height: 24px; text-align: left; color: #000000;">'
+            f'{i + 1}. {q_text}</p>',
             'html.parser',
         )
         question_td.append(new_p)
@@ -1547,6 +1547,32 @@ def _escape_attr(value: str) -> str:
     return value.replace('&', '&amp;').replace('"', '&quot;').replace('<', '&lt;').replace('>', '&gt;')
 
 
+def _smart_quotes(text: str) -> str:
+    """Convert straight quotes to curly/smart quotes for email HTML.
+
+    Expects text that has already been HTML-escaped (& → &amp;, etc.)
+    so straight quotes are the only remaining quote characters.
+    """
+    LDQUO = '\u201c'  # "
+    RDQUO = '\u201d'  # "
+    LSQUO = '\u2018'  # '
+    RSQUO = '\u2019'  # '
+
+    # Double quotes: &quot; from _escape_attr
+    text = re.sub(r'&quot;(\S)', lambda m: LDQUO + m.group(1), text)
+    text = re.sub(r'(\S)&quot;', lambda m: m.group(1) + RDQUO, text)
+    text = text.replace('&quot;', RDQUO)
+
+    # Apostrophes (it's, don't, they're)
+    text = re.sub(r"(\w)'(\w)", lambda m: m.group(1) + RSQUO + m.group(2), text)
+    # Single quotes
+    text = re.sub(r"'(\S)", lambda m: LSQUO + m.group(1), text)
+    text = re.sub(r"(\S)'", lambda m: m.group(1) + RSQUO, text)
+    text = text.replace("'", RSQUO)
+
+    return text
+
+
 # ── Graph placeholder replacement ────────────────────────────────────────────
 
 def _replace_graph_placeholders(html: str, inline_graphs: list) -> str:
@@ -1568,7 +1594,7 @@ def _replace_graph_placeholders(html: str, inline_graphs: list) -> str:
         return (
             f'<div style="position: relative; display: inline-block; width: 100%; margin: 16px 0;">'
             f'<img alt="{alt}" class="fluid" src="{url}"'
-            f' style="width: 100%; max-width: 552px; height: auto; display: block; border-radius: 8px;">'
+            f' style="width: 100%; max-width: 552px; height: auto; display: block;">'
             f'</div>'
         )
 
@@ -1642,17 +1668,30 @@ def apply_email_fixes(html: str) -> str:
     #     This ensures _apply_link_fixes can create span wrappers with
     #     the correct px size, and also fixes non-Gmail clients where
     #     the <a> tag's own font-size takes effect.
+    #     Skip links inside responsive-size areas (.news-top-link, footer)
+    #     where the desktop font-size would lock in and prevent mobile
+    #     CSS from overriding on older iOS devices.
     for a_tag in soup.find_all('a', href=True):
         a_style = a_tag.get('style', '')
         if re.search(r'\bfont-size\s*:', a_style, re.I):
             continue  # already has font-size
+        # Skip links inside .news-top-link (responsive size: 18px desktop, 14px mobile)
+        if a_tag.find_parent(class_='news-top-link'):
+            continue
         # Walk up ancestors looking for an explicit inline font-size
+        parent_size = None
         for parent in a_tag.parents:
             p_style = parent.get('style', '') if hasattr(parent, 'get') else ''
-            fz_m = re.search(r'font-size\s*:\s*(\d+px)', p_style, re.I)
+            fz_m = re.search(r'font-size\s*:\s*(\d+)px', p_style, re.I)
             if fz_m:
-                a_tag['style'] = f"font-size:{fz_m.group(1)};" + a_style
+                parent_size = int(fz_m.group(1))
                 break
+        # Skip footer links (≤ 14px parent) — let them inherit naturally
+        # so the email-footer-link CSS can control sizing
+        if parent_size is not None and parent_size <= 14:
+            continue
+        if parent_size is not None:
+            a_tag['style'] = f"font-size:{parent_size}px;" + a_style
 
     # 11. Tag footer-area <p> elements (font-size ≤ 14px with links) so
     #     Gmail iOS CSS can target them.
@@ -1849,7 +1888,7 @@ def _inject_gmail_ios_css(html: str) -> str:
         "}\n"
         "u + #body p.sub-text{"
         "font-size:18px!important;"
-        "font-family:'Lora',Georgia,serif!important"
+        "font-family:'DM Sans',Arial,Helvetica,sans-serif!important"
         "}\n"
         "/* Gmail iOS: fix link sizes in welcome banner, headings + footer */\n"
         "u + #body .welcome-message a,"

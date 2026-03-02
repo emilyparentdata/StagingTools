@@ -399,6 +399,7 @@ def _process_docx(tmp_path: str, template_type: str = 'standard') -> dict:
             'bottom_line_html': reformatted.get('bottom_line_html', ''),
             'article_url': article_url,
             'months_old': parsed.get('months_old', ''),
+            'discussion_intro': parsed.get('discussion_intro', ''),
             'discussion_questions': parsed.get('discussion_questions', []),
         }
 

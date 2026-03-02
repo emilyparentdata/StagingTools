@@ -1,0 +1,433 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="x-apple-disable-message-reformatting" />
+    <title>The Pregnancy Dataset We Can't Afford to Lose - ParentData</title>
+    
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=DM+Sans:ital,wght@0,400;0,500;0,700;0,800;1,300;1,400;1,700&display=swap" rel="stylesheet">
+  
+    
+    <style type="text/css">   
+    
+/* Email Client Resets */
+body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+body { margin: 0; padding: 0; width: 100% !important; height: 100% !important; }
+
+/* Remove spacing on Outlook */
+table { border-collapse: collapse !important; }
+
+/* Prevent WebKit and Windows mobile changing default text sizes */
+body, table, td, p, a, li, blockquote { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+
+/* What it does: Remove spaces around the email design added by some email clients. */
+html, body { margin: 0 auto !important; padding: 0 !important; height: 100% !important; width: 100% !important; }
+
+/* What it does: Stops email clients resizing small text. */
+* { -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; }
+
+/* Center the email */
+.email-container { max-width: 600px; margin: 0 auto; }
+
+/* Force Outlook to provide a "view in browser" link */
+#outlook a { padding: 0; }
+
+/* Prevent Webkit and Windows mobile from changing default text sizes */
+.ExternalClass { width: 100%; }
+.ExternalClass, .ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td, .ExternalClass div {
+    line-height: 100%;
+}
+
+/* Force Hotmail to display normal line spacing */
+.ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td, .ExternalClass div {
+    line-height: 100%;
+}
+/* Forces links to stay black and underlined in modern clients */
+p a{color:#000000!important;text-decoration:underline!important;  }
+li a{color:#000000!important;text-decoration:underline!important; }
+.apple-link p a{color:#000000!important;text-decoration:underline!important; }
+.g-italic-fnt { font-size: 16px !important; }
+  .tablebox,  .tablebox p{
+  		font-size: 16px !important;
+        line-height: 22px !important;
+	}
+   .tablebox a, .tablebox li a {
+    color: #054F8B !important;
+    text-decoration: underline !important;
+    font-size: 16px !important;
+  }
+
+/* Remove spacing on images */
+a[x-apple-data-detectors] {
+    color: inherit !important;
+    text-decoration: none !important;
+    font-size: inherit !important;
+    font-family: inherit !important;
+    font-weight: inherit !important;
+    line-height: inherit !important;
+}
+
+.fade-out-medium { opacity: .5; }
+.fade-out-light { opacity: .2; }
+
+/* Responsive styles */
+@media only screen and (max-width: 480px) {
+    .email-container { width: 100% !important; min-width: 100% !important; }
+    .news-top-link, .news-top-link span a { font-size: 14px !important; padding: 0 4px !important;}
+    .news-top-link a span { font-size: 14px !important;}
+    .fluid { max-width: 100% !important; height: auto !important; margin-left: auto !important; margin-right: auto !important; }
+    .stack-column, .stack-column-center { 
+        display: block !important; 
+        width: 100% !important; 
+        max-width: 100% !important; 
+        direction: ltr !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+    .center-on-mobile { text-align: center !important; }
+    .welcome-message { font-size: 14px !important; line-height: 20px !important; padding: 8px 12px !important; }
+    .sub-text { font-size: 16px !important; }
+    .mobile-padding { padding: 12px 0px !important; }
+    .mobile-hide { display: none !important; }
+    .mobile-show { display: block !important; max-height: none !important; }
+    .headline-mobile { font-size: 32px !important; line-height: 36px !important; letter-spacing: -1.6px !important; padding: 0px 12px !important; }
+    .upgrade-headline-mobile { font-size: 30px !important; line-height: 36px !important; letter-spacing: -1.5px !important; }
+    .logo-mobile { width: 123px !important; height: 36px !important; }
+    .button-mobile { width: 250px !important; padding: 19px 27px !important; }
+    .subscribe-btn-mobile a { padding: 20px 24px !important; font-size: 20px !important; }
+    .continue-reading-btn a { padding: 16px !important; font-size: 18px !important; }
+    .box-pad { padding: 0px !important; }
+    .table-box-mobile { padding: 24px 20px !important; }
+    .top-box-header-m { font-size: 16px !important; line-height: 22px !important;   }
+    .no-top-pad { padding-top: 0px !important; }
+    
+    /* Fix horizontal scroll issues */
+    body { width: 100% !important; min-width: 100% !important; }
+    table[class=email-container] { width: 100% !important; }
+    img { max-width: 100% !important; height: auto !important; }
+    
+    /* Fix price image overflow */
+    .price-image { width: 100% !important; max-width: 300px !important; height: auto !important; }
+    
+    /* Force pricing table to stack */
+    .pricing-container { 
+        width: 100% !important; 
+        max-width: 100% !important;
+    }
+    
+    .pricing-row { 
+        display: block !important; 
+        width: 100% !important;
+    }
+    
+    .pricing-old, .pricing-new { 
+        display: block !important; 
+        width: 100% !important; 
+        max-width: 100% !important;
+        text-align: center !important;
+        padding: 0 20px !important;
+    }
+    
+    .pricing-old { 
+        padding-bottom: 16px !important; 
+    }
+    
+    /* Force nested table inside pricing-new to be 100% width */
+    .pricing-new table { 
+        width: 100% !important; 
+        max-width: 100% !important;
+    }
+    
+    .pricing-new td { 
+        display: block !important; 
+        width: 100% !important;
+    }
+    
+    .brush-bg { 
+        max-width: 280px !important; 
+        width: 100% !important; 
+        height: auto !important;
+    }
+    
+    .pricing-old p { 
+        font-size: 48px !important; 
+    }
+    
+    .pricing-new p { 
+        font-size: 48px !important; 
+    }
+}
+</style>
+    
+    <!--[if gte mso 9]>
+    <style type="text/css">
+        /* Outlook-specific styles */
+        table { border-collapse: collapse; }
+        .outlook-fallback { font-family: Arial, sans-serif !important; }
+    </style>
+    <![endif]-->
+</head>
+
+<body style="margin: 0; padding: 0; background-color: #f4f4f4; font-family: 'DM Sans', Arial, Helvetica, sans-serif;">
+<div style="display: none; font-size: 1px; line-height: 1px; max-height: 0; max-width: 0; opacity: 0; overflow: hidden; mso-hide: all;">It's Q&amp;A day</div>
+<!-- Main Email Container --><center style="width: 100%; background-color: #f4f4f4;">
+<table align="center" border="0" cellpadding="0" cellspacing="0" class="email-container" role="presentation" style="max-width: 600px; margin: 0px auto; background-color: rgb(255, 255, 255);" width="100%"><!-- HEADER SECTION: Cream Background with Logo -->
+<tbody>
+<tr>
+<td style="background-color: rgb(208, 214, 252); text-align: center; width: 99.6667%;">
+<p class="news-top-link" style="font-size: 18px; font-family: 'DM Sans', Arial, Helvetica, sans-serif; padding: 0 15px;">You are 37 weeks pregnant! <span style="text-decoration: underline; font-family: 'DM Sans', Arial, Helvetica, sans-serif;"><a href="https://parentdata.org/account/" style="color: #000000; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-size: 18px; font-style: italic;" title="Change Age">Change due date.</a></span></p>
+</td>
+</tr>
+<tr>
+<td style="background-image: url('https://library.iterable.com/3244/21559/3984bb7c3e8b457a9acf12c643b3094a-banner-cover-bg-x3.png'); background-position: center center; background-size: 600px 140px; background-repeat: no-repeat; padding: 28px 0px; text-align: center; width: 99.6667%; height: 82.3281px;"><img alt="ParentData Logo" class="fluid" height="75" src="https://library.iterable.com/3244/21559/7cc960cdabae4f22be88bd8677ab72e9-logo-pregdata.png" width="179">
+<table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+<tbody>
+<tr>
+<td style="text-align: center; position: relative;"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr>
+<td style="background-color: rgb(255, 255, 255); padding: 0px; width: 99.6667%;">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%"><!-- Headline -->
+<tbody>
+<tr>
+<td style="text-align: center; padding-bottom: 16px; padding-top: 20px;">
+<h1 class="headline-mobile" style="margin: 0px; font-family: Lora, Georgia, serif; font-weight: bold; font-size: 36px; line-height: 48px; letter-spacing: -2.4px; color: rgb(0, 0, 0); padding: 0px 42px; text-align: center;"><span style="white-space: pre-wrap;">It's Q&amp;A day for PregnantData!</span></h1>
+</td>
+</tr>
+<!-- Subtitle -->
+<tr>
+<td class="table-box-mobile top-box-header-m no-top-pad" style="text-align: center; padding: 24px 40px;">
+<p class="sub-text" style="margin: 0px; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 300; font-size: 18px; line-height: 28px; letter-spacing: -0.8px; color: rgb(0, 0, 0); text-align: center;"><span style="white-space: pre-wrap;">Today&rsquo;s questions are about breastfeeding for the second time, C-section antibodies, and whether your feet will go back to their normal size postpartum.</span></p>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<!--
+<tr>
+<td style="background-color: rgb(255, 255, 255); padding: 12px 24px 20px;">
+<table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+<tbody>
+<tr>
+<td align="center">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" style="max-width: 444px; width: 100%;">
+<tbody>
+<tr>
+<td class="mobile-padding" style="background-color: #a9ddf3; border-radius: 50px; padding: 12px 52px; text-align: center;">
+<p class="welcome-message" style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 300; font-style: italic; font-size: 18px; line-height: 32px; letter-spacing: -0.9px; color: #000000;">Welcome to the Free Digest, ParentData's weekly newsletter for free subscribers.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+--> <!-- Got a question? Ask Petey section -->
+<tr>
+<td class="table-box-mobile" style="background-color: #ffffff; padding: 0 48px 32px 48px;">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+<tbody>
+<tr>
+<td align="center">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation">
+<tbody>
+<tr>
+<td align="center">
+<div class="" style="display: inline-block; mso-hide: all; width: auto; /* html/webmail styles */                border-radius: 15px; background-color: #fceea9; border: 2px solid #000000; box-shadow: 0px 4px 4px 0px rgba(0,0,0,0.25);"><a href="https://parentdata.typeform.com/to/NHBsKJHv" rel="noopener" style="display: block; /* link padding &amp; text styles */                                        padding: 14px 24px; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 800; font-size: 20px; line-height: 20px; letter-spacing: 0.24px; color: #000000; text-decoration: none; text-transform: uppercase; text-align: center; white-space: nowrap;" target="_blank">&nbsp;ASK A QUESTION</a></div>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr>
+<td class="table-box-mobile no-top-pad" style="background-color: rgb(208, 214, 252); padding: 0px 48px 20px; width: 99.6667%;">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%"><!-- Author -->
+<tbody>
+<tr>
+<td style="padding-bottom: 16px; padding-top: 20px;"><img alt="Question" src="https://library.iterable.com/3244/21559/f9730096bc984ff899c50047c0900530-question.png" style="display:block;" width="146"></td>
+</tr>
+<tr>
+<td style="padding-bottom: 0px;">
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 18px; line-height: 24px; letter-spacing: -0.8px; color: #000000; font-style: italic;">I had a fairly traumatic breastfeeding attempt/experience with my first child. I have one flat and one inverted nipple and knew it would be challenging going into it, but had numerous midwives and lactation consultants tell me I could make it work, so I tried. It didn&rsquo;t help that I had a baby who seemed distinctly disinterested in the process and preferred the bottle anyway. After seeing six lactation consultants, pumping seven times a day, and taping myself up with nipple shields and Haakaa tubes, all I ended up with was three bouts of mastitis, a trip to the ER for fear of an abscess (I didn&rsquo;t have one, thankfully), and a fraught relationship with my newborn.</p>
+<br>
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 18px; line-height: 24px; letter-spacing: -0.8px; color: #000000; font-style: italic;">I am now pregnant again, and I mention all this to ask &mdash; is there any decent chance this will be different a second time around? Should I even make an effort, or go straight to formula?<span style="white-space: pre-wrap;"></span><br><br><span style="white-space: pre-wrap;">&mdash;Nervous about Breastfeeding</span></p>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr>
+<td class="table-box-mobile no-top-pad" style="background-color: #ffffff; padding: 0px 48px 20px; width: 99.6667%;">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%"><!-- Author -->
+<tbody>
+<tr>
+<td style="padding-bottom: 24px; padding-top: 20px;"><img alt="Answer" src="https://library.iterable.com/3244/21559/738060915124467fa3c8591de01dea1f-answer.png" style="display:block;" width="146"></td>
+</tr>
+<tr>
+<td class="tablebox" style="padding-bottom: 0px;">
+<div>
+<p style="white-space-collapse: preserve; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 24px; color: #000000; margin-top: 0px;">First of all, this sounds incredibly traumatic and I&rsquo;m sorry it happened to you. It&rsquo;s a bit of a cautionary tale. On the whole, having more support for people to figure out breastfeeding is something I strongly believe in. But we do need to be careful that in delivering that support, it doesn&rsquo;t come with the message that you must do this at all costs <span class="g-italic-fnt" style="font-style: italic; font-size: 16px;">or</span> that if you do not end up <a href="https://parentdata.org/post-topic/breastfeeding-formula/">breastfeeding</a>, you&rsquo;re some kind of failure. Your experience shouldn&rsquo;t be the norm, and clearly it would have been better if someone had suggested you switch to formula much, much earlier.</p>
+<p style="white-space-collapse: preserve; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 24px; color: #000000; margin-top: 0px;">Your experience was extreme, but your question about whether the second will be similar is one I hear from many women. Broadly, the answer is that breastfeeding does tend to &mdash; on average &mdash; <a href="https://pubmed.ncbi.nlm.nih.gov/11583756/">be easier the second time</a>, but there is correlation over time in experiences.</p>
+<p style="white-space-collapse: preserve; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 24px; color: #000000; margin-top: 0px;">To elaborate: there are some aspects of what makes breastfeeding hard that are likely to get easier with a second. First, your milk comes in sooner (on average) with a second birth. This means some of the early struggles where you aren&rsquo;t producing enough milk are lessened. More nebulously, the fact that at least one of you has done this before (you, not the new baby) seems to make it easier. For whatever reason, women do tend to report that nursing is easier with later children.</p>
+<p style="white-space-collapse: preserve; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 24px; color: #000000; margin-top: 0px;">Having said that, some of the barriers to breastfeeding can remain. Your milk production overall will be similar. In your case, your nipples are not going to change, even if you may have a better sense of the range of possible options.</p>
+<p style="white-space-collapse: preserve; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 24px; color: #000000; margin-top: 0px;">When Dr. Spock wrote about breastfeeding in his child care book back in the 1970s, he said some version of &ldquo;You might consider trying breastfeeding, since some people like it and it might work for you.&rdquo; He did not go on to say it&rsquo;s the <a href="https://parentdata.org/what-matters-childhood-outcomes/">key to a successful child</a> or anything of the type, just that it might work for you. I think this is the right advice here too. You could try it with the second, and maybe it will work better and you&rsquo;ll like it. But be prepared to quit if it doesn&rsquo;t work, and know that <a href="https://parentdata.org/formula-feeding-guilt/">everything will be fine</a>.</p>
+</div>
+</td>
+</tr>
+<tr>
+<td style="padding-bottom: 0px;"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr>
+<td class="table-box-mobile no-top-pad" style="background-color: rgb(208, 214, 252); padding: 0px 48px 20px; width: 99.6667%;">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%"><!-- Author -->
+<tbody>
+<tr>
+<td style="padding-bottom: 16px; padding-top: 20px;"><img alt="Question" src="https://library.iterable.com/3244/21559/f9730096bc984ff899c50047c0900530-question.png" style="display:block;" width="146"></td>
+</tr>
+<tr>
+<td style="padding-bottom: 0px;">
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 18px; line-height: 24px; letter-spacing: -0.8px; color: #000000; font-style: italic;"><span style="white-space: pre-wrap;">Hi Emily. There&rsquo;s been a Dutch/Scottish study that found that babies born via C-section have half the amount of protective antibodies produced after childhood vaccines than those born vaginally. Is this study good? This feels pretty significant. I was set on a C-section to give birth next time after suffering a serious tear with my first baby, but now I&rsquo;m worried I&rsquo;d be putting them at risk to protect my own health. </span><br><br><span style="white-space: pre-wrap;">&mdash;Gabi</span></p>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr>
+<td class="table-box-mobile no-top-pad" style="background-color: #ffffff; padding: 0px 48px 20px; width: 99.6667%;">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%"><!-- Author -->
+<tbody>
+<tr>
+<td style="padding-bottom: 24px; padding-top: 20px;"><img alt="Answer" src="https://library.iterable.com/3244/21559/738060915124467fa3c8591de01dea1f-answer.png" style="display:block;" width="146"></td>
+</tr>
+<tr>
+<td class="tablebox" style="padding-bottom: 0px;">
+<div>
+<p style="white-space-collapse: preserve; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 24px; color: #000000; margin-top: 0px;">The study you are referring to is <a href="https://www.nature.com/articles/s41467-022-34155-2">here</a>. In it, researchers took data from a number of babies (either 66 or 101, depending on the vaccine) and measured their degree of antibody response to vaccination. That is: they measured the amount of antibody produced after vaccination with either the pneumococcal or meningococcal vaccines.</p>
+<p style="white-space-collapse: preserve; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 24px; color: #000000; margin-top: 0px;">They found that there was variation in the concentration of antibodies across individuals based on both their mode of birth and whether they were breastfed or formula-fed. They hypothesize that this response is related to gut bacteria, since gut bacteria also vary along these dimensions.</p>
+<p style="white-space-collapse: preserve; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 24px; color: #000000; margin-top: 0px;">These results are interesting, and the mechanism is plausible. There is also <a href="https://www.nature.com/articles/s41564-024-01694-x">other recent work</a> which suggests that babies born by C-section are less likely to have a strong immune response to the first dose of the measles vaccine.</p>
+<p style="white-space-collapse: preserve; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 24px; color: #000000; margin-top: 0px;">Together, these results paint a picture suggesting that birth by C-section might be associated with a lower immune response to antibodies. There are, however, several important caveats.</p>
+<p style="white-space-collapse: preserve; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 24px; color: #000000; margin-top: 0px;">First, none of these studies are randomized, and some of the results are a little confusing (the first paper finds that antibody responses are lowest in vaginally-born, formula-fed babies, but it's not clear why this would be). The combination of these facts makes us worry that something else is driving the results other than a causal relationship.&nbsp;</p>
+<p style="white-space-collapse: preserve; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 24px; color: #000000; margin-top: 0px;">Second &mdash; more importantly &mdash; it&rsquo;s not clear these differences have any practical importance. In the first paper, the average antibody levels in all the groups are sufficient to prevent disease. Despite the breathless headlines, it is not the case that any of these groups did not show a significant and robust antibody response. In the case of measles vaccines, the second dose of the vaccine produces a robust response across the board.</p>
+<p style="white-space-collapse: preserve; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 24px; color: #000000; margin-top: 0px;">Bottom line: this should not impact your choice of birth mode. It&rsquo;s an interesting fact, possibly worthy of some follow-up as we seek to better understand the microbiome. Not worth changing behavior for.</p>
+</div>
+</td>
+</tr>
+<tr>
+<td style="padding-bottom: 0px;"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr>
+<td class="table-box-mobile no-top-pad" style="background-color: rgb(208, 214, 252); padding: 0px 48px 20px; width: 99.6667%;">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%"><!-- Author -->
+<tbody>
+<tr>
+<td style="padding-bottom: 16px; padding-top: 20px;"><img alt="Question" src="https://library.iterable.com/3244/21559/f9730096bc984ff899c50047c0900530-question.png" style="display:block;" width="146"></td>
+</tr>
+<tr>
+<td style="padding-bottom: 0px;">
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 18px; line-height: 24px; letter-spacing: -0.8px; color: #000000; font-style: italic;">My feet grew while I was pregnant: one size up; my baby is 14 months now. Will they ever go back to pre-pregnancy size? They aren&rsquo;t swollen anymore, just a size longer, so all my pre-preggie shoes don&rsquo;t fit. Am I wasting my time holding onto them? I suspect it was the relaxin hormone with all the tendons between the bones in my feet and toes.<br><br><span style="white-space: pre-wrap;">&mdash;Tanya</span></p>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr>
+<td class="table-box-mobile no-top-pad" style="background-color: #ffffff; padding: 0px 48px 20px; width: 99.6667%;">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%"><!-- Author -->
+<tbody>
+<tr>
+<td style="padding-bottom: 24px; padding-top: 20px;"><img alt="Answer" src="https://library.iterable.com/3244/21559/738060915124467fa3c8591de01dea1f-answer.png" style="display:block;" width="146"></td>
+</tr>
+<tr>
+<td class="tablebox" style="padding-bottom: 0px;">
+<div>
+<p style="white-space-collapse: preserve; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 24px; color: #000000; margin-top: 0px;">I am sorry to report that you are indeed probably wasting your time. I looked into this in detail, and I&rsquo;m afraid your question is answered by the title of <a href="https://journals.lww.com/ajpmr/fulltext/2013/03000/pregnancy_leads_to_lasting_changes_in_foot.6.aspx">this paper</a>: &ldquo;Pregnancy Leads to Lasting Changes in Foot Structure.&rdquo;</p>
+<p style="white-space-collapse: preserve; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 24px; color: #000000; margin-top: 0px;">The authors in this paper follow 49 women from pregnancy through five months <a href="https://parentdata.org/smell-different-postpartum/">postpartum</a>. They find that foot size does increase during pregnancy. Interestingly, what happens is the arch gets less rigid, leading to a broadening and flattening of the foot, which often results in a need for a larger size shoe. These authors found that the foot size did not revert five months <a href="https://parentdata.org/postpartum-support-team/">postpartum</a>.</p>
+<p style="white-space-collapse: preserve; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 24px; color: #000000; margin-top: 0px;">I will say: this is only five months out! So maybe three or four years later, things will return to normal. Then again, maybe not. In the meantime, buy some nice shoes!<span style="white-space: pre-wrap;"></span></p>
+</div>
+<div>
+<p style="white-space-collapse: preserve; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; font-size: 16px; line-height: 24px; color: #000000;"><span class="g-italic-fnt" style="font-style: italic; font-size: 16px; font-family: 'DM Sans', Arial, Helvetica, sans-serif;">Today's answers come from Emily Oster.</span></p>
+</div>
+</td>
+</tr>
+<tr>
+<td style="padding-bottom: 0px;"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<!-- FOOTER SECTION -->
+<tr>
+<td class="table-box-mobile" style="background-color: #d0d6fc; padding: 40px 48px;">
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+<tbody><!-- Footer Logo -->
+<tr>
+<td style="text-align: left; padding-bottom: 24px;"><img alt="Footer Logo" class="fluid" src="https://library.iterable.com/3244/21559/0c234709315b456daeae8158543952a5-footerlogo.png" style="max-width: 120px; height: auto;" width="120"></td>
+</tr>
+<!-- Footer Text -->
+<tr>
+<td style="text-align: left; padding-bottom: 16px;">
+<p style="margin: 0 0 8px 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 14px; line-height: normal; color: #000000;">You are receiving this email because you opted in via our website.</p>
+</td>
+</tr>
+<!-- Change Preferences -->
+<tr>
+<td style="text-align: left; padding-bottom: 12px;">
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 800; font-size: 14px; line-height: normal; color: #000000;">Want to change how you receive these emails?</p>
+</td>
+</tr>
+<!-- Unsubscribe Link -->
+<tr>
+<td style="text-align: left; padding-bottom: 16px;">
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 14px; line-height: normal; color: #000000;"><a href="{{hostedUnsubscribeUrl}}" style="color: #000000; text-decoration: underline; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-size: 14px;">Unsubscribe from this list</a></p>
+</td>
+</tr>
+<!-- Manage Preferences -->
+<tr>
+<td style="text-align: left; padding-bottom: 20px;">
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 14px; line-height: normal; color: #000000;">To manage all of your newsletter preferences or cancel, please <a href="https://parentdata.org/account/" style="color: #000000; text-decoration: underline; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-size: 14px;">visit your account</a>.</p>
+</td>
+</tr>
+<!-- Copyright -->
+<tr>
+<td style="text-align: left;">
+<p style="margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; font-size: 14px; line-height: normal; color: #000000;">Copyright &copy; 2026 ParentData, All rights reserved.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</center>
+</body>
+</html>
