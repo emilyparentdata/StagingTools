@@ -13,6 +13,7 @@ Authentication:
 """
 
 import os
+import re
 import requests as _requests
 from urllib.parse import urlparse
 
@@ -172,14 +173,19 @@ def fetch_article_metadata(url: str) -> dict:
     }
 
 
+def _strip_site_suffix(title: str) -> str:
+    """Remove trailing ' | ParentData by Emily Oster' or similar site name."""
+    return re.sub(r'\s*\|\s*ParentData\b.*$', '', title).strip()
+
+
 def fetch_article_image(url: str) -> dict:
     """
-    Fetch the featured image for a parentdata.org article URL.
+    Fetch the featured image (and title) for a parentdata.org article URL.
 
     Tries the WP REST API (requires auth) first, then falls back to scraping
     the og:image meta tag from the public article page.
 
-    Returns {'image_url': str, 'image_alt': str}. Both empty strings on failure.
+    Returns {'image_url': str, 'image_alt': str, 'title': str}. Empty strings on failure.
     """
     # Try WP REST API if credentials are available
     auth = _wp_auth()
@@ -202,13 +208,14 @@ def fetch_article_image(url: str) -> dict:
                 posts = resp.json()
                 if posts:
                     post = posts[0]
+                    title = _strip_site_suffix(post.get('title', {}).get('rendered', ''))
                     media = post.get('_embedded', {}).get('wp:featuredmedia', [])
                     if media and isinstance(media[0], dict):
                         m = media[0]
                         img_url = m.get('source_url', '')
-                        img_alt = m.get('alt_text', '') or post.get('title', {}).get('rendered', '')
+                        img_alt = m.get('alt_text', '') or title
                         if img_url:
-                            return {'image_url': img_url, 'image_alt': img_alt}
+                            return {'image_url': img_url, 'image_alt': img_alt, 'title': title}
         except Exception:
             pass
 
@@ -229,12 +236,12 @@ def fetch_article_image(url: str) -> dict:
             if og_img and og_img.get('content'):
                 img_url = og_img['content']
                 og_title = soup.find('meta', property='og:title')
-                img_alt = og_title.get('content', '') if og_title else ''
-                return {'image_url': img_url, 'image_alt': img_alt}
+                title = _strip_site_suffix(og_title.get('content', '') if og_title else '')
+                return {'image_url': img_url, 'image_alt': title, 'title': title}
     except Exception:
         pass
 
-    return {'image_url': '', 'image_alt': ''}
+    return {'image_url': '', 'image_alt': '', 'title': ''}
 
 
 def _slug_from_url(url: str) -> str:

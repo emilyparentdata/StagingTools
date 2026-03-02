@@ -84,6 +84,46 @@ TEMPLATES = {
         'has_related_reading': False,
         'has_bottom_line': False,
     },
+    'pregnant_article': {
+        'label': 'Pregnancy Article',
+        'file': BASE_DIR / 'email_templates' / 'template_pregnantdata.html',
+        'has_welcome': False,
+        'has_author_block': False,
+        'has_related_reading': False,
+        'has_bottom_line': True,
+    },
+    'pregnant_qa': {
+        'label': 'Pregnancy Q&A',
+        'file': BASE_DIR / 'email_templates' / 'template_pregnantqa.html',
+        'has_welcome': False,
+        'has_author_block': False,
+        'has_related_reading': False,
+        'has_bottom_line': False,
+    },
+    'toddler_article': {
+        'label': 'Toddler Article',
+        'file': BASE_DIR / 'email_templates' / 'template_toddlerarticle.html',
+        'has_welcome': False,
+        'has_author_block': False,
+        'has_related_reading': False,
+        'has_bottom_line': True,
+    },
+    'toddler_qa': {
+        'label': 'Toddler Q&A',
+        'file': BASE_DIR / 'email_templates' / 'template_toddlerqa.html',
+        'has_welcome': False,
+        'has_author_block': False,
+        'has_related_reading': False,
+        'has_bottom_line': False,
+    },
+    'toddler_digest': {
+        'label': 'Toddler Digest',
+        'file': BASE_DIR / 'email_templates' / 'template_toddlerdigest.html',
+        'has_welcome': False,
+        'has_author_block': False,
+        'has_related_reading': False,
+        'has_bottom_line': False,
+    },
 }
 
 
@@ -123,8 +163,72 @@ def upload():
     wp_url_1 = request.form.get('wp_url_1', '').strip()
     wp_url_2 = request.form.get('wp_url_2', '').strip()
 
+    wp_url_3 = request.form.get('wp_url_3', '').strip()
+
     if not wordpress_url and not google_doc_url and not has_file and not (wp_url_1 and wp_url_2):
         return jsonify({'error': 'Provide a .docx file, a Google Doc link, or a ParentData article URL'}), 400
+
+    # ── Pregnant Q&A: three WordPress URLs ───────────────────────────────────
+    if template_type == 'pregnant_qa' and wp_url_1 and wp_url_2 and wp_url_3:
+        try:
+            from wp_fetcher import fetch_wp_article
+            from claude_client import extract_qa_content
+
+            article1 = fetch_wp_article(wp_url_1)
+            article2 = fetch_wp_article(wp_url_2)
+            article3 = fetch_wp_article(wp_url_3)
+
+            qa1 = extract_qa_content(article1['content_html'])
+            qa2 = extract_qa_content(article2['content_html'])
+            qa3 = extract_qa_content(article3['content_html'])
+
+            author1 = _strip_name_credentials(article1.get('author_name', ''))
+            author2 = _strip_name_credentials(article2.get('author_name', ''))
+            author3 = _strip_name_credentials(article3.get('author_name', ''))
+            qa_authors = list(dict.fromkeys(a for a in [author1, author2, author3] if a))
+
+            return jsonify({
+                'qa1': qa1,
+                'qa2': qa2,
+                'qa3': qa3,
+                'qa_authors': qa_authors,
+            })
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+
+    # ── Toddler Q&A: two or three WordPress URLs ────────────────────────────
+    if template_type == 'toddler_qa' and wp_url_1 and wp_url_2:
+        try:
+            from wp_fetcher import fetch_wp_article
+            from claude_client import extract_qa_content
+
+            article1 = fetch_wp_article(wp_url_1)
+            article2 = fetch_wp_article(wp_url_2)
+
+            qa1 = extract_qa_content(article1['content_html'])
+            qa2 = extract_qa_content(article2['content_html'])
+
+            author1 = _strip_name_credentials(article1.get('author_name', ''))
+            author2 = _strip_name_credentials(article2.get('author_name', ''))
+            all_authors = [author1, author2]
+
+            result = {
+                'qa1': qa1,
+                'qa2': qa2,
+                'qa_authors': [],
+            }
+
+            if wp_url_3:
+                article3 = fetch_wp_article(wp_url_3)
+                qa3 = extract_qa_content(article3['content_html'])
+                author3 = _strip_name_credentials(article3.get('author_name', ''))
+                all_authors.append(author3)
+                result['qa3'] = qa3
+
+            result['qa_authors'] = list(dict.fromkeys(a for a in all_authors if a))
+            return jsonify(result)
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
 
     # ── Q&A: two WordPress URLs ──────────────────────────────────────────────
     if template_type == 'qa' and wp_url_1 and wp_url_2:
@@ -162,7 +266,8 @@ def upload():
                 article['content_html'],
                 article.get('featured_image_url', ''),
             )
-            reformatted = reformat_wp_content(content_html, template_type)
+            reformat_type = 'fertility' if template_type == 'pregnant_article' else template_type
+            reformatted = reformat_wp_content(content_html, reformat_type)
 
             # Use WP excerpt as subtitle; fall back to Claude-generated if absent
             excerpt_text = article.get('excerpt_text', '')
@@ -292,6 +397,74 @@ def _process_docx(tmp_path: str, template_type: str = 'standard') -> dict:
             _apply_staging_instructions(response_data, staging)
 
         return response_data
+
+    if template_type == 'toddler_article':
+        from docx_parser import parse_toddler_article_docx
+        from wp_fetcher import fetch_wp_article
+        from claude_client import reformat_wp_content
+
+        parsed = parse_toddler_article_docx(tmp_path)
+        article_url = parsed.get('article_url', '')
+        if not article_url:
+            raise ValueError(
+                'No article URL found. Add "Article Link: https://…" to the doc.'
+            )
+
+        article = fetch_wp_article(article_url)
+        content_html = _strip_featured_image(
+            article['content_html'],
+            article.get('featured_image_url', ''),
+        )
+        reformatted = reformat_wp_content(content_html, 'fertility')
+
+        excerpt_text = article.get('excerpt_text', '')
+        subtitle_lines = (
+            [excerpt_text] if excerpt_text
+            else reformatted.get('subtitle_lines', [])
+        )
+
+        return {
+            'title': article.get('title', ''),
+            'subtitle_lines': subtitle_lines,
+            'author_name': article.get('author_name', ''),
+            'featured_image_url': article.get('featured_image_url', ''),
+            'featured_image_alt': article.get('featured_image_alt', ''),
+            'article_body_html': reformatted.get('article_body_html', ''),
+            'bottom_line_html': reformatted.get('bottom_line_html', ''),
+            'article_url': article_url,
+            'months_old': parsed.get('months_old', ''),
+            'discussion_questions': parsed.get('discussion_questions', []),
+        }
+
+    if template_type == 'toddler_digest':
+        from docx_parser import parse_toddler_digest_docx
+        from wp_fetcher import fetch_article_image
+
+        digest = parse_toddler_digest_docx(tmp_path)
+        articles = digest.get('articles', [])
+
+        for article in articles:
+            img = {'image_url': '', 'image_alt': '', 'title': ''}
+            if article.get('url'):
+                try:
+                    img = fetch_article_image(article['url'])
+                except Exception:
+                    pass
+            article['image_url'] = img.get('image_url', '')
+            article['image_alt'] = img.get('image_alt', '') or article.get('title', '')
+            # Use WP title if the doc didn't have one
+            if not article.get('title') and img.get('title'):
+                import html as _html
+                article['title'] = _html.unescape(img['title'])
+
+        return {
+            'title': digest.get('title', ''),
+            'months_old': digest.get('months_old', ''),
+            'intro_text': digest.get('intro_text', ''),
+            'articles': articles,
+            'win_text': digest.get('win_text', ''),
+            'win_attribution': digest.get('win_attribution', ''),
+        }
 
     if template_type == 'fertility_digest':
         from docx_parser import parse_digest_docx

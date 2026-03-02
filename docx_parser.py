@@ -275,6 +275,205 @@ def parse_paid_digest_docx(file_path: str) -> dict:
     return {'sections': sections}
 
 
+def parse_toddler_article_docx(file_path: str) -> dict:
+    """
+    Parse a ToddlerData article DOCX (exported from Google Doc).
+
+    Expected document structure:
+      Preheader: Your child is 22 months old!
+      https://parentdata.org/some-article/      (bare URL — only PD link in the doc)
+      Discussion Questions:
+      1. What types of screens…
+      2. When are screens allowed…
+      3. How long will screen time last?
+
+    Returns:
+        {
+            months_old:            str,
+            article_url:           str,
+            discussion_questions:  [str]
+        }
+    """
+    from docx.oxml.ns import qn as _qn
+
+    doc = Document(file_path)
+
+    months_old = ''
+    article_url = ''
+    discussion_questions = []
+    in_questions = False
+
+    _pd_url_re = re.compile(r'https?://(?:www\.)?parentdata\.org/\S+', re.I)
+
+    for para in doc.paragraphs:
+        text = para.text.strip()
+        if not text:
+            continue
+
+        # "Preheader: …" → extract months
+        m = re.match(r'^Preheader\s*:\s*(.+)$', text, re.I)
+        if m:
+            months_match = re.search(r'(\d+)\s*months?\s*old', m.group(1), re.I)
+            if months_match:
+                months_old = months_match.group(1)
+            continue
+
+        # "Discussion Questions:" heading
+        if re.match(r'^Discussion\s+Questions?\s*:?\s*$', text, re.I):
+            in_questions = True
+            continue
+
+        # Numbered question lines after heading
+        if in_questions:
+            q_match = re.match(r'^\d+\.\s*(.+)$', text)
+            if q_match:
+                discussion_questions.append(q_match.group(1).strip())
+            elif text:
+                # Non-numbered text after questions section — might be a question without number
+                discussion_questions.append(text)
+            continue
+
+        # ParentData URL — found in text or as a hyperlink in the paragraph
+        if not article_url:
+            url_match = _pd_url_re.search(text)
+            if url_match:
+                article_url = url_match.group(0).rstrip('.,;:')
+            else:
+                # Check hyperlinks embedded in the paragraph XML
+                hl_url = _get_hyperlink_url(para, doc, _qn)
+                if hl_url and _pd_url_re.match(hl_url):
+                    article_url = hl_url
+
+    return {
+        'months_old': months_old,
+        'article_url': article_url,
+        'discussion_questions': discussion_questions,
+    }
+
+
+def parse_toddler_digest_docx(file_path: str) -> dict:
+    """
+    Parse a ToddlerData digest DOCX (exported from Google Doc).
+
+    Expected document structure:
+      Subject Line: <email title>
+      Preheader: ToddlerData, 18 Months Old
+      From Name: …                            (skipped)
+      <intro paragraph(s)>
+      <article URL>                            (bare URL or hyperlink)
+      <article description>
+      … (repeat for up to 3 articles)
+      Win of the Month / Win of the Week       (bold heading)
+      <quote text>
+      —Attribution
+
+    Returns:
+        {
+            title:            str,
+            months_old:       str,
+            intro_text:       str,
+            articles:         [{title, description, url}] × up to 3,
+            win_text:         str,
+            win_attribution:  str,
+        }
+    """
+    from docx.oxml.ns import qn as _qn
+
+    doc = Document(file_path)
+
+    _pd_url_re = re.compile(r'https?://(?:www\.)?parentdata\.org/\S+', re.I)
+
+    email_title = ''
+    months_old = ''
+    intro_lines = []
+    articles = []
+    win_text = ''
+    win_attribution = ''
+    in_win = False
+    seen_first_url = False
+    last_was_url = False  # True if the previous paragraph was an article URL
+
+    for para in doc.paragraphs:
+        text = para.text.strip()
+        if not text:
+            last_was_url = False
+            continue
+
+        # "Subject line: …" → email title
+        m = re.match(r'^Subject\s+line\s*:\s*(.+)$', text, re.I)
+        if m:
+            email_title = m.group(1).strip()
+            last_was_url = False
+            continue
+
+        # "Preheader: …" → extract months
+        m = re.match(r'^Preheader\s*:\s*(.+)$', text, re.I)
+        if m:
+            months_match = re.search(r'(\d+)\s*months?\s*old', m.group(1), re.I)
+            if months_match:
+                months_old = months_match.group(1)
+            last_was_url = False
+            continue
+
+        # "From Name: …" → skip
+        if re.match(r'^From\s+Name\s*:', text, re.I):
+            last_was_url = False
+            continue
+
+        # "Win of the Week/Month" heading (bold)
+        if re.match(r'^Win\s+of\s+the\s+(Week|Month)\s*:?\s*$', text, re.I):
+            in_win = True
+            last_was_url = False
+            continue
+
+        # Inside Win section
+        if in_win:
+            # Attribution line starts with em-dash or hyphen
+            if re.match(r'^[\u2014\u2013\-]\s*', text):
+                win_attribution = re.sub(r'^[\u2014\u2013\-]\s*', '', text).strip()
+            elif not win_text:
+                win_text = text
+            last_was_url = False
+            continue
+
+        # ParentData URL → new article (check text and hyperlinks)
+        url = ''
+        url_match = _pd_url_re.search(text)
+        if url_match:
+            url = url_match.group(0).rstrip('.,;:')
+        else:
+            hl_url = _get_hyperlink_url(para, doc, _qn)
+            if hl_url and _pd_url_re.match(hl_url):
+                url = hl_url
+
+        if url:
+            seen_first_url = True
+            articles.append({'title': '', 'description': '', 'url': url})
+            last_was_url = True
+            continue
+
+        # Description line right after a URL
+        if last_was_url and articles:
+            articles[-1]['description'] = text
+            last_was_url = False
+            continue
+
+        # Plain text before first article URL → intro
+        if not seen_first_url:
+            intro_lines.append(text)
+
+        last_was_url = False
+
+    return {
+        'title': email_title,
+        'months_old': months_old,
+        'intro_text': ' '.join(intro_lines),
+        'articles': articles[:3],
+        'win_text': win_text,
+        'win_attribution': win_attribution,
+    }
+
+
 def _get_hyperlink_url(para, doc, qn) -> str:
     """Return the URL of the first hyperlink in a paragraph, or ''."""
     for hl in para._element.findall('.//' + qn('w:hyperlink')):

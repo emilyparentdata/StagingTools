@@ -27,6 +27,11 @@
         <option value="latest_teaser">Latest Teaser</option>
         <option value="marketing">Marketing - Full Article Send</option>
         <option value="paid_digest">Paid Digest</option>
+        <option value="pregnant_article">Pregnancy Article</option>
+        <option value="pregnant_qa">Pregnancy Q&amp;A</option>
+        <option value="toddler_article">Toddler Article</option>
+        <option value="toddler_digest">Toddler Digest</option>
+        <option value="toddler_qa">Toddler Q&amp;A</option>
       </select>
     </div>
   </section>
@@ -70,6 +75,13 @@
           <p class="hint" style="margin-top:5px;">Pull from an already-published ParentData article.</p>
         </div>
       </div>
+
+      <div id="weeks-pregnant-row" style="display:none; margin-top:12px;">
+        <div class="field-group" style="margin-bottom:0;">
+          <label for="weeks-pregnant">Weeks Pregnant</label>
+          <input type="number" id="weeks-pregnant" min="1" max="42" placeholder="e.g. 29" style="max-width:120px;">
+        </div>
+      </div>
     </div>
 
     <!-- Q&A upload options (two URLs) -->
@@ -88,6 +100,58 @@
         <textarea id="qa-intro-text" rows="3" style="width:100%;" placeholder="It's Q&amp;A day! This week's questions are about…"></textarea>
       </div>
       <button type="button" class="btn-primary" onclick="handleQAUrls()" style="margin-top:16px;">Fetch Both Articles</button>
+    </div>
+
+    <!-- Pregnant Q&A upload options (three URLs + weeks pregnant + intro) -->
+    <div id="pregnant-qa-upload-area" style="display:none;">
+      <p class="hint" style="margin-bottom:14px;">Paste three ParentData Q&amp;A article URLs, enter the weeks pregnant number, and write the intro text.</p>
+      <div class="field-group">
+        <label for="pqa-weeks-pregnant">Weeks Pregnant</label>
+        <input type="number" id="pqa-weeks-pregnant" min="1" max="42" placeholder="e.g. 37" style="max-width:120px;">
+      </div>
+      <div class="field-group">
+        <label for="pqa-intro-text">Intro text</label>
+        <textarea id="pqa-intro-text" rows="3" style="width:100%;" placeholder="Today&rsquo;s questions are about breastfeeding, C-section antibodies, and&hellip;"></textarea>
+      </div>
+      <div class="field-group">
+        <label for="pqa-url-1">Article 1 URL</label>
+        <input type="url" id="pqa-url-1" placeholder="https://parentdata.org/…">
+      </div>
+      <div class="field-group">
+        <label for="pqa-url-2">Article 2 URL</label>
+        <input type="url" id="pqa-url-2" placeholder="https://parentdata.org/…">
+      </div>
+      <div class="field-group">
+        <label for="pqa-url-3">Article 3 URL</label>
+        <input type="url" id="pqa-url-3" placeholder="https://parentdata.org/…">
+      </div>
+      <button type="button" class="btn-primary" onclick="handlePregnantQAUrls()" style="margin-top:16px;">Fetch All Articles</button>
+    </div>
+
+    <!-- Toddler Q&A upload options (2 or 3 URLs + months old + intro) -->
+    <div id="toddler-qa-upload-area" style="display:none;">
+      <p class="hint" style="margin-bottom:14px;">Paste two or three ParentData Q&amp;A article URLs, enter the months old, and write the intro text.</p>
+      <div class="field-group">
+        <label for="tqa-months-old">Months Old</label>
+        <input type="number" id="tqa-months-old" min="1" max="48" placeholder="e.g. 22" style="max-width:120px;">
+      </div>
+      <div class="field-group">
+        <label for="tqa-intro-text">Intro text</label>
+        <textarea id="tqa-intro-text" rows="3" style="width:100%;" placeholder="Today&rsquo;s questions are about screen time, day care, and&hellip;"></textarea>
+      </div>
+      <div class="field-group">
+        <label for="tqa-url-1">Article 1 URL</label>
+        <input type="url" id="tqa-url-1" placeholder="https://parentdata.org/…">
+      </div>
+      <div class="field-group">
+        <label for="tqa-url-2">Article 2 URL</label>
+        <input type="url" id="tqa-url-2" placeholder="https://parentdata.org/…">
+      </div>
+      <div class="field-group">
+        <label for="tqa-url-3">Article 3 URL <span style="font-weight:400;color:#888;">(optional — leave blank for 2 Q&amp;As)</span></label>
+        <input type="url" id="tqa-url-3" placeholder="https://parentdata.org/…">
+      </div>
+      <button type="button" class="btn-primary" onclick="handleToddlerQAUrls()" style="margin-top:16px;">Fetch Articles</button>
     </div>
 
     <div id="upload-status" class="status-bar" hidden></div>
@@ -261,10 +325,40 @@
       </details>
     </div>
 
-    <div class="field-group" style="margin-top:8px;">
+    <div id="qa-author-line-group" class="field-group" style="margin-top:8px;">
       <label for="qa-author-line">Author attribution line</label>
       <p class="hint">Appears at the bottom of the email in italic. Edit freely.</p>
       <input type="text" id="qa-author-line" placeholder="Today&#8217;s answers come from Emily Oster and Nathan Fox.">
+    </div>
+  </section>
+
+  <!-- ── Step 5 (Pregnant QA): Q&A Pair 3 ────────────────────────────── -->
+  <section id="section-qa3" class="card" hidden>
+    <h2>5. Question &amp; Answer 3</h2>
+
+    <div class="field-group">
+      <label for="qa3-question">Question Text</label>
+      <p class="hint">The reader's question as plain text (no HTML).</p>
+      <textarea id="qa3-question" rows="4" placeholder="My feet grew while I was pregnant…"></textarea>
+    </div>
+
+    <div class="field-group">
+      <label for="qa3-author">Sign-off Name</label>
+      <input type="text" id="qa3-author" placeholder="e.g. Tanya">
+    </div>
+
+    <div class="field-group">
+      <label for="qa3-answer">Answer HTML</label>
+      <details>
+        <summary>Show / hide answer body</summary>
+        <textarea id="qa3-answer" rows="16" class="code-area" placeholder="Answer HTML will appear here after fetch…"></textarea>
+      </details>
+    </div>
+
+    <div class="field-group" style="margin-top:8px;">
+      <label for="pqa-author-line">Author attribution line</label>
+      <p class="hint">Appears at the bottom of the email in italic. Edit freely.</p>
+      <input type="text" id="pqa-author-line" placeholder="Today&#8217;s answers come from Emily Oster.">
     </div>
   </section>
 
@@ -403,6 +497,56 @@
     <div id="paid-digest-sections"></div>
   </section>
 
+  <!-- ── Step 2 (Toddler Article): Review discussion questions ─────── -->
+  <section id="section-toddler-article" class="card" hidden>
+    <h2>2. Review Toddler Article Fields</h2>
+
+    <div class="field-group">
+      <label for="ta-months-old">Months Old</label>
+      <input type="number" id="ta-months-old" min="1" max="48" placeholder="e.g. 22" style="max-width:120px;">
+    </div>
+
+    <div class="field-group">
+      <label for="ta-discussion-questions">Discussion Questions</label>
+      <p class="hint">One question per line (numbered automatically). Edit freely.</p>
+      <textarea id="ta-discussion-questions" rows="6" style="width:100%;" placeholder="What types of screens will we allow?&#10;When are screens allowed during the day?"></textarea>
+    </div>
+  </section>
+
+  <!-- ── Step 2 (Toddler Digest): Review fields ───────────────────── -->
+  <section id="section-toddler-digest" class="card" hidden>
+    <h2>2. Review Toddler Digest Fields</h2>
+
+    <div class="field-group">
+      <label for="td-title">Email Title</label>
+      <input type="text" id="td-title" placeholder="e.g. Here's What Parents Are Thinking About Right Now" style="width:100%;">
+    </div>
+
+    <div class="field-group">
+      <label for="td-months-old">Months Old</label>
+      <input type="number" id="td-months-old" min="1" max="48" placeholder="e.g. 29" style="max-width:120px;">
+    </div>
+
+    <div class="field-group">
+      <label for="td-intro">Intro Text</label>
+      <textarea id="td-intro" rows="3" style="width:100%;" placeholder="Editorial intro paragraph…"></textarea>
+    </div>
+
+    <div id="toddler-digest-cards"></div>
+
+    <div style="border-top:1px solid #e0e0e0;margin-top:20px;padding-top:16px;">
+      <h3>Win of the Week</h3>
+      <div class="field-group">
+        <label for="td-win-text">Quote</label>
+        <textarea id="td-win-text" rows="3" style="width:100%;" placeholder="Saying hello by waving and smiling…"></textarea>
+      </div>
+      <div class="field-group">
+        <label for="td-win-attribution">Attribution</label>
+        <input type="text" id="td-win-attribution" placeholder="e.g. M &amp; B's Mamá">
+      </div>
+    </div>
+  </section>
+
   <!-- ── Generate ─────────────────────────────────────────────────────── -->
   <section id="section-generate" class="card" hidden>
     <h2>Generate Email</h2>
@@ -441,53 +585,72 @@ function selectTemplate(type) {
   currentTemplate = type;
 
   const isQA = type === 'qa';
-  document.getElementById('standard-upload-area').style.display = isQA ? 'none' : '';
+  const isPregnantQA = type === 'pregnant_qa';
+  const isToddlerQA = type === 'toddler_qa';
+  const hasOwnUploadArea = isQA || isPregnantQA || isToddlerQA;
+  document.getElementById('standard-upload-area').style.display = hasOwnUploadArea ? 'none' : '';
   document.getElementById('qa-upload-area').style.display = isQA ? '' : 'none';
+  document.getElementById('pregnant-qa-upload-area').style.display = isPregnantQA ? '' : 'none';
+  document.getElementById('toddler-qa-upload-area').style.display = isToddlerQA ? '' : 'none';
 
-  if (!isQA) {
+  if (!hasOwnUploadArea) {
     // Per-template input visibility:
     //   Latest (standard)      → Google Doc only
     //   Fertility Article      → ParentData URL only
     //   Marketing              → ParentData URL only
     //   Fertility Digest       → Google Doc only
+    //   Toddler Article        → Google Doc only
+    //   Toddler Digest         → Google Doc only
     //   Latest Teaser          → DOCX + Google Doc
-    //   (Q&A has its own area)
+    //   (Q&A types have their own areas)
     const showDocx = type === 'latest_teaser';
-    const showGdoc = type === 'standard' || type === 'fertility_digest' || type === 'latest_teaser' || type === 'paid_digest';
-    const showWp   = type === 'fertility' || type === 'marketing';
+    const showGdoc = type === 'standard' || type === 'fertility_digest' || type === 'latest_teaser' || type === 'paid_digest' || type === 'toddler_article' || type === 'toddler_digest';
+    const showWp   = type === 'fertility' || type === 'marketing' || type === 'pregnant_article';
 
     document.getElementById('docx-upload-row').style.display    = showDocx ? '' : 'none';
     document.getElementById('docx-gdoc-divider').style.display  = (showDocx && showGdoc) ? '' : 'none';
     document.getElementById('gdoc-url-row').style.display       = showGdoc ? '' : 'none';
     document.getElementById('wp-url-row-divider').style.display = 'none';
     document.getElementById('wp-url-row').style.display         = showWp ? '' : 'none';
+    document.getElementById('weeks-pregnant-row').style.display  = type === 'pregnant_article' ? '' : 'none';
   }
 }
 
-function _showPostUploadSections(isQA, isFertility, isMarketing, isDigest, isLatestTeaser, isPaidDigest) {
-  // Digest, LatestTeaser, and PaidDigest have dedicated sections; hide all other post-upload sections
-  const showStandardSections = !isQA && !isDigest && !isLatestTeaser && !isPaidDigest;
+function _showPostUploadSections(isQA, isFertility, isMarketing, isDigest, isLatestTeaser, isPaidDigest, isPregnant, isPregnantQA, isToddlerArticle, isToddlerQA, isToddlerDigest) {
+  // Digest, LatestTeaser, PaidDigest, and Toddler types have dedicated sections; hide all other post-upload sections
+  const showStandardSections = !isQA && !isPregnantQA && !isDigest && !isLatestTeaser && !isPaidDigest && !isToddlerQA && !isToddlerDigest;
 
-  // Sections common to standard + fertility + marketing
+  // Sections common to standard + fertility + marketing + toddler_article
   ['section-fields', 'section-image', 'section-body', 'section-generate'].forEach(id => {
     document.getElementById(id).style.display = showStandardSections ? '' : 'none';
     if (showStandardSections) document.getElementById(id).removeAttribute('hidden');
   });
 
   // Standard-only related reading (also shown for latest_teaser)
-  const showRelated = !isQA && !isFertility && !isMarketing && !isDigest && !isPaidDigest;
+  const showRelated = !isQA && !isPregnantQA && !isFertility && !isMarketing && !isDigest && !isPaidDigest && !isPregnant && !isToddlerArticle && !isToddlerQA && !isToddlerDigest;
   document.getElementById('section-related').style.display = showRelated ? '' : 'none';
   if (showRelated) document.getElementById('section-related').removeAttribute('hidden');
 
-  // Fertility-only
-  document.getElementById('section-bottomline').style.display = isFertility ? '' : 'none';
-  if (isFertility) document.getElementById('section-bottomline').removeAttribute('hidden');
+  // Fertility + Pregnant + Toddler Article bottom line
+  const showBottomLine = isFertility || isPregnant || isToddlerArticle;
+  document.getElementById('section-bottomline').style.display = showBottomLine ? '' : 'none';
+  if (showBottomLine) document.getElementById('section-bottomline').removeAttribute('hidden');
 
-  // QA-only
+  // QA pairs 1 & 2 (shown for fertility QA, pregnant QA, and toddler QA)
+  const showQAPairs = isQA || isPregnantQA || isToddlerQA;
   ['section-qa1', 'section-qa2'].forEach(id => {
-    document.getElementById(id).style.display = isQA ? '' : 'none';
-    if (isQA) document.getElementById(id).removeAttribute('hidden');
+    document.getElementById(id).style.display = showQAPairs ? '' : 'none';
+    if (showQAPairs) document.getElementById(id).removeAttribute('hidden');
   });
+
+  // QA pair 3 (pregnant QA and toddler QA with 3 questions)
+  const showQA3 = isPregnantQA || isToddlerQA;
+  document.getElementById('section-qa3').style.display = showQA3 ? '' : 'none';
+  if (showQA3) document.getElementById('section-qa3').removeAttribute('hidden');
+
+  // Move author attribution line: for fertility QA it's in section-qa2, for pregnant/toddler QA it's in section-qa3
+  setHide('qa-author-line-group', isPregnantQA || isToddlerQA);
+
   // section-intro is no longer shown post-upload; intro text lives in the upload form
   document.getElementById('section-intro').style.display = 'none';
 
@@ -503,14 +666,22 @@ function _showPostUploadSections(isQA, isFertility, isMarketing, isDigest, isLat
   document.getElementById('section-paid-digest').style.display = isPaidDigest ? '' : 'none';
   if (isPaidDigest) document.getElementById('section-paid-digest').removeAttribute('hidden');
 
+  // Toddler Article-only
+  document.getElementById('section-toddler-article').style.display = isToddlerArticle ? '' : 'none';
+  if (isToddlerArticle) document.getElementById('section-toddler-article').removeAttribute('hidden');
+
+  // Toddler Digest-only
+  document.getElementById('section-toddler-digest').style.display = isToddlerDigest ? '' : 'none';
+  if (isToddlerDigest) document.getElementById('section-toddler-digest').removeAttribute('hidden');
+
   // Always show generate
   const genSection = document.getElementById('section-generate');
   genSection.style.display = '';
   genSection.removeAttribute('hidden');
 
   // Field-level visibility within section-fields
-  setHide('group-welcome', isFertility || isMarketing);
-  setHide('group-author-url', isFertility || isMarketing);
+  setHide('group-welcome', isFertility || isMarketing || isPregnant || isToddlerArticle);
+  setHide('group-author-url', isFertility || isMarketing || isPregnant || isToddlerArticle);
   setHide('group-marketing', !isMarketing);
 
   // Fertility/QA-only option in generate section
@@ -553,7 +724,7 @@ async function handleGoogleDocUrl() {
   const url = document.getElementById('gdoc-url').value.trim();
   if (!url) return;
   document.getElementById('file-name').textContent = '';
-  const digestMsg = (currentTemplate === 'fertility_digest' || currentTemplate === 'paid_digest')
+  const digestMsg = (currentTemplate === 'fertility_digest' || currentTemplate === 'paid_digest' || currentTemplate === 'toddler_digest' || currentTemplate === 'toddler_article')
     ? 'Downloading Google Doc, extracting article links, and fetching article metadata… this may take 30–60 seconds.'
     : 'Downloading Google Doc and extracting fields… this may take 20–40 seconds.';
   showStatus('upload-status', digestMsg, 'info');
@@ -590,6 +761,43 @@ async function handleQAUrls() {
   await _submitUpload(formData);
 }
 
+// ── Upload (Pregnant Q&A) ─────────────────────────────────────────────────────
+async function handlePregnantQAUrls() {
+  const url1 = document.getElementById('pqa-url-1').value.trim();
+  const url2 = document.getElementById('pqa-url-2').value.trim();
+  const url3 = document.getElementById('pqa-url-3').value.trim();
+  if (!url1 || !url2 || !url3) {
+    showStatus('upload-status', 'Please enter all three article URLs.', 'error');
+    return;
+  }
+  showStatus('upload-status', 'Fetching all three articles and extracting Q&A content… this may take 30–60 seconds.', 'info');
+  const formData = new FormData();
+  formData.append('wp_url_1', url1);
+  formData.append('wp_url_2', url2);
+  formData.append('wp_url_3', url3);
+  formData.append('template_type', 'pregnant_qa');
+  await _submitUpload(formData);
+}
+
+// ── Upload (Toddler Q&A) ──────────────────────────────────────────────────────
+async function handleToddlerQAUrls() {
+  const url1 = document.getElementById('tqa-url-1').value.trim();
+  const url2 = document.getElementById('tqa-url-2').value.trim();
+  const url3 = document.getElementById('tqa-url-3').value.trim();
+  if (!url1 || !url2) {
+    showStatus('upload-status', 'Please enter at least two article URLs.', 'error');
+    return;
+  }
+  const count = url3 ? 'three' : 'two';
+  showStatus('upload-status', `Fetching ${count} articles and extracting Q&A content… this may take 30–60 seconds.`, 'info');
+  const formData = new FormData();
+  formData.append('wp_url_1', url1);
+  formData.append('wp_url_2', url2);
+  if (url3) formData.append('wp_url_3', url3);
+  formData.append('template_type', 'toddler_qa');
+  await _submitUpload(formData);
+}
+
 async function _submitUpload(formData) {
   try {
     const resp = await fetch('/upload', { method: 'POST', body: formData });
@@ -606,10 +814,23 @@ async function _submitUpload(formData) {
     const isDigest = currentTemplate === 'fertility_digest';
     const isLatestTeaser = currentTemplate === 'latest_teaser';
     const isPaidDigest = currentTemplate === 'paid_digest';
+    const isPregnant = currentTemplate === 'pregnant_article';
+    const isPregnantQA = currentTemplate === 'pregnant_qa';
+    const isToddlerArticle = currentTemplate === 'toddler_article';
+    const isToddlerQA = currentTemplate === 'toddler_qa';
+    const isToddlerDigest = currentTemplate === 'toddler_digest';
 
     if (data.article_url) uploadedArticleUrl = data.article_url;
 
-    if (isQA) {
+    if (isToddlerArticle) {
+      populateToddlerArticleFields(data);
+    } else if (isToddlerQA) {
+      populateToddlerQAFields(data);
+    } else if (isToddlerDigest) {
+      populateToddlerDigestFields(data);
+    } else if (isPregnantQA) {
+      populatePregnantQAFields(data);
+    } else if (isQA) {
       populateQAFields(data);
     } else if (isDigest) {
       populateDigestFields(data);
@@ -627,12 +848,12 @@ async function _submitUpload(formData) {
         document.getElementById('section-graphs').setAttribute('hidden', '');
       }
 
-      if (!isFertility && !isMarketing) {
+      if (!isFertility && !isMarketing && !isPregnant && !isToddlerArticle) {
         fetchRelatedArticles(data.topic_tags || [], data.related_articles || []);
       }
     }
 
-    _showPostUploadSections(isQA, isFertility, isMarketing, isDigest, isLatestTeaser, isPaidDigest);
+    _showPostUploadSections(isQA, isFertility, isMarketing, isDigest, isLatestTeaser, isPaidDigest, isPregnant, isPregnantQA, isToddlerArticle, isToddlerQA, isToddlerDigest);
     showStatus('upload-status', 'Fields extracted successfully.', 'success');
 
   } catch (err) {
@@ -677,6 +898,109 @@ function populateQAFields(data) {
     authorLine = `Today\u2019s answers come from ${authors.slice(0, -1).join(', ')} and ${authors[authors.length - 1]}.`;
   }
   document.getElementById('qa-author-line').value = authorLine;
+}
+
+function populatePregnantQAFields(data) {
+  _qaAuthors = data.qa_authors || [];
+  const qa1 = data.qa1 || {};
+  document.getElementById('qa1-question').value = qa1.question_text || '';
+  document.getElementById('qa1-author').value = qa1.question_author || '';
+  document.getElementById('qa1-answer').value = qa1.answer_html || '';
+  const qa2 = data.qa2 || {};
+  document.getElementById('qa2-question').value = qa2.question_text || '';
+  document.getElementById('qa2-author').value = qa2.question_author || '';
+  document.getElementById('qa2-answer').value = qa2.answer_html || '';
+  const qa3 = data.qa3 || {};
+  document.getElementById('qa3-question').value = qa3.question_text || '';
+  document.getElementById('qa3-author').value = qa3.question_author || '';
+  document.getElementById('qa3-answer').value = qa3.answer_html || '';
+
+  // Pre-populate editable attribution line from fetched author names
+  const authors = _qaAuthors;
+  let authorLine = '';
+  if (authors.length === 1) {
+    authorLine = `Today\u2019s answers come from ${authors[0]}.`;
+  } else if (authors.length >= 2) {
+    authorLine = `Today\u2019s answers come from ${authors.slice(0, -1).join(', ')} and ${authors[authors.length - 1]}.`;
+  }
+  document.getElementById('pqa-author-line').value = authorLine;
+}
+
+function populateToddlerArticleFields(data) {
+  // Reuse standard populateFields for title/subtitle/body/image/bottomline
+  populateFields(data);
+  document.getElementById('ta-months-old').value = data.months_old || '';
+  document.getElementById('ta-discussion-questions').value = (data.discussion_questions || []).join('\n');
+}
+
+function populateToddlerQAFields(data) {
+  _qaAuthors = data.qa_authors || [];
+  const qa1 = data.qa1 || {};
+  document.getElementById('qa1-question').value = qa1.question_text || '';
+  document.getElementById('qa1-author').value = qa1.question_author || '';
+  document.getElementById('qa1-answer').value = qa1.answer_html || '';
+  const qa2 = data.qa2 || {};
+  document.getElementById('qa2-question').value = qa2.question_text || '';
+  document.getElementById('qa2-author').value = qa2.question_author || '';
+  document.getElementById('qa2-answer').value = qa2.answer_html || '';
+
+  // Optional 3rd Q&A
+  const qa3 = data.qa3 || {};
+  document.getElementById('qa3-question').value = qa3.question_text || '';
+  document.getElementById('qa3-author').value = qa3.question_author || '';
+  document.getElementById('qa3-answer').value = qa3.answer_html || '';
+
+  // If no qa3, hide section-qa3
+  if (!qa3.question_text && !qa3.answer_html) {
+    document.getElementById('section-qa3').style.display = 'none';
+  }
+
+  const authors = _qaAuthors;
+  let authorLine = '';
+  if (authors.length === 1) {
+    authorLine = `Today\u2019s answers come from ${authors[0]}.`;
+  } else if (authors.length >= 2) {
+    authorLine = `Today\u2019s answers come from ${authors.slice(0, -1).join(', ')} and ${authors[authors.length - 1]}.`;
+  }
+  document.getElementById('pqa-author-line').value = authorLine;
+}
+
+function populateToddlerDigestFields(data) {
+  document.getElementById('td-title').value = data.title || '';
+  document.getElementById('td-months-old').value = data.months_old || '';
+  document.getElementById('td-intro').value = data.intro_text || '';
+  document.getElementById('td-win-text').value = data.win_text || '';
+  document.getElementById('td-win-attribution').value = data.win_attribution || '';
+  buildToddlerDigestCards(data.articles || []);
+}
+
+function buildToddlerDigestCards(articles) {
+  const container = document.getElementById('toddler-digest-cards');
+  container.innerHTML = '';
+  for (let i = 1; i <= 3; i++) {
+    const art = articles[i - 1] || {};
+    container.insertAdjacentHTML('beforeend', `
+      <div class="digest-card-slot" style="border-top:1px solid #e0e0e0;margin-top:20px;padding-top:16px;">
+        <h3>Article ${i}</h3>
+        <div class="field-group">
+          <label for="td-art-title-${i}">Title</label>
+          <input type="text" id="td-art-title-${i}" value="${_esc(art.title || '')}" placeholder="Article title">
+        </div>
+        <div class="field-group">
+          <label for="td-art-url-${i}">URL</label>
+          <input type="url" id="td-art-url-${i}" value="${_esc(art.url || '')}" placeholder="https://parentdata.org/…">
+        </div>
+        <div class="field-group">
+          <label for="td-art-desc-${i}">Description</label>
+          <textarea id="td-art-desc-${i}" rows="2" style="width:100%;">${_esc(art.description || '')}</textarea>
+        </div>
+        <div class="field-group image-url-field">
+          <label for="td-art-img-${i}">Image URL${art.image_url ? ' <span style="font-weight:400;color:#2a7a2a;">(auto-fetched)</span>' : ' <span class="required">*</span>'}</label>
+          <input type="url" id="td-art-img-${i}" value="${_esc(art.image_url || '')}" placeholder="https://parentdata.org/wp-content/uploads/…">
+        </div>
+      </div>
+    `);
+  }
 }
 
 function populateDigestFields(data) {
@@ -881,10 +1205,97 @@ async function generateEmail() {
   const isDigest = currentTemplate === 'fertility_digest';
   const isLatestTeaser = currentTemplate === 'latest_teaser';
   const isPaidDigest = currentTemplate === 'paid_digest';
+  const isPregnant = currentTemplate === 'pregnant_article';
+  const isPregnantQA = currentTemplate === 'pregnant_qa';
+  const isToddlerArticle = currentTemplate === 'toddler_article';
+  const isToddlerQA = currentTemplate === 'toddler_qa';
+  const isToddlerDigest = currentTemplate === 'toddler_digest';
 
   let payload;
 
-  if (isPaidDigest) {
+  if (isToddlerArticle) {
+    const subtitleLines = document.getElementById('f-subtitle').value
+      .split('\n').map(s => s.trim()).filter(Boolean);
+    const questions = document.getElementById('ta-discussion-questions').value
+      .split('\n').map(s => s.trim()).filter(Boolean);
+    payload = {
+      template_type: 'toddler_article',
+      months_old: document.getElementById('ta-months-old').value,
+      title: document.getElementById('f-title').value,
+      subtitle_lines: subtitleLines,
+      author_name: document.getElementById('f-author-name').value,
+      featured_image_url: document.getElementById('f-img-url').value,
+      featured_image_alt: document.getElementById('f-img-alt').value,
+      article_body_html: document.getElementById('f-body').value,
+      bottom_line_html: document.getElementById('f-bottomline').value,
+      article_url: uploadedArticleUrl,
+      discussion_questions: questions,
+    };
+  } else if (isToddlerQA) {
+    const qa3El = document.getElementById('qa3-question');
+    const hasQA3 = qa3El && qa3El.value.trim();
+    payload = {
+      template_type: 'toddler_qa',
+      months_old: document.getElementById('tqa-months-old').value,
+      intro_text: document.getElementById('tqa-intro-text').value,
+      qa_author_line: document.getElementById('pqa-author-line').value,
+      qa1: {
+        question_text: document.getElementById('qa1-question').value,
+        question_author: document.getElementById('qa1-author').value,
+        answer_html: document.getElementById('qa1-answer').value,
+      },
+      qa2: {
+        question_text: document.getElementById('qa2-question').value,
+        question_author: document.getElementById('qa2-author').value,
+        answer_html: document.getElementById('qa2-answer').value,
+      },
+    };
+    if (hasQA3) {
+      payload.qa3 = {
+        question_text: document.getElementById('qa3-question').value,
+        question_author: document.getElementById('qa3-author').value,
+        answer_html: document.getElementById('qa3-answer').value,
+      };
+    }
+  } else if (isToddlerDigest) {
+    payload = {
+      template_type: 'toddler_digest',
+      months_old: document.getElementById('td-months-old').value,
+      title: document.getElementById('td-title').value || 'ToddlerData Digest',
+      intro_text: document.getElementById('td-intro').value,
+      articles: [1,2,3].map(i => ({
+        title:       document.getElementById(`td-art-title-${i}`).value,
+        url:         document.getElementById(`td-art-url-${i}`).value,
+        description: document.getElementById(`td-art-desc-${i}`).value,
+        image_url:   document.getElementById(`td-art-img-${i}`).value,
+        image_alt:   document.getElementById(`td-art-title-${i}`).value,
+      })),
+      win_text: document.getElementById('td-win-text').value,
+      win_attribution: document.getElementById('td-win-attribution').value,
+    };
+  } else if (isPregnantQA) {
+    payload = {
+      template_type: 'pregnant_qa',
+      weeks_pregnant: document.getElementById('pqa-weeks-pregnant').value,
+      intro_text: document.getElementById('pqa-intro-text').value,
+      qa_author_line: document.getElementById('pqa-author-line').value,
+      qa1: {
+        question_text: document.getElementById('qa1-question').value,
+        question_author: document.getElementById('qa1-author').value,
+        answer_html: document.getElementById('qa1-answer').value,
+      },
+      qa2: {
+        question_text: document.getElementById('qa2-question').value,
+        question_author: document.getElementById('qa2-author').value,
+        answer_html: document.getElementById('qa2-answer').value,
+      },
+      qa3: {
+        question_text: document.getElementById('qa3-question').value,
+        question_author: document.getElementById('qa3-author').value,
+        answer_html: document.getElementById('qa3-answer').value,
+      },
+    };
+  } else if (isPaidDigest) {
     const sections = [];
     let cardIdx = 0;
     for (let s = 0; s < _paidDigestStructure.length; s++) {
@@ -981,7 +1392,7 @@ async function generateEmail() {
       .split('\n').map(s => s.trim()).filter(Boolean);
     const topicTags = document.getElementById('f-tags').value
       .split(',').map(s => s.trim()).filter(Boolean);
-    const relatedArticles = isFertility ? [] : [0, 1].map(i => ({
+    const relatedArticles = (isFertility || isPregnant || isToddlerArticle) ? [] : [0, 1].map(i => ({
       title: document.getElementById(`rel-${i}-title`).value,
       url: document.getElementById(`rel-${i}-url`).value,
       image_url: document.getElementById(`rel-${i}-image-url`).value,
@@ -1004,9 +1415,9 @@ async function generateEmail() {
       include_update_banner: document.getElementById('cb-update-banner').checked,
       title: document.getElementById('f-title').value,
       subtitle_lines: subtitleLines,
-      welcome_html: isFertility ? '' : document.getElementById('f-welcome').value,
+      welcome_html: (isFertility || isPregnant || isToddlerArticle) ? '' : document.getElementById('f-welcome').value,
       article_body_html: document.getElementById('f-body').value,
-      bottom_line_html: isFertility ? document.getElementById('f-bottomline').value : '',
+      bottom_line_html: (isFertility || isPregnant || isToddlerArticle) ? document.getElementById('f-bottomline').value : '',
       author_name: document.getElementById('f-author-name').value,
       author_title: document.getElementById('f-author-title').value,
       author_url: document.getElementById('f-author-url').value,
@@ -1015,6 +1426,10 @@ async function generateEmail() {
       topic_tags: topicTags,
       related_articles: relatedArticles,
       inline_graphs: inlineGraphs,
+      ...(isPregnant ? {
+        weeks_pregnant: document.getElementById('weeks-pregnant').value,
+        article_url: uploadedArticleUrl,
+      } : {}),
     };
   }
 

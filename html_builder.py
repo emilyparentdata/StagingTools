@@ -66,8 +66,18 @@ def build_email_html(template_path: str, fields: dict, template_type: str = 'sta
         _inject_fertility_digest(soup, fields)
     elif template_type == 'paid_digest':
         _inject_paid_digest(soup, fields)
+    elif template_type == 'pregnant_article':
+        _inject_pregnant_article(soup, fields)
+    elif template_type == 'pregnant_qa':
+        _inject_pregnant_qa(soup, fields)
     elif template_type == 'latest_teaser':
         _inject_latest_teaser(soup, fields)
+    elif template_type == 'toddler_article':
+        _inject_toddler_article(soup, fields)
+    elif template_type == 'toddler_qa':
+        _inject_toddler_qa(soup, fields)
+    elif template_type == 'toddler_digest':
+        _inject_toddler_digest(soup, fields)
     else:
         _update_title(soup, fields)
         _update_headline(soup, fields)
@@ -659,31 +669,299 @@ def _replace_fertility_body(soup, fields):
             main_td.append(BeautifulSoup(main_html, 'html.parser'))
 
 
-def _update_fertility_bottom_line(soup, fields):
+def _update_bottom_line_by_color(soup, fields, color_match: str):
     """
-    Replace the <ul> inside the purple bottom line box with the new content.
+    Replace the <ul> inside a colored bottom line box with the new content.
 
-    The purple box has background-color: #a9b4ff in its style attribute.
-    Inside is a nested table with an h3 heading row and a ul row.
+    color_match is a substring to find in the td's style attribute
+    (e.g. 'a9b4ff' or 'rgb(208, 214, 252)').
     """
     bottom_line_html = fields.get('bottom_line_html', '')
     if not bottom_line_html:
         return
 
-    # Find the purple bottom line td
-    purple_td = None
+    target_td = None
     for td in soup.find_all('td'):
-        if 'a9b4ff' in td.get('style', ''):
-            purple_td = td
+        if color_match in td.get('style', ''):
+            target_td = td
             break
-    if not purple_td:
+    if not target_td:
         return
 
-    # Replace the existing <ul>
-    ul = purple_td.find('ul')
+    ul = target_td.find('ul')
     if ul:
         new_ul = BeautifulSoup(bottom_line_html, 'html.parser')
         ul.replace_with(new_ul)
+
+
+def _update_fertility_bottom_line(soup, fields):
+    """Replace the <ul> inside the purple (#a9b4ff) bottom line box."""
+    _update_bottom_line_by_color(soup, fields, 'a9b4ff')
+
+
+# ── Pregnant Article template injection ──────────────────────────────────────
+
+def _inject_pregnant_article(soup, fields):
+    """Inject all fields into the pregnancy article template."""
+    _update_title(soup, fields)
+    _update_pregnant_banner(soup, fields)
+    _update_headline(soup, fields)
+    _update_fertility_subtitle_author(soup, fields)
+    _replace_fertility_body(soup, fields)
+    _update_pregnant_bottom_line(soup, fields)
+    _update_pregnant_comment_button(soup, fields)
+    _update_copyright(soup)
+
+
+def _update_pregnant_banner(soup, fields):
+    """Set the week number in the 'You are X weeks pregnant!' banner."""
+    banner_p = soup.find('p', class_='news-top-link')
+    if not banner_p:
+        return
+    weeks = fields.get('weeks_pregnant', '')
+    if not weeks:
+        return
+    banner_p.clear()
+    new_html = (
+        f'You are {weeks} weeks pregnant!<strong> </strong>'
+        '<span style="text-decoration: underline; font-style: italic;">'
+        '<a href="https://parentdata.org/account/" style="color: #000000;" '
+        'title="Change Age">Change due date.</a></span>'
+    )
+    banner_p.append(BeautifulSoup(new_html, 'html.parser'))
+
+
+def _update_pregnant_bottom_line(soup, fields):
+    """
+    Replace the <ul> inside the blue bottom line box.
+
+    The pregnancy template has two tds with rgb(208, 214, 252): the top
+    banner and the bottom line box.  The bottom line box has class
+    'table-box-mobile', so we find by both color and class.
+    """
+    bottom_line_html = fields.get('bottom_line_html', '')
+    if not bottom_line_html:
+        return
+
+    target_td = None
+    for td in soup.find_all('td'):
+        classes = td.get('class', [])
+        if ('table-box-mobile' in classes
+                and 'rgb(208, 214, 252)' in td.get('style', '')):
+            target_td = td
+            break
+    if not target_td:
+        return
+
+    ul = target_td.find('ul')
+    if ul:
+        new_ul = BeautifulSoup(bottom_line_html, 'html.parser')
+        ul.replace_with(new_ul)
+
+
+def _update_pregnant_comment_button(soup, fields):
+    """Set the LEAVE A COMMENT button href to article_url/#leave-comment."""
+    article_url = fields.get('article_url', '')
+    if not article_url:
+        return
+    comment_url = article_url.rstrip('/') + '/#leave-comment'
+    for a in soup.find_all('a'):
+        if 'LEAVE A COMMENT' in (a.get_text() or '').upper():
+            a['href'] = comment_url
+            break
+
+
+# ── Pregnant Q&A template injection ───────────────────────────────────────────
+
+def _inject_pregnant_qa(soup, fields):
+    """Inject all fields into the pregnancy Q&A template."""
+    _update_pregnant_banner(soup, fields)
+    _update_qa_intro(soup, fields)
+    _update_qa_pairs(soup, fields)
+    _update_copyright(soup)
+
+
+# ── Toddler Article template injection ───────────────────────────────────────
+
+def _inject_toddler_article(soup, fields):
+    """Inject all fields into the ToddlerData article template."""
+    _update_title(soup, fields)
+    _update_toddler_banner(soup, fields)
+    _update_headline(soup, fields)
+    _update_fertility_subtitle_author(soup, fields)
+    _replace_fertility_body(soup, fields)
+    _update_toddler_bottom_line(soup, fields)
+    _update_discussion_questions(soup, fields)
+    _update_copyright(soup)
+
+
+# ── Toddler Q&A template injection ──────────────────────────────────────────
+
+def _inject_toddler_qa(soup, fields):
+    """Inject all fields into the ToddlerData Q&A template."""
+    _update_toddler_banner(soup, fields)
+    _update_qa_intro(soup, fields)
+    _update_qa_pairs(soup, fields)
+    _remove_unused_qa_pairs(soup, fields)
+    _update_copyright(soup)
+
+
+# ── Toddler Digest template injection ───────────────────────────────────────
+
+def _inject_toddler_digest(soup, fields):
+    """Inject all fields into the ToddlerData digest template."""
+    _update_title(soup, fields)
+    _update_toddler_banner(soup, fields)
+    _update_headline(soup, fields)
+    _update_digest_intro(soup, fields)
+    _update_digest_cards(soup, fields)
+    _update_win_of_week(soup, fields)
+    _update_copyright(soup)
+
+
+def _update_toddler_banner(soup, fields):
+    """Set the months old in the 'Your child is X months old!' banner."""
+    banner_p = soup.find('p', class_='news-top-link')
+    if not banner_p:
+        return
+    months = fields.get('months_old', '')
+    if not months:
+        return
+    banner_p.clear()
+    new_html = (
+        f'Your child is {months} months old!<strong> </strong>'
+        '<span style="text-decoration: underline; font-style: italic;">'
+        '<a href="https://parentdata.org/account/" style="color: #000000;" '
+        'title="Change Age">Change age.</a></span>'
+    )
+    banner_p.append(BeautifulSoup(new_html, 'html.parser'))
+
+
+def _update_toddler_bottom_line(soup, fields):
+    """Replace the <ul> inside the pink (#e0a9ca) bottom line box."""
+    bottom_line_html = fields.get('bottom_line_html', '')
+    if not bottom_line_html:
+        return
+
+    target_td = None
+    for td in soup.find_all('td'):
+        classes = td.get('class', [])
+        if ('table-box-mobile' in classes
+                and 'e0a9ca' in td.get('style', '')):
+            target_td = td
+            break
+    if not target_td:
+        return
+
+    ul = target_td.find('ul')
+    if ul:
+        new_ul = BeautifulSoup(bottom_line_html, 'html.parser')
+        ul.replace_with(new_ul)
+
+
+def _update_discussion_questions(soup, fields):
+    """
+    Replace the discussion questions in the pink card.
+
+    Finds the section by img[alt="Discussion Questions"], then locates the
+    pink card table (background-color: #edc0db; border-radius: 20px) and
+    replaces its <p> tags with the actual questions.
+    """
+    questions = fields.get('discussion_questions', [])
+    if not questions:
+        return
+
+    dq_img = soup.find('img', attrs={'alt': 'Discussion Questions'})
+    if not dq_img:
+        return
+
+    # The pink card is a sibling or nearby table with #edc0db background
+    dq_section = dq_img.find_parent('table', role='presentation')
+    if not dq_section:
+        return
+
+    # Find the pink card table within the section
+    pink_card = None
+    for table in dq_section.find_all('table'):
+        style = table.get('style', '')
+        if '#edc0db' in style and 'border-radius' in style:
+            pink_card = table
+            break
+    if not pink_card:
+        return
+
+    # Find the td containing the question <p> tags
+    question_td = pink_card.find('td')
+    if not question_td:
+        return
+
+    # Clear existing questions
+    question_td.clear()
+
+    # Insert new questions
+    p_style = (
+        "margin: 0 0 4px 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; "
+        "font-weight: normal; font-size: 16px; line-height: 30px; color: #000000;"
+    )
+    for i, q in enumerate(questions):
+        margin = '0' if i == len(questions) - 1 else '0 0 4px 0'
+        new_p = BeautifulSoup(
+            f'<p style="margin: {margin}; font-family: \'DM Sans\', Arial, Helvetica, sans-serif; '
+            f'font-weight: normal; font-size: 16px; line-height: 30px; color: #000000;">'
+            f'{i + 1}. {_escape_attr(q)}</p>',
+            'html.parser',
+        )
+        question_td.append(new_p)
+
+
+def _remove_unused_qa_pairs(soup, fields):
+    """
+    Remove the 3rd Question/Answer pair if only 2 Q&As are provided.
+
+    Uses _outer_email_tr() on the 3rd Question and 3rd Answer img tags
+    to locate and decompose their outer <tr> rows.
+    """
+    qa3 = fields.get('qa3', {})
+    if qa3 and (qa3.get('question_text') or qa3.get('answer_html')):
+        return  # qa3 has content — keep all 3 pairs
+
+    question_imgs = soup.find_all('img', attrs={'alt': 'Question'})
+    answer_imgs = soup.find_all('img', attrs={'alt': 'Answer'})
+
+    # Remove 3rd question row
+    if len(question_imgs) >= 3:
+        outer_tr = _outer_email_tr(question_imgs[2], soup)
+        if outer_tr:
+            outer_tr.decompose()
+
+    # Remove 3rd answer row
+    if len(answer_imgs) >= 3:
+        outer_tr = _outer_email_tr(answer_imgs[2], soup)
+        if outer_tr:
+            outer_tr.decompose()
+
+
+def _update_win_of_week(soup, fields):
+    """
+    Update the Win of the Week quote and attribution.
+
+    The quote lives in td.win-quote-cell (two <p> tags: quote + attribution).
+    """
+    win_text = fields.get('win_text', '')
+    win_attribution = fields.get('win_attribution', '')
+
+    quote_td = soup.find('td', class_='win-quote-cell')
+    if not quote_td:
+        return
+
+    paragraphs = quote_td.find_all('p')
+    if paragraphs and win_text:
+        paragraphs[0].clear()
+        paragraphs[0].append(NavigableString(f'\u201c{win_text}\u201d'))
+
+    if len(paragraphs) >= 2 and win_attribution:
+        paragraphs[1].clear()
+        paragraphs[1].append(NavigableString(f'\u2014{win_attribution}'))
 
 
 # ── Fertility Digest template injection ──────────────────────────────────────
@@ -736,6 +1014,9 @@ def _update_digest_cards(soup, fields):
             if strong:
                 strong.clear()
                 strong.append(NavigableString(article.get('title', '')))
+            else:
+                title_p.clear()
+                title_p.append(NavigableString(article.get('title', '')))
 
         desc_p = tr.find('p', style=re.compile(r'DM Sans', re.I))
         if desc_p:
@@ -858,16 +1139,27 @@ def _update_qa_pairs(soup, fields):
         if not outer_tr:
             continue
 
-        # The italic <p> holds the question text and author sign-off
+        # The question text lives in italic <p> tag(s) inside a <td>.
+        # Some templates split the question across multiple <p> + <br> elements,
+        # so we clear the entire parent <td> and rebuild with a single <p>.
         italic_p = outer_tr.find('p', style=lambda s: 'italic' in (s or ''))
         if italic_p:
-            question_text = _escape_attr(qa.get('question_text', ''))
-            author = _escape_attr(qa.get('question_author', ''))
-            content = f'<span style="white-space: pre-wrap;">{question_text}</span>'
-            if author:
-                content += f'<br><br><span style="white-space: pre-wrap;">\u2014{author}</span>'
-            italic_p.clear()
-            italic_p.append(BeautifulSoup(content, 'html.parser'))
+            question_td = italic_p.find_parent('td')
+            if question_td:
+                question_text = _escape_attr(qa.get('question_text', ''))
+                author = _escape_attr(qa.get('question_author', ''))
+                content = f'<span style="white-space: pre-wrap;">{question_text}</span>'
+                if author:
+                    content += f'<br><br><span style="white-space: pre-wrap;">\u2014{author}</span>'
+                question_td.clear()
+                new_p = BeautifulSoup(
+                    f'<p style="margin: 0; font-family: \'DM Sans\', Arial, Helvetica, sans-serif; '
+                    f'font-weight: normal; font-size: 18px; line-height: 24px; '
+                    f'letter-spacing: -0.8px; color: #000000; font-style: italic;">'
+                    f'{content}</p>',
+                    'html.parser',
+                )
+                question_td.append(new_p)
 
     qa_author_line = fields.get('qa_author_line', '').strip()
 
@@ -879,12 +1171,12 @@ def _update_qa_pairs(soup, fields):
 
         tablebox_td = outer_tr.find('td', class_='tablebox')
         if tablebox_td:
-            div = tablebox_td.find('div')
-            if div:
-                div.clear()
-                answer_html = qa.get('answer_html', '')
-                if answer_html:
-                    div.append(BeautifulSoup(answer_html, 'html.parser'))
+            # Remove ALL divs (answer content + any hardcoded attribution)
+            for old_div in tablebox_td.find_all('div'):
+                old_div.decompose()
+            answer_html = qa.get('answer_html', '')
+            new_div = BeautifulSoup(f'<div>{answer_html}</div>', 'html.parser')
+            tablebox_td.append(new_div)
 
             # Add the author attribution line after the last answer
             if i == len(answer_imgs) - 1 and qa_author_line:
@@ -1346,6 +1638,34 @@ def apply_email_fixes(html: str) -> str:
                 re.search(r'\bpadding\s*:\s*0px?\b', style, re.I)):
             td['class'] = classes + ['no-top-pad']
 
+    # 10. Propagate parent font-size onto <a> tags that lack one.
+    #     This ensures _apply_link_fixes can create span wrappers with
+    #     the correct px size, and also fixes non-Gmail clients where
+    #     the <a> tag's own font-size takes effect.
+    for a_tag in soup.find_all('a', href=True):
+        a_style = a_tag.get('style', '')
+        if re.search(r'\bfont-size\s*:', a_style, re.I):
+            continue  # already has font-size
+        # Walk up ancestors looking for an explicit inline font-size
+        for parent in a_tag.parents:
+            p_style = parent.get('style', '') if hasattr(parent, 'get') else ''
+            fz_m = re.search(r'font-size\s*:\s*(\d+px)', p_style, re.I)
+            if fz_m:
+                a_tag['style'] = f"font-size:{fz_m.group(1)};" + a_style
+                break
+
+    # 11. Tag footer-area <p> elements (font-size ≤ 14px with links) so
+    #     Gmail iOS CSS can target them.
+    for p_tag in soup.find_all('p'):
+        if not p_tag.find('a', href=True):
+            continue
+        p_style = p_tag.get('style', '')
+        fz_m = re.search(r'font-size\s*:\s*(\d+)px', p_style, re.I)
+        if fz_m and int(fz_m.group(1)) <= 14:
+            classes = p_tag.get('class', [])
+            if 'email-footer-link' not in classes:
+                p_tag['class'] = classes + ['email-footer-link']
+
     html = str(soup)
 
     # 7. Gmail iOS link fix (regex on string — mirrors email-checker exactly)
@@ -1530,6 +1850,22 @@ def _inject_gmail_ios_css(html: str) -> str:
         "u + #body p.sub-text{"
         "font-size:18px!important;"
         "font-family:'Lora',Georgia,serif!important"
+        "}\n"
+        "/* Gmail iOS: fix link sizes in welcome banner, headings + footer */\n"
+        "u + #body .welcome-message a,"
+        "u + #body .welcome-message a span{"
+        "font-size:18px!important;"
+        "font-family:'DM Sans',Arial,Helvetica,sans-serif!important"
+        "}\n"
+        "u + #body .h3-heading a,"
+        "u + #body .h3-heading a span{"
+        "font-size:18px!important;"
+        "font-family:'Lora',Georgia,serif!important"
+        "}\n"
+        "u + #body .email-footer-link a,"
+        "u + #body .email-footer-link a span{"
+        "font-size:14px!important;"
+        "font-family:'DM Sans',Arial,Helvetica,sans-serif!important"
         "}\n"
     )
     # Ensure <body> has id="body" so the selector can match
