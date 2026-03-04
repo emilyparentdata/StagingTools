@@ -25,7 +25,7 @@ from bs4 import BeautifulSoup, NavigableString
 # ── Inline styles ────────────────────────────────────────────────────────────
 
 STYLE_P_SUB = (
-    "margin: 0; font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: 400; "
+    "margin: 0; font-family: 'Lora', Georgia, serif; font-weight: 400; "
     "font-size: 18px; line-height: 32px; color: #000000;"
 )
 
@@ -116,6 +116,8 @@ def build_email_html(template_path: str, fields: dict, template_type: str = 'sta
         _inject_toddler_qa(soup, fields)
     elif template_type == 'toddler_digest':
         _inject_toddler_digest(soup, fields)
+    elif template_type == 'simple':
+        _inject_simple(soup, fields)
     else:
         _update_title(soup, fields)
         _update_headline(soup, fields)
@@ -247,6 +249,11 @@ def _replace_article_sections(soup, fields):
                 f'</td></tr>'
             )
             tbody.append(BeautifulSoup(row_html, 'html.parser'))
+
+        # Add extra spacing before the author block
+        style = article_tds[1].get('style', '')
+        style = style.replace('padding: 0px 40px 20px', 'padding: 0px 40px 40px')
+        article_tds[1]['style'] = style
 
 
 def _update_author_block(soup, fields):
@@ -1660,6 +1667,79 @@ def _replace_graph_placeholders(html: str, inline_graphs: list) -> str:
         )
 
     return re.sub(r'\[\[GRAPH_(\d+)\]\]', replace_graph, html)
+
+
+# ── Simple email injection ─────────────────────────────────────────────────────
+
+_SIMPLE_P_STYLE = (
+    "font-family: 'DM Sans', Arial, Helvetica, sans-serif; font-weight: normal; "
+    "font-size: 16px; line-height: 22px; color: #000000;"
+)
+
+_SIMPLE_A_STYLE = (
+    "color: #054f8b; text-decoration: underline; "
+    "font-family: 'DM Sans', Arial, Helvetica, sans-serif;"
+)
+
+
+def _inject_simple(soup, fields):
+    """Inject content into the simple email template."""
+    # Update <title>
+    if soup.title:
+        soup.title.string = 'Simple Email - ParentData'
+
+    # Pre-button content
+    pre_td = soup.find('td', class_='simple-pre-button')
+    if pre_td:
+        pre_html = fields.get('pre_button_html', '')
+        if pre_html:
+            pre_td.clear()
+            pre_td.append(BeautifulSoup(pre_html, 'html.parser'))
+
+    # Post-button content
+    post_td = soup.find('td', class_='simple-post-button')
+    if post_td:
+        post_html = fields.get('post_button_html', '')
+        if post_html:
+            post_td.clear()
+            post_td.append(BeautifulSoup(post_html, 'html.parser'))
+
+    # Mammoth outputs bare <p> and <a> tags — apply standard email inline styles
+    for td in [pre_td, post_td]:
+        if not td:
+            continue
+        for p in td.find_all('p'):
+            if not p.get('style'):
+                p['style'] = _SIMPLE_P_STYLE
+        for a in td.find_all('a'):
+            if not a.get('style'):
+                a['style'] = _SIMPLE_A_STYLE
+
+    # Button text and URL
+    btn_div = soup.find('div', class_='simple-button')
+    if btn_div:
+        btn_text = fields.get('button_text', '').strip()
+        btn_url = fields.get('button_url', '').strip()
+        a_tag = btn_div.find('a')
+        if a_tag:
+            if btn_url:
+                a_tag['href'] = btn_url
+            span = a_tag.find('span')
+            if span and btn_text:
+                span.string = btn_text.upper()
+
+    # Footer logo: keep left-aligned (prevent apply_email_fixes from centering)
+    footer_logo = soup.find('img', alt='Footer Logo')
+    if footer_logo:
+        style = footer_logo.get('style', '')
+        if 'display' not in style.lower():
+            footer_logo['style'] = 'display:block;' + style
+
+    # Copyright year
+    copyright_p = soup.find('p', class_='simple-copyright')
+    if copyright_p:
+        year = datetime.now().year
+        copyright_p.string = f'\u00a9 {year} ParentData. All rights reserved.'
 
 
 # ── Letter-spacing fix ────────────────────────────────────────────────────────

@@ -124,6 +124,14 @@ TEMPLATES = {
         'has_related_reading': False,
         'has_bottom_line': False,
     },
+    'simple': {
+        'label': 'Simple Email',
+        'file': BASE_DIR / 'email_templates' / 'template_simple.html',
+        'has_welcome': False,
+        'has_author_block': False,
+        'has_related_reading': False,
+        'has_bottom_line': False,
+    },
 }
 
 
@@ -494,6 +502,10 @@ def _process_docx(tmp_path: str, template_type: str = 'standard') -> dict:
             'intro_text': digest.get('intro_text', ''),
             'articles':   articles,
         }
+
+    if template_type == 'simple':
+        from docx_parser import parse_simple_docx
+        return parse_simple_docx(tmp_path)
 
     if template_type == 'paid_digest':
         from docx_parser import parse_paid_digest_docx

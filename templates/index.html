@@ -20,18 +20,29 @@
     <h2>Choose Template</h2>
     <div class="field-group" style="margin-bottom:0;">
       <select id="template-select" onchange="selectTemplate(this.value)">
-        <option value="fertility">Fertility Article</option>
-        <option value="fertility_digest">Fertility Digest</option>
-        <option value="qa">Fertility Q&amp;A</option>
-        <option value="standard" selected>Latest</option>
-        <option value="latest_teaser">Latest Teaser</option>
-        <option value="marketing">Marketing - Full Article Send</option>
-        <option value="paid_digest">Paid Digest</option>
-        <option value="pregnant_article">Pregnancy Article</option>
-        <option value="pregnant_qa">Pregnancy Q&amp;A</option>
-        <option value="toddler_article">Toddler Article</option>
-        <option value="toddler_digest">Toddler Digest</option>
-        <option value="toddler_qa">Toddler Q&amp;A</option>
+        <optgroup label="Latest">
+          <option value="standard" selected>Latest</option>
+          <option value="latest_teaser">Latest Teaser</option>
+        </optgroup>
+        <optgroup label="Fertility">
+          <option value="fertility">Fertility Article</option>
+          <option value="fertility_digest">Fertility Digest</option>
+          <option value="qa">Fertility Q&amp;A</option>
+        </optgroup>
+        <optgroup label="Pregnancy">
+          <option value="pregnant_article">Pregnancy Article</option>
+          <option value="pregnant_qa">Pregnancy Q&amp;A</option>
+        </optgroup>
+        <optgroup label="Toddler">
+          <option value="toddler_article">Toddler Article</option>
+          <option value="toddler_digest">Toddler Digest</option>
+          <option value="toddler_qa">Toddler Q&amp;A</option>
+        </optgroup>
+        <optgroup label="Other">
+          <option value="marketing">Marketing - Full Article Send</option>
+          <option value="paid_digest">Paid Digest</option>
+          <option value="simple">Simple Email</option>
+        </optgroup>
       </select>
     </div>
   </section>
@@ -539,6 +550,31 @@
     </div>
   </section>
 
+  <!-- ── Simple Email Fields ────────────────────────────────────────── -->
+  <section id="section-simple" class="card" hidden>
+    <h2>2. Review Simple Email Fields</h2>
+
+    <div class="field-group">
+      <label for="simple-pre-button">Pre-button text (HTML)</label>
+      <textarea id="simple-pre-button" rows="8" class="code-area" placeholder="&lt;p&gt;Text before the button…&lt;/p&gt;"></textarea>
+    </div>
+
+    <div class="field-group">
+      <label for="simple-button-text">Button text</label>
+      <input type="text" id="simple-button-text" placeholder="e.g. UPDATE YOUR BILLING">
+    </div>
+
+    <div class="field-group">
+      <label for="simple-button-url">Button URL</label>
+      <input type="url" id="simple-button-url" placeholder="https://parentdata.org/…">
+    </div>
+
+    <div class="field-group">
+      <label for="simple-post-button">Post-button text (HTML)</label>
+      <textarea id="simple-post-button" rows="8" class="code-area" placeholder="&lt;p&gt;Text after the button…&lt;/p&gt;"></textarea>
+    </div>
+  </section>
+
   <!-- ── Generate ─────────────────────────────────────────────────────── -->
   <section id="section-generate" class="card" hidden>
     <h2>Generate Email</h2>
@@ -594,7 +630,7 @@ function selectTemplate(type) {
     //   Latest Teaser          → DOCX + Google Doc
     //   (Q&A types have their own areas)
     const showDocx = type === 'latest_teaser';
-    const showGdoc = type === 'standard' || type === 'fertility_digest' || type === 'latest_teaser' || type === 'paid_digest' || type === 'toddler_article' || type === 'toddler_qa' || type === 'toddler_digest';
+    const showGdoc = type === 'standard' || type === 'fertility_digest' || type === 'latest_teaser' || type === 'paid_digest' || type === 'toddler_article' || type === 'toddler_qa' || type === 'toddler_digest' || type === 'simple';
     const showWp   = type === 'fertility' || type === 'marketing' || type === 'pregnant_article';
 
     document.getElementById('docx-upload-row').style.display    = showDocx ? '' : 'none';
@@ -606,9 +642,9 @@ function selectTemplate(type) {
   }
 }
 
-function _showPostUploadSections(isQA, isFertility, isMarketing, isDigest, isLatestTeaser, isPaidDigest, isPregnant, isPregnantQA, isToddlerArticle, isToddlerQA, isToddlerDigest) {
-  // Digest, LatestTeaser, PaidDigest, and Toddler types have dedicated sections; hide all other post-upload sections
-  const showStandardSections = !isQA && !isPregnantQA && !isDigest && !isLatestTeaser && !isPaidDigest && !isToddlerQA && !isToddlerDigest;
+function _showPostUploadSections(isQA, isFertility, isMarketing, isDigest, isLatestTeaser, isPaidDigest, isPregnant, isPregnantQA, isToddlerArticle, isToddlerQA, isToddlerDigest, isSimple) {
+  // Digest, LatestTeaser, PaidDigest, Toddler, and Simple types have dedicated sections; hide all other post-upload sections
+  const showStandardSections = !isQA && !isPregnantQA && !isDigest && !isLatestTeaser && !isPaidDigest && !isToddlerQA && !isToddlerDigest && !isSimple;
 
   // Sections common to standard + fertility + marketing + toddler_article
   ['section-fields', 'section-image', 'section-body', 'section-generate'].forEach(id => {
@@ -617,7 +653,7 @@ function _showPostUploadSections(isQA, isFertility, isMarketing, isDigest, isLat
   });
 
   // Standard-only related reading (also shown for latest_teaser)
-  const showRelated = !isQA && !isPregnantQA && !isFertility && !isMarketing && !isDigest && !isPaidDigest && !isPregnant && !isToddlerArticle && !isToddlerQA && !isToddlerDigest;
+  const showRelated = !isQA && !isPregnantQA && !isFertility && !isMarketing && !isDigest && !isPaidDigest && !isPregnant && !isToddlerArticle && !isToddlerQA && !isToddlerDigest && !isSimple;
   document.getElementById('section-related').style.display = showRelated ? '' : 'none';
   if (showRelated) document.getElementById('section-related').removeAttribute('hidden');
 
@@ -667,6 +703,10 @@ function _showPostUploadSections(isQA, isFertility, isMarketing, isDigest, isLat
   // Toddler Digest-only
   document.getElementById('section-toddler-digest').style.display = isToddlerDigest ? '' : 'none';
   if (isToddlerDigest) document.getElementById('section-toddler-digest').removeAttribute('hidden');
+
+  // Simple Email-only
+  document.getElementById('section-simple').style.display = isSimple ? '' : 'none';
+  if (isSimple) document.getElementById('section-simple').removeAttribute('hidden');
 
   // Always show generate
   const genSection = document.getElementById('section-generate');
@@ -720,6 +760,8 @@ async function handleGoogleDocUrl() {
   document.getElementById('file-name').textContent = '';
   const digestMsg = (currentTemplate === 'fertility_digest' || currentTemplate === 'paid_digest' || currentTemplate === 'toddler_digest' || currentTemplate === 'toddler_article' || currentTemplate === 'toddler_qa')
     ? 'Downloading Google Doc, extracting article links, and fetching article metadata… this may take 30–60 seconds.'
+    : currentTemplate === 'simple'
+    ? 'Downloading Google Doc and extracting content…'
     : 'Downloading Google Doc and extracting fields… this may take 20–40 seconds.';
   showStatus('upload-status', digestMsg, 'info');
   const formData = new FormData();
@@ -794,10 +836,13 @@ async function _submitUpload(formData) {
     const isToddlerArticle = currentTemplate === 'toddler_article';
     const isToddlerQA = currentTemplate === 'toddler_qa';
     const isToddlerDigest = currentTemplate === 'toddler_digest';
+    const isSimple = currentTemplate === 'simple';
 
     if (data.article_url) uploadedArticleUrl = data.article_url;
 
-    if (isToddlerArticle) {
+    if (isSimple) {
+      populateSimpleFields(data);
+    } else if (isToddlerArticle) {
       populateToddlerArticleFields(data);
     } else if (isToddlerQA) {
       populateToddlerQAFields(data);
@@ -828,7 +873,7 @@ async function _submitUpload(formData) {
       }
     }
 
-    _showPostUploadSections(isQA, isFertility, isMarketing, isDigest, isLatestTeaser, isPaidDigest, isPregnant, isPregnantQA, isToddlerArticle, isToddlerQA, isToddlerDigest);
+    _showPostUploadSections(isQA, isFertility, isMarketing, isDigest, isLatestTeaser, isPaidDigest, isPregnant, isPregnantQA, isToddlerArticle, isToddlerQA, isToddlerDigest, isSimple);
     showStatus('upload-status', 'Fields extracted successfully.', 'success');
 
   } catch (err) {
@@ -848,6 +893,13 @@ function populateFields(data) {
   document.getElementById('f-bottomline').value = data.bottom_line_html || '';
   if (data.featured_image_url) document.getElementById('f-img-url').value = data.featured_image_url;
   if (data.featured_image_alt) document.getElementById('f-img-alt').value = data.featured_image_alt;
+}
+
+function populateSimpleFields(data) {
+  document.getElementById('simple-pre-button').value = data.pre_button_html || '';
+  document.getElementById('simple-post-button').value = data.post_button_html || '';
+  document.getElementById('simple-button-text').value = data.button_text || '';
+  document.getElementById('simple-button-url').value = data.button_url || '';
 }
 
 // Store qa_authors from upload response for use at generate time
@@ -1187,10 +1239,19 @@ async function generateEmail() {
   const isToddlerArticle = currentTemplate === 'toddler_article';
   const isToddlerQA = currentTemplate === 'toddler_qa';
   const isToddlerDigest = currentTemplate === 'toddler_digest';
+  const isSimple = currentTemplate === 'simple';
 
   let payload;
 
-  if (isToddlerArticle) {
+  if (isSimple) {
+    payload = {
+      template_type: 'simple',
+      pre_button_html: document.getElementById('simple-pre-button').value,
+      post_button_html: document.getElementById('simple-post-button').value,
+      button_text: document.getElementById('simple-button-text').value,
+      button_url: document.getElementById('simple-button-url').value,
+    };
+  } else if (isToddlerArticle) {
     const subtitleLines = document.getElementById('f-subtitle').value
       .split('\n').map(s => s.trim()).filter(Boolean);
     const questions = document.getElementById('ta-discussion-questions').value

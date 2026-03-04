@@ -737,6 +737,106 @@ def _parse_staging_instructions(paragraphs) -> dict:
     return result
 
 
+def parse_simple_docx(file_path: str) -> dict:
+    """
+    Parse a "simple email" DOCX (exported from Google Doc).
+
+    Expected document structure:
+      <pre-button paragraphs>
+      BUTTON GOES HERE          (bold marker line)
+      <post-button paragraphs>
+      Button Information         (heading)
+      Text: <button label>
+      Link: <button URL>
+
+    Returns:
+        {
+            pre_button_html:  str,
+            post_button_html: str,
+            button_text:      str,
+            button_url:       str,
+        }
+    """
+    import io
+
+    doc = Document(file_path)
+
+    # Walk paragraphs and split into three zones:
+    #   1) before "BUTTON GOES HERE"
+    #   2) after "BUTTON GOES HERE" but before "Button Information"
+    #   3) "Button Information" section (metadata)
+    pre_paras = []
+    post_paras = []
+    button_text = ''
+    button_url = ''
+
+    zone = 'pre'  # pre -> post -> info
+    for para in doc.paragraphs:
+        text = para.text.strip()
+
+        if zone == 'pre':
+            if re.match(r'^BUTTON\s+GOES\s+HERE$', text, re.I):
+                zone = 'post'
+                continue
+            pre_paras.append(para)
+
+        elif zone == 'post':
+            if re.match(r'^Button\s+Information$', text, re.I):
+                zone = 'info'
+                continue
+            post_paras.append(para)
+
+        elif zone == 'info':
+            m_text = re.match(r'^Text\s*:\s*(.+)$', text, re.I)
+            m_link = re.match(r'^Link\s*:\s*(.+)$', text, re.I)
+            if m_text:
+                button_text = m_text.group(1).strip()
+            elif m_link:
+                button_url = m_link.group(1).strip()
+
+    # Convert the pre/post paragraph ranges to HTML via mammoth.
+    # We use the full DOCX mammoth conversion, then extract by paragraph markers.
+    with open(file_path, 'rb') as f:
+        mammoth_result = mammoth.convert_to_html(f)
+    full_html = mammoth_result.value
+
+    # Split the mammoth HTML at the "BUTTON GOES HERE" text
+    marker_re = re.compile(r'BUTTON\s+GOES\s+HERE', re.I)
+    btn_info_re = re.compile(r'Button\s+Information', re.I)
+
+    # Find the marker in the HTML and split around it
+    marker_match = marker_re.search(full_html)
+    if marker_match:
+        # Find the <p> tag containing the marker
+        # Walk backwards to find the opening <p
+        start = full_html.rfind('<p', 0, marker_match.start())
+        # Walk forwards to find the closing </p>
+        end = full_html.find('</p>', marker_match.end())
+        if end != -1:
+            end += len('</p>')
+
+        pre_html = full_html[:start].strip() if start > 0 else ''
+        remaining = full_html[end:].strip() if end > 0 else ''
+    else:
+        pre_html = full_html
+        remaining = ''
+
+    # Split remaining at "Button Information"
+    info_match = btn_info_re.search(remaining)
+    if info_match:
+        info_start = remaining.rfind('<', 0, info_match.start())
+        post_html = remaining[:info_start].strip() if info_start > 0 else remaining
+    else:
+        post_html = remaining
+
+    return {
+        'pre_button_html': pre_html,
+        'post_button_html': post_html,
+        'button_text': button_text,
+        'button_url': button_url,
+    }
+
+
 def _extract_graph_placeholders(html: str) -> tuple:
     """
     Replace base64-encoded <img> tags in mammoth HTML with [[GRAPH_N]] markers.
