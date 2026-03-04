@@ -1456,12 +1456,27 @@ def _scale_marketing_body_fonts(html: str) -> str:
 
     22px Lora section headings → 18px
     16px DM Sans body text / list items → 14px
+
+    The "bottom line" section is left at full size since it's the key takeaway.
     """
     if not html:
         return html
-    html = re.sub(r'\bfont-size:\s*22px', 'font-size:18px', html)
-    html = re.sub(r'\bfont-size:\s*16px', 'font-size:14px', html)
-    return html
+
+    # Split at the bottom line heading so it keeps full-size fonts
+    bl_match = re.search(
+        r'<(?:h[12]|p)\b[^>]*>(?:\s*<[^>]+>)*\s*(?:The\s+)?[Bb]ottom\s+[Ll]ine',
+        html,
+    )
+    if bl_match:
+        before = html[:bl_match.start()]
+        after = html[bl_match.start():]
+    else:
+        before = html
+        after = ''
+
+    before = re.sub(r'\bfont-size:\s*22px', 'font-size:18px', before)
+    before = re.sub(r'\bfont-size:\s*16px', 'font-size:14px', before)
+    return before + after
 
 
 def _find_marketing_author_td(soup):
