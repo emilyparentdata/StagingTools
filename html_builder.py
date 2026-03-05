@@ -103,7 +103,7 @@ def build_email_html(template_path: str, fields: dict, template_type: str = 'sta
         _inject_marketing(soup, fields)
     elif template_type == 'fertility_digest':
         _inject_fertility_digest(soup, fields)
-    elif template_type == 'paid_digest':
+    elif template_type in ('paid_digest', 'free_digest'):
         _inject_paid_digest(soup, fields)
     elif template_type == 'pregnant_article':
         _inject_pregnant_article(soup, fields)

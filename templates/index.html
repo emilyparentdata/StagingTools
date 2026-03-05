@@ -41,6 +41,7 @@
         <optgroup label="Other">
           <option value="marketing">Marketing - Full Article Send</option>
           <option value="paid_digest">Paid Digest</option>
+          <option value="free_digest">Free Digest</option>
           <option value="simple">Simple Email</option>
         </optgroup>
       </select>
@@ -653,7 +654,7 @@ function selectTemplate(type) {
     //   Latest Teaser          → DOCX + Google Doc
     //   (Q&A types have their own areas)
     const showDocx = type === 'latest_teaser';
-    const showGdoc = type === 'standard' || type === 'fertility_digest' || type === 'latest_teaser' || type === 'paid_digest' || type === 'toddler_article' || type === 'toddler_qa' || type === 'toddler_digest' || type === 'simple';
+    const showGdoc = type === 'standard' || type === 'fertility_digest' || type === 'latest_teaser' || type === 'paid_digest' || type === 'free_digest' || type === 'toddler_article' || type === 'toddler_qa' || type === 'toddler_digest' || type === 'simple';
     const showWp   = type === 'fertility' || type === 'marketing' || type === 'pregnant_article';
 
     document.getElementById('docx-upload-row').style.display    = showDocx ? '' : 'none';
@@ -781,7 +782,7 @@ async function handleGoogleDocUrl() {
   const url = document.getElementById('gdoc-url').value.trim();
   if (!url) return;
   document.getElementById('file-name').textContent = '';
-  const digestMsg = (currentTemplate === 'fertility_digest' || currentTemplate === 'paid_digest' || currentTemplate === 'toddler_digest' || currentTemplate === 'toddler_article' || currentTemplate === 'toddler_qa')
+  const digestMsg = (currentTemplate === 'fertility_digest' || currentTemplate === 'paid_digest' || currentTemplate === 'free_digest' || currentTemplate === 'toddler_digest' || currentTemplate === 'toddler_article' || currentTemplate === 'toddler_qa')
     ? 'Downloading Google Doc, extracting article links, and fetching article metadata… this may take 30–60 seconds.'
     : currentTemplate === 'simple'
     ? 'Downloading Google Doc and extracting content…'
@@ -853,7 +854,7 @@ async function _submitUpload(formData) {
     const isMarketing = currentTemplate === 'marketing';
     const isDigest = currentTemplate === 'fertility_digest';
     const isLatestTeaser = currentTemplate === 'latest_teaser';
-    const isPaidDigest = currentTemplate === 'paid_digest';
+    const isPaidDigest = currentTemplate === 'paid_digest' || currentTemplate === 'free_digest';
     const isPregnant = currentTemplate === 'pregnant_article';
     const isPregnantQA = currentTemplate === 'pregnant_qa';
     const isToddlerArticle = currentTemplate === 'toddler_article';
@@ -1256,7 +1257,7 @@ async function generateEmail() {
   const isMarketing = currentTemplate === 'marketing';
   const isDigest = currentTemplate === 'fertility_digest';
   const isLatestTeaser = currentTemplate === 'latest_teaser';
-  const isPaidDigest = currentTemplate === 'paid_digest';
+  const isPaidDigest = currentTemplate === 'paid_digest' || currentTemplate === 'free_digest';
   const isPregnant = currentTemplate === 'pregnant_article';
   const isPregnantQA = currentTemplate === 'pregnant_qa';
   const isToddlerArticle = currentTemplate === 'toddler_article';
@@ -1376,7 +1377,7 @@ async function generateEmail() {
       sections.push({ name, articles });
     }
     payload = {
-      template_type: 'paid_digest',
+      template_type: currentTemplate,
       sections: sections,
     };
   } else if (isLatestTeaser) {
