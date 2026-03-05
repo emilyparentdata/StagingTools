@@ -1273,8 +1273,10 @@ def _inject_marketing(soup, fields):
     _update_title(soup, fields)
     _update_marketing_banner(soup, fields)
     _update_marketing_intro(soup, fields)
-    _update_marketing_pricing(soup, fields)
+    # Body replacement must run BEFORE pricing removal — it uses the
+    # "UPGRADE NOW" link as an anchor to locate the body rows.
     _replace_marketing_body(soup, fields)
+    _update_marketing_pricing(soup, fields)
     _update_marketing_author(soup, fields)
     _update_copyright(soup)
 
@@ -1284,6 +1286,29 @@ def _update_marketing_banner(soup, fields):
     p = soup.find('p', class_='welcome-message')
     if not p:
         return
+
+    if fields.get('sponsor') == 'lemonade':
+        # Replace with Lemonade sponsor ad — three <p> tags inside the same <td>
+        td = p.parent
+        td.clear()
+        lemonade_html = (
+            '<p class="welcome-message" style="margin: 0; font-family: \'DM Sans\', Arial, Helvetica, sans-serif; font-weight: 300; font-style: italic; font-size: 18px; line-height: 32px; letter-spacing: -0.9px; color: #000000;">'
+            "Today's newsletter is free in full, thanks to:</p>"
+            '<p class="welcome-message" style="margin: 0; font-family: \'DM Sans\', Arial, Helvetica, sans-serif; font-weight: 300; font-style: italic; font-size: 18px; line-height: 32px; letter-spacing: -0.9px; color: #000000;">'
+            '<a href="https://go.lemonade.com/visit/?bta=39304&amp;brand=pet" style="color: #000000; text-decoration: underline; display: block;" title="Image link">'
+            '<img alt="Lemonade" class="fluid" height="150" '
+            'src="https://library.iterable.com/3244/21559/a7895fde09ea49398700709fce8e51a2-logo_dark_2.png" '
+            'style="width: 192px; max-width: 330px; height: 43px; display: block; border-radius: 12px; margin-left: auto; margin-right: auto;" width="330">'
+            '</a></p>'
+            '<p class="welcome-message" style="margin: 0; font-family: \'DM Sans\', Arial, Helvetica, sans-serif; font-weight: 300; font-style: italic; font-size: 18px; line-height: 32px; letter-spacing: -0.9px; color: #000000;">'
+            '&nbsp;Everyone in your family deserves protection &ndash; pets included. '
+            '<span style="color: rgb(0, 0, 0);">Pet insurance from $10/month</span>.<br>'
+            '<a href="https://go.lemonade.com/visit/?bta=39304&amp;brand=pet" style="color: #000000; text-decoration: underline; font-size: 18px;">'
+            '<span style="font-size: 18px; color: #000000; text-decoration: underline;">Get your free quote today!</span></a></p>'
+        )
+        td.append(BeautifulSoup(lemonade_html, 'html.parser'))
+        return
+
     p.clear()
     p.append(NavigableString(fields.get('banner_text', "It's the final day of your trial!")))
 
@@ -1292,6 +1317,13 @@ def _update_marketing_intro(soup, fields):
     """Replace the intro tablebox paragraphs with CSV-sourced text and discount link."""
     intro_td = soup.find('td', class_='tablebox')
     if not intro_td:
+        return
+
+    if fields.get('no_intro'):
+        # Remove the entire intro section (outer <tr> containing the tablebox)
+        intro_tr = intro_td.find_parent('tr', style=re.compile(r'height:\s*auto'))
+        if intro_tr:
+            intro_tr.decompose()
         return
 
     text = fields.get('intro_option_text', '')
@@ -1320,6 +1352,15 @@ def _update_marketing_intro(soup, fields):
 
 def _update_marketing_pricing(soup, fields):
     """Update the old (strikethrough) price, new price, and UPGRADE NOW button href."""
+    if fields.get('no_discount'):
+        # Remove the entire cream-background upgrade section
+        old_price_td = soup.find('td', class_='pricing-old')
+        if old_price_td:
+            upgrade_tr = old_price_td.find_parent('tr', style=re.compile(r'height:\s*auto'))
+            if upgrade_tr:
+                upgrade_tr.decompose()
+        return
+
     old_price_td = soup.find('td', class_='pricing-old')
     if old_price_td:
         p = old_price_td.find('p')
@@ -1368,9 +1409,6 @@ def _replace_marketing_body(soup, fields):
     featured_image_alt = _escape_attr(fields.get('featured_image_alt', ''))
     article_body_html = fields.get('article_body_html', '')
     article_url = _escape_attr(fields.get('article_url', '#'))
-
-    # Scale down font sizes for marketing context (slightly smaller than standard body)
-    article_body_html = _scale_marketing_body_fonts(article_body_html)
 
     # Split body at first heading so image goes between intro text and first section
     intro_html, main_html = _split_at_first_heading(article_body_html)
@@ -1448,35 +1486,6 @@ def _update_marketing_author(soup, fields):
 
 
 # ── Utilities ────────────────────────────────────────────────────────────────
-
-def _scale_marketing_body_fonts(html: str) -> str:
-    """
-    Scale down inline font sizes in marketing article body HTML so the body
-    feels like a preview rather than the full newsletter layout.
-
-    22px Lora section headings → 18px
-    16px DM Sans body text / list items → 14px
-
-    The "bottom line" section is left at full size since it's the key takeaway.
-    """
-    if not html:
-        return html
-
-    # Split at the bottom line heading so it keeps full-size fonts
-    bl_match = re.search(
-        r'<(?:h[12]|p)\b[^>]*>(?:\s*<[^>]+>)*\s*(?:The\s+)?[Bb]ottom\s+[Ll]ine',
-        html,
-    )
-    if bl_match:
-        before = html[:bl_match.start()]
-        after = html[bl_match.start():]
-    else:
-        before = html
-        after = ''
-
-    before = re.sub(r'\bfont-size:\s*22px', 'font-size:18px', before)
-    before = re.sub(r'\bfont-size:\s*16px', 'font-size:14px', before)
-    return before + after
 
 
 def _find_marketing_author_td(soup):

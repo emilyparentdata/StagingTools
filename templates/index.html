@@ -189,33 +189,56 @@
 
     <div id="group-marketing" style="display:none;">
       <div class="field-group">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+          <input type="checkbox" id="mkt-lemonade"
+                 onchange="document.getElementById('mkt-banner').closest('.field-group').style.display = this.checked ? 'none' : ''">
+          Use Lemonade sponsor banner
+        </label>
+      </div>
+      <div class="field-group">
         <label for="mkt-banner">Banner text</label>
         <input type="text" id="mkt-banner" value="It's the final day of your trial!">
+      </div>
+      <div class="field-group">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+          <input type="checkbox" id="mkt-no-intro"
+                 onchange="document.getElementById('mkt-intro').closest('.field-group').style.display = this.checked ? 'none' : ''">
+          No intro text
+        </label>
       </div>
       <div class="field-group">
         <label for="mkt-intro">Intro text</label>
         <select id="mkt-intro"><option value="">— loading options —</option></select>
       </div>
       <div class="field-group">
-        <label>Pricing plan</label>
-        <div style="display:flex;gap:24px;padding:4px 0;">
-          <label style="font-weight:400;display:flex;align-items:center;gap:6px;cursor:pointer;">
-            <input type="radio" name="mkt-pricing-mode" id="mkt-mode-yearly" value="yearly" checked>
-            Yearly&nbsp;(<s>$120</s>&nbsp;&rarr;&nbsp;$84/year)
-          </label>
-          <label style="font-weight:400;display:flex;align-items:center;gap:6px;cursor:pointer;">
-            <input type="radio" name="mkt-pricing-mode" id="mkt-mode-monthly" value="monthly">
-            Monthly&nbsp;(<s>$12</s>&nbsp;&rarr;&nbsp;$7/month)
-          </label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+          <input type="checkbox" id="mkt-no-discount"
+                 onchange="document.getElementById('mkt-discount-fields').style.display = this.checked ? 'none' : ''">
+          No discount banner
+        </label>
+      </div>
+      <div id="mkt-discount-fields">
+        <div class="field-group">
+          <label>Pricing plan</label>
+          <div style="display:flex;gap:24px;padding:4px 0;">
+            <label style="font-weight:400;display:flex;align-items:center;gap:6px;cursor:pointer;">
+              <input type="radio" name="mkt-pricing-mode" id="mkt-mode-yearly" value="yearly" checked>
+              Yearly&nbsp;(<s>$120</s>&nbsp;&rarr;&nbsp;$84/year)
+            </label>
+            <label style="font-weight:400;display:flex;align-items:center;gap:6px;cursor:pointer;">
+              <input type="radio" name="mkt-pricing-mode" id="mkt-mode-monthly" value="monthly">
+              Monthly&nbsp;(<s>$12</s>&nbsp;&rarr;&nbsp;$7/month)
+            </label>
+          </div>
         </div>
-      </div>
-      <div class="field-group">
-        <label for="mkt-price">Discount price</label>
-        <input type="text" id="mkt-price" value="$84/year">
-      </div>
-      <div class="field-group">
-        <label for="mkt-url">Discount URL</label>
-        <input type="url" id="mkt-url" value="https://parentdata.org/register/plus-yearly/?coupon=allaccess30">
+        <div class="field-group">
+          <label for="mkt-price">Discount price</label>
+          <input type="text" id="mkt-price" value="$84/year">
+        </div>
+        <div class="field-group">
+          <label for="mkt-url">Discount URL</label>
+          <input type="url" id="mkt-url" value="https://parentdata.org/register/plus-yearly/?coupon=allaccess30">
+        </div>
       </div>
     </div>
   </section>
@@ -1419,6 +1442,9 @@ async function generateEmail() {
       featured_image_alt: document.getElementById('f-img-alt').value,
       article_body_html: document.getElementById('f-body').value,
       banner_text: document.getElementById('mkt-banner').value,
+      sponsor: document.getElementById('mkt-lemonade').checked ? 'lemonade' : '',
+      no_discount: document.getElementById('mkt-no-discount').checked,
+      no_intro: document.getElementById('mkt-no-intro').checked,
       intro_option_text: document.getElementById('mkt-intro').selectedOptions[0]?.dataset.text || '',
       old_price: document.getElementById('mkt-mode-monthly').checked ? '$12' : '$120',
       discount_price: document.getElementById('mkt-price').value,
