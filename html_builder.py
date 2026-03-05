@@ -38,6 +38,7 @@ SHARED_MOBILE_CSS = (
     ".stack-column,.stack-column-center{display:block!important;width:100%!important;max-width:100%!important;direction:ltr!important;padding-left:0!important;padding-right:0!important}\n"
     ".center-on-mobile{text-align:center!important}\n"
     ".welcome-message{font-size:14px!important;line-height:20px!important;padding:8px 12px!important}\n"
+    ".welcome-message a,.welcome-message a span{font-size:14px!important;line-height:20px!important}\n"
     ".sub-text{font-size:16px!important}\n"
     ".mobile-padding{padding:12px 0px!important}\n"
     ".mobile-hide{display:none!important}\n"
@@ -1303,8 +1304,8 @@ def _update_marketing_banner(soup, fields):
             '<p class="welcome-message" style="margin: 0; font-family: \'DM Sans\', Arial, Helvetica, sans-serif; font-weight: 300; font-style: italic; font-size: 18px; line-height: 32px; letter-spacing: -0.9px; color: #000000;">'
             '&nbsp;Everyone in your family deserves protection &ndash; pets included. '
             '<span style="color: rgb(0, 0, 0);">Pet insurance from $10/month</span>.<br>'
-            '<a href="https://go.lemonade.com/visit/?bta=39304&amp;brand=pet" style="color: #000000; text-decoration: underline; font-size: 18px;">'
-            '<span style="font-size: 18px; color: #000000; text-decoration: underline;">Get your free quote today!</span></a></p>'
+            '<a href="https://go.lemonade.com/visit/?bta=39304&amp;brand=pet" style="color: #000000; text-decoration: underline; font-size: 18px; font-weight: 300; font-style: italic; font-family: \'DM Sans\', Arial, Helvetica, sans-serif;">'
+            '<span style="font-size: 18px; color: #000000; text-decoration: underline; font-weight: 300; font-style: italic;">Get your free quote today!</span></a></p>'
         )
         td.append(BeautifulSoup(lemonade_html, 'html.parser'))
         return
