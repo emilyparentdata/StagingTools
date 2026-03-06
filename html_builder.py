@@ -1823,6 +1823,9 @@ def apply_email_fixes(html: str) -> str:
       7. Gmail iOS link fix: add inline styles + <span> wrapper to every <a href>
       8. Iterable-injected heights (fractional px or ≥300px on table/tr/td) → height:auto
       9. table-box-mobile <td> with zero top-padding missing no-top-pad → add class
+     10. Strip white-space-collapse from inline styles
+     11. Ensure <p> tags have bottom margin for paragraph spacing
+     12. Replace empty <div></div> with visible spacers
     """
     soup = BeautifulSoup(html, 'html.parser')
 
@@ -1850,6 +1853,44 @@ def apply_email_fixes(html: str) -> str:
     # 6. Remove <script> and <iframe>
     for tag in soup.find_all(['script', 'iframe']):
         tag.decompose()
+
+    # 6a. Strip white-space-collapse from inline styles (unsupported in most
+    #     email clients; causes missing paragraph breaks in some)
+    for tag in soup.find_all(style=re.compile(r'white-space-collapse', re.I)):
+        tag['style'] = re.sub(
+            r'\s*white-space-collapse\s*:\s*[^;]+;?\s*', '', tag['style']
+        )
+
+    # 6b. Ensure <p> tags inside body content have a bottom margin so
+    #     paragraphs don't collapse together in clients that strip defaults.
+    #     Only targets <p> tags with an explicit inline style but no effective
+    #     bottom spacing from margin shorthand, margin-bottom, or padding-bottom.
+    for p in soup.find_all('p', style=True):
+        style = p.get('style', '')
+        if re.search(r'\bpadding-bottom\s*:', style, re.I):
+            continue
+        if re.search(r'\bmargin-bottom\s*:', style, re.I):
+            continue
+        # Check margin shorthand — extract bottom value
+        ms = re.search(r'\bmargin\s*:\s*([^;]+)', style, re.I)
+        if ms:
+            parts = ms.group(1).strip().split()
+            # CSS margin: 1 val=all, 2=vert horiz, 3=top horiz bottom, 4=T R B L
+            bottom = (
+                parts[0] if len(parts) == 1 else
+                parts[0] if len(parts) == 2 else  # vert = top & bottom
+                parts[2] if len(parts) >= 3 else
+                parts[0]
+            )
+            if bottom not in ('0', '0px', '0em'):
+                continue  # has nonzero bottom margin already
+        p['style'] = style.rstrip('; ') + '; margin-bottom: 16px;'
+
+    # 6c. Replace empty <div></div> spacers with a visible spacer
+    for div in soup.find_all('div'):
+        if not div.get_text(strip=True) and not div.find(True) and not div.get('style'):
+            div['style'] = 'height:16px;line-height:16px;font-size:1px;'
+            div.string = '\u00a0'
 
     # 9. no-top-pad class
     for td in soup.find_all('td'):

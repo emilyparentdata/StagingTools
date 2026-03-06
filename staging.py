@@ -742,9 +742,8 @@ def check_email():
         return jsonify({'error': 'No HTML provided'}), 400
 
     try:
-        from html_builder import apply_email_fixes, fix_letter_spacing
-        fixed = fix_letter_spacing(raw_html)
-        fixed = apply_email_fixes(fixed)
+        from html_builder import apply_email_fixes
+        fixed = apply_email_fixes(raw_html)
         return Response(fixed, mimetype='text/html; charset=utf-8')
     except Exception as e:
         return jsonify({'error': str(e)}), 500

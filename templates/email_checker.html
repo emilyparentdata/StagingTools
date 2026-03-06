@@ -128,6 +128,12 @@ function describeFixes(before, after) {
   const linksBefore = (before.match(/<a\b[^>]*href/gi) || []).length;
   if (linksBefore > 0) counts.push('<span>' + linksBefore + '</span> links processed for Gmail iOS');
 
+  const wscBefore = (before.match(/white-space-collapse\s*:/gi) || []).length;
+  if (wscBefore > 0) counts.push('<span>' + wscBefore + '</span> white-space-collapse declarations stripped');
+
+  const emptyDivsBefore = (before.match(/<div><\/div>/gi) || []).length;
+  if (emptyDivsBefore > 0) counts.push('<span>' + emptyDivsBefore + '</span> empty divs converted to spacers');
+
   const gmailCss = after.includes('u + #body');
   if (gmailCss) counts.push('Gmail iOS CSS injected');
 
