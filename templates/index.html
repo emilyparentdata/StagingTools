@@ -617,6 +617,15 @@
       <a id="download-link" download="staged_email.html" class="btn-secondary">Download HTML</a>
       <button type="button" class="btn-secondary" onclick="copyHtml()">Copy HTML</button>
     </div>
+    <div id="wp-draft-area" hidden style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e0e0e0;">
+      <button type="button" class="btn-primary" onclick="createWpDraft()">Create WordPress Draft</button>
+      <button type="button" class="btn-secondary" onclick="copyWpHtml()">Copy WP HTML</button>
+      <button type="button" class="btn-secondary" onclick="previewWpHtml()">Preview WP HTML</button>
+      <div id="wp-draft-status" class="status-bar" hidden></div>
+      <div id="wp-draft-result" hidden style="margin-top: 8px;">
+        <a id="wp-draft-link" target="_blank" class="btn-secondary">Open Draft in WordPress</a>
+      </div>
+    </div>
   </section>
 
 </main>
@@ -627,7 +636,10 @@ let currentTemplate = 'standard';
 let allSuggestions = [];
 let slotData = [{}, {}];
 let lastGeneratedHtml = '';
+let lastGeneratePayload = null;
 let uploadedArticleUrl = '';
+let uploadedPhotoCredit = '';
+let uploadedAgeGroups = [];
 let ltArticleBodyHtml = '';
 let _paidDigestStructure = [];  // [{articleCount: N}, ...] — tracks how many articles per section
 const LT_DEFAULT_INTRO = "Welcome to The Latest, where I break down current research and headlines in pregnancy, parenting, and personal health. If you\u2019ve seen a recent headline (parenting or otherwise) that you\u2019d like me to cover here, let me know by sharing your questions.\n\nDid you know that ParentData offers customized weekly newsletters tailored to your exact life stage \u2014 from trying to conceive through toddlerhood? That means the data and guidance you\u2019re getting is always relevant to where you are right now.";
@@ -863,6 +875,8 @@ async function _submitUpload(formData) {
     const isSimple = currentTemplate === 'simple';
 
     if (data.article_url) uploadedArticleUrl = data.article_url;
+    uploadedPhotoCredit = data.photo_credit || '';
+    uploadedAgeGroups = data.age_groups || [];
 
     if (isSimple) {
       populateSimpleFields(data);
@@ -1489,6 +1503,8 @@ async function generateEmail() {
       featured_image_url: document.getElementById('f-img-url').value,
       featured_image_alt: document.getElementById('f-img-alt').value,
       topic_tags: topicTags,
+      photo_credit: uploadedPhotoCredit,
+      age_groups: uploadedAgeGroups,
       related_articles: relatedArticles,
       inline_graphs: inlineGraphs,
       ...(isPregnant ? {
@@ -1497,6 +1513,9 @@ async function generateEmail() {
       } : {}),
     };
   }
+
+  lastGeneratePayload = payload;
+  lastWpHtml = '';
 
   try {
     const resp = await fetch('/generate', {
@@ -1522,6 +1541,15 @@ async function generateEmail() {
     document.getElementById('result-links').removeAttribute('hidden');
 
     showStatus('generate-status', 'Email generated! Open the preview, download, or copy the HTML.', 'success');
+
+    // Show WP HTML button for standard template only
+    const wpArea = document.getElementById('wp-draft-area');
+    if (currentTemplate === 'standard') {
+      wpArea.removeAttribute('hidden');
+      document.getElementById('wp-draft-status').setAttribute('hidden', '');
+    } else {
+      wpArea.setAttribute('hidden', '');
+    }
 
   } catch (err) {
     showStatus('generate-status', `Network error: ${err.message}`, 'error');
@@ -1561,6 +1589,72 @@ async function copyHtml() {
     setTimeout(() => { btn.textContent = original; }, 2000);
   } catch (err) {
     alert('Copy failed — please use the Download button instead.\n\n' + err.message);
+  }
+}
+
+// ── WordPress HTML ───────────────────────────────────────────────────────────
+let lastWpHtml = '';
+
+async function _fetchWpHtml() {
+  if (!lastGeneratePayload) return null;
+  if (lastWpHtml) return lastWpHtml;
+
+  const resp = await fetch('/wp-html', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(lastGeneratePayload),
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({ error: resp.statusText }));
+    throw new Error(err.error || resp.statusText);
+  }
+  lastWpHtml = await resp.text();
+  return lastWpHtml;
+}
+
+async function copyWpHtml() {
+  try {
+    const html = await _fetchWpHtml();
+    await navigator.clipboard.writeText(html);
+    showStatus('wp-draft-status', 'WordPress HTML copied to clipboard!', 'success');
+  } catch (err) {
+    showStatus('wp-draft-status', `Error: ${err.message}`, 'error');
+  }
+}
+
+async function previewWpHtml() {
+  try {
+    const html = await _fetchWpHtml();
+    const blob = new Blob([html], { type: 'text/html' });
+    window.open(URL.createObjectURL(blob), '_blank');
+  } catch (err) {
+    showStatus('wp-draft-status', `Error: ${err.message}`, 'error');
+  }
+}
+
+async function createWpDraft() {
+  if (!lastGeneratePayload) return;
+  showStatus('wp-draft-status', 'Creating WordPress draft... this may take 15-30 seconds.', 'info');
+  document.getElementById('wp-draft-result').setAttribute('hidden', '');
+
+  try {
+    const resp = await fetch('/wp-draft', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(lastGeneratePayload),
+    });
+    const data = await resp.json();
+
+    if (!resp.ok || data.error) {
+      showStatus('wp-draft-status', `Error: ${data.error || resp.statusText}`, 'error');
+      return;
+    }
+
+    document.getElementById('wp-draft-link').href = data.edit_url || data.preview_url || '#';
+    document.getElementById('wp-draft-result').removeAttribute('hidden');
+    showStatus('wp-draft-status', 'WordPress draft created!', 'success');
+  } catch (err) {
+    showStatus('wp-draft-status', `Network error: ${err.message}`, 'error');
   }
 }
 

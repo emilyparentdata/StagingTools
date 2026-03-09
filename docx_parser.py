@@ -17,8 +17,10 @@ LABEL_PATTERNS = {
     'subtitle':        r'^subtitle\s*:\s*(.+)$',
     'author_name':     r'^author(?:\s+name)?\s*:\s*(.+)$',
     'author_title':    r'^author\s+title\s*:\s*(.+)$',
-    'topic_tags':      r'^(?:topic\s+)?tags?\s*:\s*(.+)$',
+    'topic_tags':      r'^(?:topic\s+)?tag(?:\(s\)|s)?\s*:\s*(.+)$',
     'power_keywords':  r'^power\s+keywords?\s*:\s*(.+)$',
+    'photo_credit':    r'^PC\s*:\s*(.+)$',
+    'age_groups':      r'^age\s+group(?:\(s\)|s)?\s*:\s*(.+)$',
 }
 
 # Detects the staging instructions heading
@@ -87,6 +89,7 @@ def parse_docx(file_path: str) -> dict:
     detected = {
         'title': '', 'subtitle': '', 'author_name': '',
         'author_title': '', 'topic_tags': [], 'power_keywords': [],
+        'photo_credit': '', 'age_groups': [],
     }
     for para in article_paras:
         text = para.text.strip()
@@ -96,7 +99,7 @@ def parse_docx(file_path: str) -> dict:
             m = re.match(pattern, text, re.IGNORECASE)
             if m:
                 value = m.group(1).strip()
-                if field in ('topic_tags', 'power_keywords'):
+                if field in ('topic_tags', 'power_keywords', 'age_groups'):
                     detected[field] = [t.strip() for t in value.split(',') if t.strip()]
                 else:
                     detected[field] = value
@@ -119,6 +122,8 @@ def parse_docx(file_path: str) -> dict:
         'detected_author_title': detected['author_title'],
         'detected_topic_tags': detected['topic_tags'],
         'detected_power_keywords': detected['power_keywords'],
+        'detected_photo_credit': detected['photo_credit'],
+        'detected_age_groups': detected['age_groups'],
         'staging_instructions': staging_instructions,
     }
 

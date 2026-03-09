@@ -550,6 +550,9 @@ def _process_docx(tmp_path: str, template_type: str = 'standard') -> dict:
         'author_name':     fields.get('author_name') or parsed['detected_author_name'],
         'author_title':    fields.get('author_title') or parsed['detected_author_title'],
         'topic_tags':      fields.get('topic_tags') or parsed['detected_topic_tags'],
+        'power_keywords':  parsed.get('detected_power_keywords', []),
+        'photo_credit':    parsed.get('detected_photo_credit', ''),
+        'age_groups':      parsed.get('detected_age_groups', []),
         'welcome_html':    fields.get('welcome_html', ''),
         'article_body_html': fields.get('article_body_html', ''),
         'bottom_line_html':  fields.get('bottom_line_html', ''),
@@ -745,6 +748,46 @@ def check_email():
         from html_builder import apply_email_fixes
         fixed = apply_email_fixes(raw_html)
         return Response(fixed, mimetype='text/html; charset=utf-8')
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/wp-html', methods=['POST'])
+def wp_html():
+    """Strip email styles from article body and return clean HTML for WordPress."""
+    data = request.get_json(force=True)
+    if not data:
+        return jsonify({'error': 'No JSON body received'}), 400
+
+    try:
+        from wp_client import strip_email_styles
+        body_html = data.get('article_body_html', '')
+        graphs = data.get('inline_graphs', [])
+        featured_image_url = data.get('featured_image_url', '')
+        photo_credit = data.get('photo_credit', '')
+        clean = strip_email_styles(
+            body_html, graphs,
+            featured_image_url=featured_image_url,
+            photo_credit=photo_credit,
+        )
+        if not clean.strip():
+            return jsonify({'error': 'No article body to convert'}), 400
+        return Response(clean, mimetype='text/html; charset=utf-8')
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/wp-draft', methods=['POST'])
+def wp_draft():
+    """Create a WordPress draft post from the staged email fields."""
+    data = request.get_json(force=True)
+    if not data:
+        return jsonify({'error': 'No JSON body received'}), 400
+
+    try:
+        from wp_client import publish_draft
+        result = publish_draft(data)
+        return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

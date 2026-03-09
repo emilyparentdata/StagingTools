@@ -401,6 +401,29 @@ IMPORTANT: Return ONLY the raw JSON object. No markdown fences, no explanation."
     return _call_claude(prompt)
 
 
+def generate_wp_meta(raw_text: str, title: str) -> dict:
+    """Generate WordPress metadata: excerpt, meta description, focus keyword, slug.
+
+    Returns dict with keys: excerpt, meta_description, focus_keyword, slug.
+    """
+    prompt = f"""You are writing metadata for a ParentData blog post.
+
+Article title: {title}
+
+Article text (first 2000 chars):
+{raw_text[:2000]}
+
+Return a JSON object with exactly these keys:
+- "excerpt": A 2-3 sentence summary of the article in plain text. Informative, not clickbaity. Write in third person.
+- "meta_description": An SEO meta description under 155 characters. Should include the core topic.
+- "focus_keyword": The primary SEO keyword phrase (2-4 words).
+- "slug": A URL-friendly slug (3-5 words, lowercase, hyphenated, no stop words).
+
+IMPORTANT: Return ONLY the raw JSON object. No markdown fences, no explanation."""
+
+    return _call_claude(prompt, max_tokens=500)
+
+
 def _call_claude(prompt: str, max_tokens: int = 8000) -> dict:
     """Send a prompt to Claude and parse the JSON response."""
     response = client.messages.create(
