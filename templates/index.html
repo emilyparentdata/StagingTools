@@ -699,8 +699,12 @@
     <div style="border-top:1px solid #e0e0e0;margin-top:20px;padding-top:16px;">
       <h3>Real Talk</h3>
       <div class="field-group">
-        <label for="bsb-real-talk">Quote Text</label>
-        <textarea id="bsb-real-talk" rows="3" style="width:100%;" placeholder="Real Talk testimonial text…"></textarea>
+        <label for="bsb-real-talk-prompt">Prompt</label>
+        <textarea id="bsb-real-talk-prompt" rows="2" style="width:100%;" placeholder="We asked our readers to share…"></textarea>
+      </div>
+      <div class="field-group">
+        <label for="bsb-real-talk-quote">Quote (italic)</label>
+        <textarea id="bsb-real-talk-quote" rows="3" style="width:100%;" placeholder="Reader quote text…"></textarea>
       </div>
     </div>
   </section>
@@ -1641,7 +1645,8 @@ function populateBabySendBFields(data) {
   document.getElementById('bsb-title').value = data.title || '';
   document.getElementById('bsb-age-text').value = data.age_text || '';
   document.getElementById('bsb-intro').value = data.intro_text || '';
-  document.getElementById('bsb-real-talk').value = data.real_talk_text || '';
+  document.getElementById('bsb-real-talk-prompt').value = data.real_talk_prompt || '';
+  document.getElementById('bsb-real-talk-quote').value = data.real_talk_quote || '';
 
   // Build article cards
   const container = document.getElementById('bsb-article-cards');
@@ -1985,7 +1990,8 @@ async function generateEmail() {
       title: document.getElementById('bsb-title').value,
       age_text: document.getElementById('bsb-age-text').value,
       intro_text: document.getElementById('bsb-intro').value,
-      real_talk_text: document.getElementById('bsb-real-talk').value,
+      real_talk_prompt: document.getElementById('bsb-real-talk-prompt').value,
+      real_talk_quote: document.getElementById('bsb-real-talk-quote').value,
       articles: [0, 1, 2].map(i => {
         const raw = document.getElementById(`bsb-art-desc-${i}`).value;
         const lines = raw.split('\n').map(s => s.trim()).filter(Boolean);

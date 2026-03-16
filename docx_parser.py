@@ -1162,7 +1162,10 @@ def parse_baby_send_b_docx(file_path: str) -> dict:
 
         # Collecting Real Talk lines
         if in_real_talk:
-            real_talk_lines.append(text)
+            # Check if the paragraph is fully italic (= the reader quote)
+            runs = para.runs
+            all_italic = runs and all(r.italic for r in runs if r.text.strip())
+            real_talk_lines.append(('italic' if all_italic else 'normal', text))
             continue
 
         # BUTTON: … — extract hyperlink URL
@@ -1226,7 +1229,12 @@ def parse_baby_send_b_docx(file_path: str) -> dict:
         'age_text': age_text,
         'intro_text': ' '.join(intro_lines),
         'articles': articles[:3],
-        'real_talk_text': ' '.join(real_talk_lines),
+        'real_talk_prompt': ' '.join(
+            t for kind, t in real_talk_lines if kind == 'normal'
+        ),
+        'real_talk_quote': ' '.join(
+            t for kind, t in real_talk_lines if kind == 'italic'
+        ),
     }
 
 

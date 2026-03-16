@@ -649,7 +649,8 @@ def _process_docx(tmp_path: str, template_type: str = 'standard') -> dict:
             'age_text': parsed.get('age_text', ''),
             'intro_text': parsed.get('intro_text', ''),
             'articles': articles,
-            'real_talk_text': parsed.get('real_talk_text', ''),
+            'real_talk_prompt': parsed.get('real_talk_prompt', ''),
+            'real_talk_quote': parsed.get('real_talk_quote', ''),
         }
 
     if template_type == 'baby_qa':

@@ -1265,7 +1265,6 @@ def _inject_baby_send_b(soup, fields):
     """Inject all fields into the BabyData Send B template."""
     _update_title(soup, fields)
     _update_baby_banner(soup, fields)
-    _update_headline(soup, fields)
     # Map intro_text → subtitle_lines for the shared subtitle helper
     if fields.get('intro_text') and not fields.get('subtitle_lines'):
         fields['subtitle_lines'] = [fields['intro_text']]
@@ -1339,22 +1338,41 @@ def _inject_baby_send_b_cards(soup, fields):
 
 
 def _inject_baby_send_b_real_talk(soup, fields):
-    """Update the Real Talk quote section in Baby Send B."""
-    real_talk_text = fields.get('real_talk_text', '')
-    if not real_talk_text:
+    """Update the Real Talk section in Baby Send B.
+
+    The template has two <p> tags inside the Real Talk td: a prompt
+    paragraph and an italic quote paragraph.  We replace the prompt
+    text and the italic quote separately.
+    """
+    prompt = fields.get('real_talk_prompt', '')
+    quote = fields.get('real_talk_quote', '')
+    if not prompt and not quote:
         return
     # Find the Real Talk section (blue bg with h3 "Real Talk")
     for td in soup.find_all('td', class_='table-box-mobile'):
         h3 = td.find('h3')
         if h3 and 'Real Talk' in h3.get_text():
-            # Find the quote paragraphs after h3
-            paragraphs = td.find_all('p')
-            for p in paragraphs:
-                # Skip the h3, update the first content paragraph
-                if 'font-size: 18px' in (p.get('style') or ''):
-                    p.clear()
-                    p.append(BeautifulSoup(real_talk_text, 'html.parser'))
-                    break
+            paragraphs = [
+                p for p in td.find_all('p')
+                if 'font-size: 18px' in (p.get('style') or '')
+            ]
+            if not paragraphs:
+                break
+            # First <p>: the prompt
+            if prompt:
+                paragraphs[0].clear()
+                paragraphs[0].append(
+                    BeautifulSoup(prompt, 'html.parser'),
+                )
+            # Second <p>: the italic quote
+            if len(paragraphs) > 1 and quote:
+                paragraphs[1].clear()
+                # Wrap in <em> with a leading <br> to match template style
+                paragraphs[1].append(
+                    BeautifulSoup(
+                        f'<em><br>{quote}</em>', 'html.parser',
+                    ),
+                )
             break
 
 
