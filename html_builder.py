@@ -1383,10 +1383,38 @@ def _inject_baby_article(soup, fields):
     _update_title(soup, fields)
     _update_baby_banner(soup, fields)
     _update_headline(soup, fields)
-    _update_fertility_subtitle_author(soup, fields)
+    _update_baby_subtitle_author(soup, fields)
     _update_baby_bottom_line(soup, fields)
     _replace_baby_article_body(soup, fields)
     _update_copyright(soup)
+
+
+def _update_baby_subtitle_author(soup, fields):
+    """
+    Update the subtitle and author line in the baby article template.
+
+    The baby article template uses h3.subtext-mobile for the subtitle
+    and p.subtext-mobile for the author name (not p.sub-text / top-box-header-m
+    like the fertility template).
+    """
+    subtext_els = soup.find_all(class_='subtext-mobile')
+    if not subtext_els:
+        return
+
+    # First subtext-mobile element: subtitle (h3)
+    subtitle_lines = fields.get('subtitle_lines', [])
+    subtitle_text = subtitle_lines[0] if subtitle_lines else ''
+    if subtext_els:
+        subtext_els[0].clear()
+        subtext_els[0].append(NavigableString(subtitle_text))
+
+    # Second subtext-mobile element: author name (p)
+    if len(subtext_els) >= 2:
+        author_name = fields.get('author_name', '')
+        author_title = fields.get('author_title', '')
+        author_line = f'{author_name}, {author_title}' if author_title else author_name
+        subtext_els[1].clear()
+        subtext_els[1].append(NavigableString(author_line))
 
 
 def _update_baby_bottom_line(soup, fields):
@@ -1439,7 +1467,6 @@ def _inject_baby_qa(soup, fields):
     """Inject all fields into the BabyData Q&A template."""
     _update_title(soup, fields)
     _update_baby_banner(soup, fields)
-    _update_headline(soup, fields)
     _update_qa_intro(soup, fields)
     _update_baby_qa_pairs(soup, fields)
     _update_copyright(soup)
@@ -1454,6 +1481,7 @@ def _update_baby_qa_pairs(soup, fields):
         if qa and (qa.get('question_text') or qa.get('answer_html')):
             qa_pairs.append({
                 'question': qa.get('question_text', ''),
+                'question_author': qa.get('question_author', ''),
                 'answer_html': qa.get('answer_html', ''),
             })
     qa_author_line = fields.get('qa_author_line', '')
@@ -1486,8 +1514,13 @@ def _update_baby_qa_pairs(soup, fields):
                     for td in q_table.find_all('td'):
                         p = td.find('p', style=re.compile(r'font-style.*italic'))
                         if p:
+                            question_text = _escape_attr(pair.get('question', ''))
+                            author = _escape_attr(pair.get('question_author', ''))
+                            content = f'<span style="white-space: pre-wrap;">{question_text}</span>'
+                            if author:
+                                content += f'<br><br><span style="white-space: pre-wrap;">\u2014{author}</span>'
                             p.clear()
-                            p.append(NavigableString(pair.get('question', '')))
+                            p.append(BeautifulSoup(content, 'html.parser'))
                             break
 
         # Update answer content
