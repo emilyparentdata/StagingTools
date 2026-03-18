@@ -970,6 +970,7 @@ let lastGeneratePayload = null;
 let uploadedArticleUrl = '';
 let uploadedPhotoCredit = '';
 let uploadedAgeGroups = [];
+let uploadedPowerKeywords = [];
 let ltArticleBodyHtml = '';
 let _paidDigestStructure = [];  // [{articleCount: N}, ...] — tracks how many articles per section
 const LT_DEFAULT_INTRO = "Welcome to The Latest, where I break down current research and headlines in pregnancy, parenting, and personal health. If you\u2019ve seen a recent headline (parenting or otherwise) that you\u2019d like me to cover here, let me know by sharing your questions.\n\nDid you know that ParentData offers customized weekly newsletters tailored to your exact life stage \u2014 from trying to conceive through toddlerhood? That means the data and guidance you\u2019re getting is always relevant to where you are right now.";
@@ -1276,6 +1277,7 @@ async function _submitUpload(formData) {
     if (data.article_url) uploadedArticleUrl = data.article_url;
     uploadedPhotoCredit = data.photo_credit || '';
     uploadedAgeGroups = data.age_groups || [];
+    uploadedPowerKeywords = data.power_keywords || [];
 
     if (isBabySendA) {
       populateBabySendAFields(data);
@@ -2271,6 +2273,7 @@ async function generateEmail() {
       topic_tags: topicTags,
       photo_credit: uploadedPhotoCredit,
       age_groups: uploadedAgeGroups,
+      power_keywords: uploadedPowerKeywords,
       related_articles: relatedArticles,
       inline_graphs: inlineGraphs,
       ...(isPregnant ? {

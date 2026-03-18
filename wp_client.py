@@ -177,7 +177,68 @@ def strip_email_styles(
             blocks.append(_make_image_block(
                 featured_image_url, '', photo_credit))
 
-    return '\n\n'.join(blocks)
+    html_out = '\n\n'.join(blocks)
+
+    # Insert <p id="bottom-line"> anchor 3 paragraphs above the "Bottom Line" heading
+    html_out = _insert_bottom_line_anchor_html(html_out)
+
+    return html_out
+
+
+def _insert_bottom_line_anchor_html(html: str) -> str:
+    """Insert <p id="bottom-line"> 3 paragraphs above any heading containing
+    'bottom line', searching the final HTML string directly."""
+    # Find a heading (any level) containing "bottom line"
+    heading_match = re.search(
+        r'<!-- wp:heading -->.*?</h[1-6]>\s*<!-- /wp:heading -->',
+        html, re.DOTALL | re.IGNORECASE,
+    )
+    # Filter to only the one that actually says "bottom line"
+    bl_match = None
+    for m in re.finditer(
+        r'<!-- wp:heading -->.*?</h[1-6]>\s*<!-- /wp:heading -->',
+        html, re.DOTALL,
+    ):
+        if re.search(r'bottom\s+line', m.group(), re.IGNORECASE):
+            bl_match = m
+            break
+
+    if not bl_match:
+        # Fallback: look for a bare <h2> without wp:heading comments
+        bl_match = re.search(
+            r'<h[1-6][^>]*>[^<]*bottom\s+line[^<]*</h[1-6]>',
+            html, re.IGNORECASE,
+        )
+
+    if not bl_match:
+        print('[wp_client] _insert_bottom_line_anchor: no bottom-line heading found')
+        return html
+
+    print(f'[wp_client] _insert_bottom_line_anchor: found heading at pos {bl_match.start()}')
+
+    # Find the 3rd <p> tag before the heading, then back up to its
+    # <!-- wp:paragraph --> wrapper so we insert before the whole block.
+    text_before = html[:bl_match.start()]
+    para_starts = [m.start() for m in re.finditer(r'<p[\s>]', text_before)]
+
+    if len(para_starts) >= 3:
+        p_pos = para_starts[-3]
+        # Back up to the <!-- wp:paragraph --> comment that wraps this <p>
+        wp_comment = text_before.rfind('<!-- wp:paragraph -->', 0, p_pos)
+        insert_pos = wp_comment if wp_comment != -1 else p_pos
+    elif para_starts:
+        p_pos = para_starts[0]
+        wp_comment = text_before.rfind('<!-- wp:paragraph -->', 0, p_pos)
+        insert_pos = wp_comment if wp_comment != -1 else p_pos
+    else:
+        insert_pos = bl_match.start()
+
+    anchor = (
+        '\n\n<!-- wp:paragraph -->\n'
+        '<p id="bottom-line"></p>\n'
+        '<!-- /wp:paragraph -->\n\n'
+    )
+    return html[:insert_pos] + anchor + html[insert_pos:]
 
 
 def _inner_html(tag) -> str:
@@ -321,25 +382,43 @@ def find_or_create_post_topic(name: str) -> int:
 def find_coauthor(name: str) -> int | None:
     """Look up a Co-Authors Plus author by display name or username.
 
-    The coauthors API 'name' field is a username (e.g. 'EOster'), not
-    the display name ('Emily Oster, PhD').  We search and match loosely.
+    The coauthors API searches by username (e.g. 'EOster'), not display
+    name ('Emily Oster, PhD').  We try multiple search strategies:
+    full name, last name, first name.
     """
-    resp = _session.get(
-        f'{WP_API}/coauthors',
-        params={'search': name, 'per_page': 10},
-        auth=_wp_auth(),
-        timeout=10,
-    )
-    if resp.ok:
-        results = resp.json()
-        # Pick the entry with the most posts (most likely the active one)
-        best = None
-        for author in results:
-            if best is None or author.get('count', 0) > best.get('count', 0):
-                best = author
-        if best:
-            return best['id']
-    return None
+    # Try full name first, then individual parts (the API matches usernames,
+    # so "Emily Oster" won't match but "Oster" will match "EOster")
+    queries = [name]
+    parts = name.split()
+    if len(parts) > 1:
+        queries.append(parts[-1])   # last name
+        queries.append(parts[0])    # first name
+
+    all_results = {}
+    for q in queries:
+        resp = _session.get(
+            f'{WP_API}/coauthors',
+            params={'search': q, 'per_page': 10},
+            auth=_wp_auth(),
+            timeout=10,
+        )
+        if resp.ok:
+            for author in resp.json():
+                all_results[author['id']] = author
+        if all_results:
+            break  # stop as soon as we get results
+
+    if not all_results:
+        return None
+
+    results = list(all_results.values())
+
+    # Pick the entry with the most posts (most likely the active account)
+    best = None
+    for author in results:
+        if best is None or author.get('count', 0) > best.get('count', 0):
+            best = author
+    return best['id'] if best else None
 
 
 # ── Draft creation (for future API integration) ──────────────────────────────
@@ -364,23 +443,41 @@ def create_draft(
         payload['post-type'] = post_type_ids
     if coauthor_ids:
         payload['coauthors'] = coauthor_ids
-    meta = {}
-    if meta_description:
-        meta['rank_math_description'] = meta_description
-    if focus_keyword:
-        meta['rank_math_focus_keyword'] = focus_keyword
-    if meta:
-        payload['meta'] = meta
-
     resp = _session.post(f'{WP_API}/posts', json=payload, auth=_wp_auth(), timeout=30)
     resp.raise_for_status()
     data = resp.json()
     post_id = data['id']
+
+    # Set Rank Math SEO fields via the Rank Math API (the WP post meta
+    # endpoint silently drops unregistered rank_math_* keys)
+    rank_meta = {}
+    if meta_description:
+        rank_meta['rank_math_description'] = meta_description
+    if focus_keyword:
+        rank_meta['rank_math_focus_keyword'] = focus_keyword
+    if rank_meta:
+        _set_rank_math_meta(post_id, rank_meta)
     return {
         'id': post_id,
         'edit_url': f'{WP_SITE_URL}/wp-admin/post.php?post={post_id}&action=edit',
         'preview_url': data.get('link', f'{WP_SITE_URL}/?p={post_id}&preview=true'),
     }
+
+
+def _set_rank_math_meta(post_id: int, meta: dict) -> None:
+    """Set Rank Math SEO fields via the Rank Math REST API."""
+    rank_math_api = f'{WP_SITE_URL}/wp-json/rankmath/v1/updateMeta'
+    try:
+        resp = _session.post(
+            rank_math_api,
+            json={'objectID': post_id, 'objectType': 'post', 'meta': meta},
+            auth=_wp_auth(),
+            timeout=10,
+        )
+        resp.raise_for_status()
+        print(f'[wp_client] Rank Math meta set for post {post_id}: {list(meta.keys())}')
+    except Exception as e:
+        print(f'[wp_client] Warning: failed to set Rank Math meta: {e}')
 
 
 def resolve_post_id(url: str) -> int | None:
@@ -421,9 +518,17 @@ def update_post(post_id: int, **fields) -> dict:
         if val:  # skip None, empty string, empty list, 0
             payload[wp_key] = val
 
-    meta = fields.get('meta')
-    if meta:
-        payload['meta'] = meta
+    # Separate Rank Math fields from standard WP meta
+    meta = fields.get('meta') or {}
+    rank_meta = {}
+    wp_meta = {}
+    for k, v in meta.items():
+        if k.startswith('rank_math_'):
+            rank_meta[k] = v
+        else:
+            wp_meta[k] = v
+    if wp_meta:
+        payload['meta'] = wp_meta
 
     resp = _session.post(
         f'{WP_API}/posts/{post_id}',
@@ -433,6 +538,10 @@ def update_post(post_id: int, **fields) -> dict:
     )
     resp.raise_for_status()
     data = resp.json()
+
+    if rank_meta:
+        _set_rank_math_meta(post_id, rank_meta)
+
     return {
         'id': post_id,
         'edit_url': f'{WP_SITE_URL}/wp-admin/post.php?post={post_id}&action=edit',
@@ -507,6 +616,12 @@ def _prepare_post_fields(fields: dict) -> dict:
         except Exception as e:
             print(f'[wp_client] Warning: coauthor lookup failed for "{author_name}": {e}')
 
+    # Power keywords from the DOCX override Claude-generated focus keyword
+    power_keywords = fields.get('power_keywords', [])
+    print(f'[wp_client] power_keywords={power_keywords}, coauthor_ids={coauthor_ids}')
+    has_anchor = 'id="bottom-line"' in content
+    print(f'[wp_client] bottom-line anchor in content: {has_anchor}')
+
     return {
         'title': title,
         'content': content,
@@ -516,6 +631,7 @@ def _prepare_post_fields(fields: dict) -> dict:
         'post_topic_ids': post_topic_ids,
         'post_type_ids': [WP_POST_TYPE_ARTICLE],
         'coauthor_ids': coauthor_ids,
+        'power_keywords': power_keywords,
     }
 
 
@@ -532,8 +648,11 @@ def publish_or_update(fields: dict) -> dict:
         meta = {}
         if wp_meta.get('meta_description'):
             meta['rank_math_description'] = wp_meta['meta_description']
-        if wp_meta.get('focus_keyword'):
-            meta['rank_math_focus_keyword'] = wp_meta['focus_keyword']
+        # Power keywords from the doc override Claude-generated focus keyword
+        power_kw = prepared.get('power_keywords', [])
+        focus_kw = ', '.join(power_kw) if power_kw else wp_meta.get('focus_keyword', '')
+        if focus_kw:
+            meta['rank_math_focus_keyword'] = focus_kw
         return update_post(
             post_id,
             title=prepared['title'],
@@ -558,6 +677,9 @@ def publish_draft(fields: dict) -> dict:
 def _create_draft_from_prepared(prepared: dict) -> dict:
     """Create a WordPress draft from a _prepare_post_fields result."""
     wp_meta = prepared['wp_meta']
+    # Power keywords from the doc override Claude-generated focus keyword
+    power_kw = prepared.get('power_keywords', [])
+    focus_keyword = ', '.join(power_kw) if power_kw else wp_meta.get('focus_keyword', '')
     return create_draft(
         title=prepared['title'], content=prepared['content'],
         excerpt=wp_meta.get('excerpt', ''), slug=wp_meta.get('slug', ''),
@@ -567,5 +689,5 @@ def _create_draft_from_prepared(prepared: dict) -> dict:
         post_type_ids=prepared['post_type_ids'],
         coauthor_ids=prepared['coauthor_ids'],
         meta_description=wp_meta.get('meta_description', ''),
-        focus_keyword=wp_meta.get('focus_keyword', ''),
+        focus_keyword=focus_keyword,
     )

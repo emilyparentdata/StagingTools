@@ -145,6 +145,8 @@ Extract all fields and produce properly formatted email HTML. Return a single JS
   Preserve ALL hyperlinks from the source document with their original href values.
   Convert special characters to their HTML entities or Unicode equivalents.
   Do NOT include Emily's welcome section here — only the guest author's article content.
+  IMPORTANT: If the article has a "The bottom line" section (heading + bullet list), you MUST include it in article_body_html. Do NOT omit or separate it.
+  Remove any "[Take me to the bottom line]" placeholder text — that is a button added separately.
 
 GRAPH PLACEHOLDERS:
 If the mammoth HTML contains [[GRAPH_1]], [[GRAPH_2]], etc., these are embedded
