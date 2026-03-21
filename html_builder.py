@@ -2998,48 +2998,56 @@ def _fix_iterable_heights(html: str) -> str:
 # ── Replace header and footer ────────────────────────────────────────────────
 
 def replace_header_footer(html: str) -> str:
-    """Replace the header (first <tr>) and footer (last <tr>) of any email
-    HTML with the header and footer from the Latest template."""
+    """Replace the header and footer of any ParentData email HTML with
+    the header and footer from the Latest template.
+
+    Finds the header by the ParentData Logo image and the footer by the
+    Footer Logo image, regardless of table nesting depth.
+    """
+    import copy
     from pathlib import Path
 
     template_path = Path(__file__).parent / 'email_templates' / 'latest_template.html'
     with open(template_path, encoding='utf-8') as f:
         latest_soup = BeautifulSoup(f.read(), 'html.parser')
 
-    # Find the main tbody in the Latest template
-    latest_table = latest_soup.find('table', class_='email-container')
-    if not latest_table:
-        raise ValueError('Could not find email-container table in Latest template')
-    latest_tbody = latest_table.find('tbody')
-    if not latest_tbody:
-        raise ValueError('Could not find tbody in Latest template')
+    # Extract header and footer <tr>s from the Latest template
+    latest_logo = latest_soup.find('img', alt='ParentData Logo')
+    if not latest_logo:
+        raise ValueError('Could not find ParentData Logo in Latest template')
+    latest_header_tr = latest_logo.find_parent('tr')
 
-    latest_trs = latest_tbody.find_all('tr', recursive=False)
-    if len(latest_trs) < 2:
-        raise ValueError('Latest template has fewer than 2 top-level trs')
-
-    latest_header_tr = latest_trs[0]
-    latest_footer_tr = latest_trs[-1]
+    latest_footer_logo = latest_soup.find('img', alt='Footer Logo')
+    if not latest_footer_logo:
+        raise ValueError('Could not find Footer Logo in Latest template')
+    latest_footer_td = latest_footer_logo.find_parent('td', class_='table-box-mobile')
+    latest_footer_tr = latest_footer_td.find_parent('tr') if latest_footer_td else latest_footer_logo.find_parent('tr')
 
     # Parse the input HTML
     soup = BeautifulSoup(html, 'html.parser')
-    input_table = soup.find('table', class_='email-container')
-    if not input_table:
-        raise ValueError('Could not find email-container table in input HTML')
-    input_tbody = input_table.find('tbody')
-    if not input_tbody:
-        raise ValueError('Could not find tbody in input HTML')
 
-    input_trs = input_tbody.find_all('tr', recursive=False)
-    if len(input_trs) < 2:
-        raise ValueError('Input HTML has fewer than 2 top-level trs')
+    # Replace header: find the <tr> containing the logo image
+    input_logo = soup.find('img', alt='ParentData Logo')
+    if not input_logo:
+        # Try other common logo alt texts
+        input_logo = soup.find('img', alt=re.compile(r'logo', re.I))
+    if not input_logo:
+        raise ValueError('Could not find a logo image in the input HTML')
+    input_header_tr = input_logo.find_parent('tr')
+    if input_header_tr:
+        input_header_tr.replace_with(copy.copy(latest_header_tr))
 
-    # Replace header (first tr)
-    import copy
-    input_trs[0].replace_with(copy.copy(latest_header_tr))
-
-    # Replace footer (last tr) — re-find after the header swap
-    input_trs = input_tbody.find_all('tr', recursive=False)
-    input_trs[-1].replace_with(copy.copy(latest_footer_tr))
+    # Replace footer: find the <tr> containing the Footer Logo
+    input_footer_logo = soup.find('img', alt='Footer Logo')
+    if not input_footer_logo:
+        raise ValueError('Could not find Footer Logo in the input HTML')
+    input_footer_tr = input_footer_logo.find_parent('tr')
+    # Walk up to the <tr> that wraps the entire footer section (the one
+    # whose td directly contains the footer table with unsubscribe links)
+    footer_td = input_footer_logo.find_parent('td', class_='table-box-mobile')
+    if footer_td:
+        input_footer_tr = footer_td.find_parent('tr')
+    if input_footer_tr:
+        input_footer_tr.replace_with(copy.copy(latest_footer_tr))
 
     return str(soup)

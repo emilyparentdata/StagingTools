@@ -954,6 +954,28 @@ def email_checker():
     return render_template('email_checker.html')
 
 
+@app.route('/replace-header-footer')
+def replace_header_footer_page():
+    """Serve the header/footer replacement tool UI."""
+    return render_template('replace_header_footer.html')
+
+
+@app.route('/replace-hf', methods=['POST'])
+def replace_hf():
+    """Accept email HTML, replace header and footer with Latest versions."""
+    data = request.get_json(force=True)
+    raw_html = data.get('html', '')
+    if not raw_html.strip():
+        return jsonify({'error': 'No HTML provided'}), 400
+
+    try:
+        from html_builder import replace_header_footer
+        fixed = replace_header_footer(raw_html)
+        return Response(fixed, mimetype='text/html; charset=utf-8')
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/check-email', methods=['POST'])
 def check_email():
     """Accept raw HTML, apply all email compatibility fixes, return cleaned HTML."""
